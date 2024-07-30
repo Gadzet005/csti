@@ -1,10 +1,5 @@
-from src.contest_interface import ContestInterface
-from src.consts import Contest, Language
-
+from src.contest.contest import Contest
 
 if __name__ == "__main__":
-    contest = ContestInterface()
-    contest.openContest(Contest.hse_asm_3.value, "", "")
-
-    task = contest.getTask(1)
-    print(task.getCondition())
+    contest = Contest(1752)
+    print(contest.task.getCondition().text)
