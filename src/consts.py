@@ -1,4 +1,18 @@
-CONTEST_SOLUTIONS_BASE_URL = "https://contest.solutions"
-DEFAULT_LANG_ID = 1 # Русский язык
-HSE_ASM_CONTEST_3_ID = 1852
-ASM_LANG_ID = 50
+from enum import Enum
+
+BASE_URL = "https://contest.solutions"
+
+class Locale(Enum):
+    english = 0
+    russian = 1
+    ukrainian = 2
+    kazakh = 3
+
+DEFAULT_LOCALE = Locale.russian.value
+
+class Contest(Enum):
+    hse_asm_3 = 1852
+    msu_asm_3 = 1752
+
+class Language(Enum):
+    asm = 50

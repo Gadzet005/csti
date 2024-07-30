@@ -1,12 +1,10 @@
-from src.ContestInterface import ContestInterface
-from src.consts import ASM_LANG_ID, HSE_ASM_CONTEST_3_ID
-
-
-def main():
-    contestInterface = ContestInterface(HSE_ASM_CONTEST_3_ID, "username", "password")
-    taskText = contestInterface.getTask(1)
-    print(taskText)
+from src.contest_interface import ContestInterface
+from src.consts import Contest, Language
 
 
 if __name__ == "__main__":
-    main()
+    contest = ContestInterface()
+    contest.openContest(Contest.hse_asm_3.value, "", "")
+
+    task = contest.getTask(1)
+    print(task.getCondition())
