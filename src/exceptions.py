@@ -6,3 +6,9 @@ class ParserException(Exception):
 
 class IllegalStateException(Exception):
     pass
+
+class ProgramRunTimeError(Exception):
+    pass
+
+class ProgramCompilerError(Exception):
+    pass
