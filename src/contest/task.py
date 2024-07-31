@@ -1,4 +1,4 @@
-from contest.task_status import TaskStatusInfo
+from .task_status_info import TaskStatusInfo
 from .contest_interface import ContestInterface
 from .parser import Parser
 

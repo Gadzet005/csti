@@ -5,12 +5,10 @@ from .parser import Parser
 from .task import Task
 
 from src.consts import DEFAULT_LOCALE, NO_AUTH_SID, \
-	DEFAULT_REQUESTS_URL
-from src.exceptions import AuthException, ContestException
+	DEFAULT_REQUESTS_URL, DEFAULT_LANG_ID 
+from .exceptions import AuthException, ContestException
 
-from .login import login, password
-solutionLangId = "50"
-
+from src.login import login, password
 
 class Contest(ContestInterface):
 	def __init__(self, id_: int):
@@ -84,7 +82,7 @@ class Contest(ContestInterface):
 			data={
 				"SID": self._sessionId,
 				"prob_id": taskId,
-				"lang_id": solutionLangId,
+				"lang_id": DEFAULT_LANG_ID,
 				"file": file,
 				"action_40": ""
 			}

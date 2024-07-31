@@ -1,9 +1,13 @@
 from bs4 import BeautifulSoup
 import re
+import requests
 from inspect import cleandoc
 
-from .task_status import TaskStatus, TaskStatusInfo
-from src.exceptions import ParserException
+
+from .task_status_info import TaskStatusInfo
+from .exceptions import ParserException
+
+from src.login import HOME_URL, FIO_PATERN
 
 
 PARSER_TYPE = "html.parser"
@@ -90,11 +94,11 @@ class Parser(object):
 			return None
 		statusHistoryLine = statusTable.find_all("tr")
 		if statusHistoryLine is None:
-			raise ParserException("Ошибка при получении статуса задачи")
+			raise ParserException("Ошибка при получении статуса задачи.")
 		# Не учитываем строку с информацией о колоннах
 		statusBlocks = statusHistoryLine[1].find_all("td", class_="b1")
 		if statusBlocks is None:
-			raise ParserException("Ошибка при получении статуса задачи")
+			raise ParserException("Ошибка при получении статуса задачи.")
 		
 		return TaskStatusInfo(
 			int(statusBlocks[0].text),
@@ -102,3 +106,53 @@ class Parser(object):
 			int(statusBlocks[5].text)
 		)
 
+	@staticmethod
+	def getHwContestIdAndUserTasks(localContestId: int) -> tuple[int, map]:
+		response = requests.get(HOME_URL)
+		soup = BeautifulSoup(response.content, PARSER_TYPE)
+		tabcontent = soup.find("div", id=f"block_hw{localContestId}")
+		if tabcontent is None:
+			raise ParserException("Не удалось получить список заданных задач или номер контеста.")
+		
+		
+		contestButton = tabcontent.find("a", class_="button")
+		if contestButton is None:
+			raise ParserException("Не удалось получить номер контеста.")
+
+		contestIdMatches = re.findall(r"Контест (\d{4})", contestButton.text)
+
+		if contestIdMatches is None or len(contestIdMatches) != 1:
+			raise ParserException("Не удалось получить номер контеста.")
+
+		contestId = int(contestIdMatches[0])
+
+		if contestButton is None:
+			raise ParserException("Не удалось получить номер контеста.")
+
+		homeworksMathes = tabcontent.find_all("td", string=re.compile(FIO_PATERN))
+
+		if homeworksMathes is None or len(homeworksMathes) != 1:
+			raise ParserException("Не удалось получить список задач проверьте паттерн ФИО.")
+		tasks = homeworksMathes[0].parent.find_all(string=re.compile(r"\d"))
+
+		"""
+		TODO: В некоторых задачах есть буквы, написать норм решение.
+		Пример: R = 10
+		"""
+		tasks = map(lambda task: task.replace("R", "10"), tasks)
+		return (contestId, tasks)
+
+	@staticmethod
+	def getAviableHwContestsCount() -> int:
+		response = requests.get(HOME_URL)
+		soup = BeautifulSoup(response.content, PARSER_TYPE)
+		nav = soup.find("nav")
+		if nav is None:
+			raise ParserException("Не удалось получить кол-во контестов")
+
+		hwContestButtons = nav.find_all("a", href=re.compile(r"#hw\d+"))
+		
+		if hwContestButtons is None:
+			raise ParserException("Не удалось получить кол-во контестов")
+
+		return len(hwContestButtons)
