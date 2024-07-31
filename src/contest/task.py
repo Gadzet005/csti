@@ -1,7 +1,6 @@
 from .contest_interface import ContestInterface
 from .parser import Parser
 
-from bs4 import BeautifulSoup
 
 class Task:
 	def __init__(self, contestInterface: ContestInterface, id_: int) -> None:
@@ -9,28 +8,27 @@ class Task:
 		self._id: int = id_
 	
 	@property
-	def _getHtml(self) -> bytes:
+	def _html(self) -> bytes:
 		return self._contestInterface.requestTask(self._id).content
 
 	@property
-	def getInfo(self):
+	def info(self):
 		return
 
 	@property
-	def getName(self):
-		return Parser.getTaskName(self._getHtml)
-		
+	def name(self):
+		return Parser.getTaskName(self._html)
 
 	@property
-	def getCondition(self):
-		return Parser.getTaskCondition(self._getHtml)
+	def condition(self):
+		return Parser.getTaskCondition(self._html)
 
 	@property
-	def getTests(self):
-		return Parser.getTaskTests(self._getHtml)
+	def tests(self):
+		return Parser.getTaskTests(self._html)
 
 	@property
-	def getStatus(self):
+	def status(self):
 		pass
 
 	def sendSolution(self, file: str):
