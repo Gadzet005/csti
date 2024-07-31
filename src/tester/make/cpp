@@ -1,0 +1,10 @@
+# C++
+COMPILER := g++
+FLAGS := -O2 -Wall -Werror
+
+compile:
+	$(COMPILER) $(FLAGS) $(DIR)/$(FILE) -o $(DIR)/program
+run:
+	$(DIR)/program >> $(DIR)/output.txt
+clear:
+	rm $(DIR)/program $(DIR)/output.txt
