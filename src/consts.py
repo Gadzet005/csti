@@ -15,4 +15,6 @@ class Contest(Enum):
     msu_asm_3 = 1752
 
 class Language(Enum):
+    c = 1 # TODO: найти id для c и c++
+    cpp = 2
     asm = 50
