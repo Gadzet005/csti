@@ -1,6 +1,8 @@
 from enum import Enum
 
 BASE_URL = "https://contest.solutions"
+NO_AUTH_SID = "0000000000000000"
+DEFAULT_REQUESTS_URL = f"{BASE_URL}/cgi-bin/new-client"
 
 class Locale(Enum):
     english = 0
@@ -10,7 +12,7 @@ class Locale(Enum):
 
 DEFAULT_LOCALE = Locale.russian.value
 
-class Contest(Enum):
+class ContestId(Enum):
     hse_asm_3 = 1852
     msu_asm_3 = 1752
 
