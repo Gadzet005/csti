@@ -1,0 +1,4 @@
+format:
+	clang-format --style=file:src/formatter/make/cformat.yaml $(DIR)/$(FILE) > $(DIR)/$(FORMATTED_FILE)
+clear:
+	rm $(DIR)/$(FORMATTED_FILE)

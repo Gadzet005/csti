@@ -7,8 +7,8 @@ FLAGS := 	-O2 -Wall -Werror -Wformat-security -Wignored-qualifiers -Winit-self -
 			-Wno-pointer-sign -Wno-unused-result -std=gnu99 -lm
 
 compile:
-	$(COMPILER) $(FLAGS) $(DIR)/$(FILE) -o $(DIR)/program
+	$(COMPILER) $(FLAGS) $(DIR)/$(FILE) -o $(DIR)/$(COMPILED_FILE)
 run:
-	$(DIR)/program > $(DIR)/output.txt
+	$(DIR)/$(COMPILED_FILE) > $(DIR)/$(OUTPUT_FILE)
 clear:
-	rm $(DIR)/program $(DIR)/output.txt
+	rm $(DIR)/$(COMPILED_FILE) $(DIR)/$(OUTPUT_FILE)

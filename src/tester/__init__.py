@@ -1,29 +1,25 @@
-import subprocess
 import os
-from src.tester.exceptions import (
-    RuntimeError, CompileError
-)
+import subprocess
 from src.consts import Language
+from src.tester.exceptions import RuntimeError, CompileError
 
-class Tester():
-    # Названия скомпилированного файла и файла с выходными данными
-    compiledFileName = "program"
-    outputFileName = "output.txt"
 
+class Tester:
     def __init__(self, lang: Language, path: str):
         self._makefile = self.getMakefileByLang(lang)
-        self._dir, self._fileName = os.path.split(path)
+
+        self._dir, self._file = os.path.split(path)
+        self._fileName, self._fileExt = os.path.splitext(self._file)
 
     @staticmethod
     def getMakefileByLang(lang: Language):
-        dir = os.path.dirname(__file__)
         match lang:
             case Language.c:
-                return os.path.join(dir, "make/c")
+                return "src/tester/make/c"
             case Language.cpp:
-                return os.path.join(dir, "make/cpp")
+                return "src/tester/make/cpp"
             case Language.asm:
-                return os.path.join(dir, "make/asm")
+                return "src/tester/make/asm"
             case _:
                 raise ValueError(f"Неподдерживаемый язык: {lang}")
 
@@ -38,38 +34,45 @@ class Tester():
         lines = filter(lambda x: x != "", lines)
 
         return '\n'.join(lines)
+    
+    @property
+    def _compiledFile(self):
+        return self._fileName
+    
+    @property
+    def _outputFileName(self):
+        return self._fileName + "-output.txt"
 
     # Компиляция программы
     def compileProgram(self):
-        result = subprocess.run(
-            [
-                "make", "compile", "-f", self._makefile, 
-                f"DIR={self._dir}", f"FILE={self._fileName}"
-            ], capture_output=True
-        )
+        result = subprocess.run([
+            "make", "compile", "-f", self._makefile, f"DIR={self._dir}", 
+            f"FILE={self._file}", f"COMPILED_FILE={self._compiledFile}"
+        ], capture_output=True)
 
         if result.returncode != 0:
             raise CompileError(result.stderr.decode())
 
     # Запуск программы. Возращает вывод программы
     def runProgram(self, input: str) -> str:
-        result = subprocess.run(
-            [
+        result = subprocess.run([
                 "make", "run", "-f", self._makefile, f"DIR={self._dir}",
+                f"COMPILED_FILE={self._compiledFile}", f"OUTPUT_FILE={self._outputFileName}"
             ], capture_output=True, input=input.encode()
         )
 
         if result.returncode != 0:
             raise RuntimeError(result.stderr.decode())
         
-        output = open(os.path.join(self._dir, self.outputFileName), 'r').read()
+        output = open(os.path.join(self._dir, self._outputFileName), 'r').read()
         return output.strip()
 
     # Очистка временных файлов
     def clear(self):
-        subprocess.run(
-            ["make", "clear", "-f", self._makefile, f"DIR={self._dir}",], capture_output=True
-        )
+        subprocess.run([
+            "make", "clear", "-f", self._makefile, f"DIR={self._dir}",
+            f"COMPILED_FILE={self._compiledFile}", f"OUTPUT_FILE={self._outputFileName}"
+            ], capture_output=True)
 
     """
     Запуск тестов. Выводит результаты тестов
@@ -82,7 +85,7 @@ class Tester():
         try:
             self.compileProgram()
         except CompileError as error:
-            print(f">>> Ошибка компиляции файла '{self._fileName}' \n{error.message}")
+            print(f">>> Ошибка компиляции файла '{self._file}' \n{error.message}")
             return False
         
         testCount = len(testCases)
@@ -106,4 +109,3 @@ class Tester():
         self.clear()
         
         return testPassed
-    
