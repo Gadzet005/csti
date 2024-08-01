@@ -1,6 +1,3 @@
-class ProgramError(Exception):
-    def __init__(self, message=None):
-        self.message = message
-
+class ProgramError(Exception): pass
 class RuntimeError(ProgramError): pass
 class CompileError(ProgramError): pass

@@ -1,7 +1,7 @@
 from src.consts import Language
 
-class FormatException(Exception): pass
+class FormatError(Exception): pass
 
-class FormatNotSupported(FormatException):
+class FormatNotSupported(FormatError):
     def __init__(self, lang: Language):
         super().__init__(f"Не поддерживается форматирование языка: {lang.name}")

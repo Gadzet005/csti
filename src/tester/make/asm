@@ -1,10 +1,9 @@
-# nasm intel x86
 COMPILER := nasm-x86
 FLAGS := -DUNIX -f elf -Werror
 
 compile:
-	$(COMPILER) $(FLAGS) $(DIR)/$(FILE) -o $(DIR)/program
+	$(COMPILER) $(FLAGS) $(DIR)/$(FILE) -o $(DIR)/$(COMPILED_FILE)
 run:
-	$(DIR)/program >> $(DIR)/output.txt
+	$(DIR)/$(COMPILED_FILE) > $(DIR)/$(OUTPUT_FILE)
 clear:
-	rm $(DIR)/program $(DIR)/output.txt
+	rm $(DIR)/$(COMPILED_FILE) $(DIR)/$(OUTPUT_FILE)

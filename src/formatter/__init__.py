@@ -1,13 +1,13 @@
 import os
 import subprocess
 from src.consts import Language
-from src.formatter.exceptions import FormatNotSupported, FormatException
+from src.formatter.exceptions import FormatNotSupported, FormatError
 
 
 class Formatter:
     def __init__(self, lang: Language, path: str):
         if not self.canBeFormatted(lang):
-            return FormatNotSupported(lang)
+            raise FormatNotSupported(lang)
         self._makefile = self.getMakefileByLang(lang)
 
         self._dir, self._file = os.path.split(path)
@@ -20,8 +20,6 @@ class Formatter:
                 return "src/formatter/make/c"
             case Language.cpp:
                 return "src/formatter/make/c"
-            case Language.asm:
-                return None
             case _:
                 return None
     
@@ -33,7 +31,6 @@ class Formatter:
     @property
     def _formattedFileName(self):
         return self._fileName + "-formatted" + self._fileExt
-        return self._dir
 
     # Форматирует указанный файл и возвращает путь до отформатированного файла
     def format(self):
@@ -47,7 +44,7 @@ class Formatter:
         )
 
         if result.returncode != 0:
-            raise FormatException(
+            raise FormatError(
                 f"Ошибка при форматировании файла '{self._file}':\n{result.stderr.decode()}"
             )
 

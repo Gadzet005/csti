@@ -80,12 +80,15 @@ class Tester:
     Возвращает успешно ли пройдены все тесты.
     """
     def runTests(self, testCases: list[str, str]):
-        testPassed = True
+        if (len(testCases) == 0): 
+            return True
+
+        allTestPassed = True
 
         try:
             self.compileProgram()
         except CompileError as error:
-            print(f">>> Ошибка компиляции файла '{self._file}' \n{error.message}")
+            print(f">>> Ошибка компиляции файла '{self._file}' \n{error}")
             return False
         
         testCount = len(testCases)
@@ -101,11 +104,13 @@ class Tester:
                         f"Неправильный ответ\nВходные данные:\n{input}\n"
                         f"Выходные данные:\n{output}\nОжидаемые выходные данные:\n{expected}"
                     )
+                    allTestPassed = False
                 else:
                     print("OK")
             except RuntimeError:
                 print(f"Ошибка выполнения")
+                allTestPassed = False
         
         self.clear()
         
-        return testPassed
+        return allTestPassed
