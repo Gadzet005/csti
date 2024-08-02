@@ -1,20 +1,17 @@
 import requests
 
-from .contest_interface import ContestInterface
-from .parser import Parser
-from .task import Task
+from config import LANG_ID, LOCALE, login, password
+from src.consts import ContestConsts
+from src.contest.contest_interface import ContestInterface
+from src.contest.exceptions import AuthException, ContestException
+from src.contest.parser.contest_parser import ContestParser
+from src.contest.task.task import Task
 
-from src.consts import DEFAULT_LOCALE, NO_AUTH_SID, \
-	DEFAULT_REQUESTS_URL, DEFAULT_LANG_ID 
-from .exceptions import AuthException, ContestException
-
-from src.login import login, password
 
 class Contest(ContestInterface):
 	def __init__(self, id_: int):
-		# TODO: Сделать из id свойство. 
 		self._id: int = id_ 
-		self._sessionId: str = NO_AUTH_SID
+		self._sessionId: str = ContestConsts.NON_AUTHENTICATED_SESSION_ID
 		self._session: requests.Session|None = None
 		
 		self._startSession()
@@ -27,7 +24,7 @@ class Contest(ContestInterface):
 		
 		self._session = requests.Session();
 		response = self._session.post(
-			DEFAULT_REQUESTS_URL,
+			ContestConsts.getRequestsUrl(),
 			headers={
 				"Content-Type": "multipart/form-data",
 			},
@@ -35,13 +32,13 @@ class Contest(ContestInterface):
 				"contest_id": self._id,
 				"login": login,
 				"password": password,
-				"locale_id": DEFAULT_LOCALE
+				"locale_id": LOCALE
 			}
 		)
 		
-		sessionId = Parser.getSessionId(response.content)
+		sessionId = ContestParser.getSessionId(response.content)
 		
-		if sessionId == NO_AUTH_SID:
+		if sessionId == ContestConsts.NON_AUTHENTICATED_SESSION_ID:
 			raise AuthException("В доступе к контесту отказано. \
 				Проверьте номер контеста, лоигин и пароль.")
 
@@ -65,7 +62,7 @@ class Contest(ContestInterface):
 	# -----------ContestInterface-----------
 	def requestTask(self, taskId: int) -> requests.Response:
 		return self.session.get(
-			DEFAULT_REQUESTS_URL,
+			ContestConsts.getRequestsUrl(),
 			params = {
 				"SID": self._sessionId,
 				"action": 139, # TODO: добавить enum.
@@ -75,14 +72,14 @@ class Contest(ContestInterface):
 
 	def sendTask(self, taskId: int, file: str) -> requests.Response:
 		return self.session.post(
-			DEFAULT_REQUESTS_URL,
+			ContestConsts.getRequestsUrl(),
 			headers={
 				"Content-Type": "multipart/form-data",
 			},
 			data={
 				"SID": self._sessionId,
 				"prob_id": taskId,
-				"lang_id": DEFAULT_LANG_ID,
+				"lang_id": LANG_ID.value,
 				"file": file,
 				"action_40": ""
 			}
