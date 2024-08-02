@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+
 from src.consts import Language
 from src.program.exceptions import UnexpectedLanguage
 
@@ -15,10 +16,10 @@ class MakeInfo:
         format = "format"
 
     def __init__(self, lang: Language):
-        self._makefile: str = None
+        self._makefile: str|None = None
         self._canBeCompiled: bool = True
         self._canBeFormatted: bool = True
-        self._formatConfig: str = None
+        self._formatConfig: str|None = None
 
         match lang:
             case Language.c:
@@ -42,9 +43,9 @@ class MakeInfo:
         return self._canBeFormatted
     
     @property
-    def makefile(self) -> str:
+    def makefile(self) -> str|None:
         return self._makefile
     
     @property
-    def formatConfig(self) -> str:
+    def formatConfig(self) -> str|None:
         return self._formatConfig

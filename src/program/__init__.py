@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 import os
 import subprocess
-from typing import Self
+
 from src.consts import Language
+from src.program.exceptions import (
+    CompileError, FormatError, NotSupportedLanguage, RunError,
+    TimeoutError
+)
 from src.program.make_info import MakeInfo
 from src.program.utils import normalizeText
-from src.program.exceptions import (
-    RunError, CompileError, FormatError, NotSupportedLanguage
-)
 
 
 class Program:
@@ -37,19 +40,24 @@ class Program:
         if result.returncode != 0:
             raise CompileError(result.stderr.decode())
     
-    def run(self, input: str) -> str:
+    def run(self, input: str|None = None, timeout: str|None = None) -> str:
         """ 
         Запускает программу и возвращает её вывод. 
         Если язык компилируемый, то требуется вызов метода compile
         """
 
-        result = subprocess.run([
-                "make", MakeInfo.Target.run.value, "-f", self._makeInfo.makefile,
-                f"DIR={self.dir}",
-                f"COMPILED_FILE={self.compiledFile}", 
-                f"OUTPUT_FILE={self.outputFile}",
-            ], capture_output=True, input=input.encode()
-        )
+        inputBuffer = input.encode() if input else None
+
+        try:
+            result = subprocess.run([
+                    "make", MakeInfo.Target.run.value, "-f", self._makeInfo.makefile,
+                    f"DIR={self.dir}",
+                    f"COMPILED_FILE={self.compiledFile}", 
+                    f"OUTPUT_FILE={self.outputFile}",
+                ], capture_output=True, input=inputBuffer, timeout=timeout
+            )
+        except subprocess.TimeoutExpired:
+            raise TimeoutError
 
         if result.returncode != 0:
             raise RunError(result.stderr.decode())
@@ -57,7 +65,7 @@ class Program:
         output = open(os.path.join(self.dir, self.outputFile), 'r').read()
         return output
 
-    def format(self) -> Self:
+    def format(self) -> Program:
         """ 
         Выполняет форматирование программы, возвращает экземпляр 
         Program для отформатированного файла 
@@ -91,7 +99,7 @@ class Program:
         ], capture_output=True
         )
 
-    def test(self, testCases: list[str, str]) -> bool:
+    def test(self, testCases: list[tuple[str, str]], timeout: str|None = None) -> bool:
         """
         Запуск тестов. Выводит результаты тестов
         testCases: [(Вход, Ожидаемый выход), ...]
@@ -109,7 +117,7 @@ class Program:
         for idx, (input, expected) in enumerate(testCases, 1):
             print(f">>> [{idx}/{testCount}]", end=" ")
             try:
-                output = normalizeText(self.run(input))
+                output = normalizeText(self.run(input, timeout))
                 expected = normalizeText(expected)
 
                 if output != expected:
@@ -122,6 +130,9 @@ class Program:
                     print("OK")
             except RunError as error:
                 print(f"Ошибка выполнения\n{error}")
+                allTestPassed = False
+            except TimeoutError:
+                print(f"Превышено максимальное время выполнения")
                 allTestPassed = False
 
         return allTestPassed
