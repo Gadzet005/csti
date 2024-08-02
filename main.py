@@ -1,6 +1,5 @@
-from src.contest.contest import Contest
+from src.program import Program
+from src.consts import Language
 
 if __name__ == "__main__":
-	contest = Contest(1752)
-	contest.selectTask(int(input()))
-	print(list(contest.task.tests))
+	pass
