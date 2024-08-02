@@ -1,8 +1,5 @@
 from enum import Enum
 
-BASE_URL = "https://contest.solutions"
-NO_AUTH_SID = "0000000000000000"
-DEFAULT_REQUESTS_URL = f"{BASE_URL}/cgi-bin/new-client"
 
 class Locale(Enum):
     english = 0
@@ -10,13 +7,21 @@ class Locale(Enum):
     ukrainian = 2
     kazakh = 3
 
-DEFAULT_LOCALE = Locale.russian.value
-
-class ContestId(Enum):
-    hse_asm_3 = 1852
-    msu_asm_3 = 1752
 
 class Language(Enum):
     c = 1 # TODO: найти id для c и c++
     cpp = 2
     asm = 50
+
+
+class ContestConsts(object):
+	URL = "https://contest.solutions"
+	NON_AUTHENTICATED_SESSION_ID = "0000000000000000"
+	
+	@staticmethod
+	def getRequestsUrl():
+		return f"{ContestConsts.URL}/cgi-bin/new-client"
+
+# TODO: Не работает если в ссылке ошибка.
+REQUEST_TIME_LIMIT = 10 
+PARSER_TYPE = "html.parser"
