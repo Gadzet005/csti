@@ -5,6 +5,7 @@ in pkgs.mkShell {
 		(pkgs.python3.withPackages (python-pkgs: with python-pkgs; [
 			requests
 			beautifulsoup4
+			requests-cache
 		]))
 	];
 }

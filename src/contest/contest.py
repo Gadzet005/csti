@@ -7,6 +7,7 @@ from src.contest.exceptions import AuthException, ContestException
 from src.contest.parser.contest_parser import ContestParser
 from src.contest.task.task import Task
 
+import requests_cache
 
 class Contest(ContestInterface):
 	def __init__(self, id_: int):
@@ -71,17 +72,18 @@ class Contest(ContestInterface):
 		)
 
 	def sendTask(self, taskId: int, file: str) -> requests.Response:
-		return self.session.post(
-			ContestConsts.getRequestsUrl(),
-			headers={
-				"Content-Type": "multipart/form-data",
-			},
-			data={
-				"SID": self._sessionId,
-				"prob_id": taskId,
-				"lang_id": LANG_ID.value,
-				"file": file,
-				"action_40": ""
-			}
-		)
-
+		with requests_cache.disabled():
+			return self.session.post(
+				ContestConsts.getRequestsUrl(),
+				headers={
+					"Content-Type": "multipart/form-data",
+				},
+				data={
+					"SID": self._sessionId,
+					"prob_id": taskId,
+					"lang_id": LANG_ID.value,
+					"file": file,
+					"action_40": ""
+				}
+			)
+	

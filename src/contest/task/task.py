@@ -1,8 +1,8 @@
-from functools import lru_cache
-
 from src.contest.contest_interface import ContestInterface
 from src.contest.parser.task_parser import TaskParser
 from src.contest.task.solution import Solution
+
+import requests_cache
 
 
 # TODO: Добавить кеширование и проверку возвращаемого значения в функциях.
@@ -15,9 +15,10 @@ class Task:
 		return self._contestInterface.requestTask(self._id).content
 
 	def getInfo(self) -> map:
-		return TaskParser.getInfo(self._getHtml())
+		with requests_cache.disabled():
+			return TaskParser.getInfo(self._getHtml())
 
-	def getName(self) -> str:
+	def getName(self) -> str:	
 		return TaskParser.getName(self._getHtml())
 
 	def getCondition(self) -> str:
@@ -27,8 +28,8 @@ class Task:
 		return TaskParser.getTests(self._getHtml())
 
 	def getStatus(self) -> Solution|None:
-		return TaskParser.getLastSolution(self._getHtml())
+			return TaskParser.getLastSolution(self._getHtml())
 
 	def sendSolution(self, file: str):
-		return self._contestInterface.sendTask(self._id, file)
+			return self._contestInterface.sendTask(self._id, file)
 
