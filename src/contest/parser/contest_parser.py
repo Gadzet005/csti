@@ -50,7 +50,7 @@ class ContestParser(object):
 		tasks = homeworksMathes[0].parent.find_all(string=re.compile(r"\d"))
 
 		return (contestId, tasks)
-
+	
 	@staticmethod
 	def getAviableHwCount() -> int:
 		response = requests.get(HOME_URL, timeout=REQUEST_TIME_LIMIT)

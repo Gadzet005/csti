@@ -1,7 +1,10 @@
 import unittest
+
 import requests
-from src.contest.parser import ContestParser
+
 from src.consts import ContestConsts
+from src.contest.parser import ContestParser
+
 
 class TestContestParser(unittest.TestCase):
 	def testGetSessionId(self):
