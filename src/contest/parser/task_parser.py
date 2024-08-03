@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 from src.consts import PARSER_TYPE
 from src.contest.exceptions import CantParseElement
-from src.contest.task.solution import Solution
+from src.contest.task.solution import Solution, SolutionStatus
 
 
 class TaskParser(object):
@@ -79,10 +79,14 @@ class TaskParser(object):
 		statusBlocks = statusHistoryLine[1].find_all("td", class_="b1")
 		if statusBlocks is None:
 			raise CantParseElement("last solution")
+
+		testPassedElement = statusBlocks[5].text
+
+		
 		
 		return Solution(
 			int(statusBlocks[0].text),
-			statusBlocks[4].text,
-			int(statusBlocks[5].text)
+			SolutionStatus(statusBlocks[4].text),
+			int(testPassedElement if testPassedElement.isdigit() else 0)
 		)
 

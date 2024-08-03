@@ -9,6 +9,11 @@ class SolutionStatus(Enum):
 	execution_error = "Ошибка выполнения"
 	bad_output_format = "Неправильный формат вывода"
 	unclassified_error = "Не классифицированная ошибка"
+	time_limit = "Превышено максимальное время работы"
+
+	@classmethod
+	def _missing_(cls, value):
+		return cls.unclassified_error
 
 
 @dataclass

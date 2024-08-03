@@ -22,6 +22,9 @@ class ContestParser(object):
 		
 		return sessionIdMatches[0]
 
+	"""
+		 Если тип дз не является контестом то возвращается -1.
+	"""
 	@staticmethod
 	def getHomework(localContestId: int) -> tuple[int, map]:
 		response = requests.get(HOME_URL, timeout=REQUEST_TIME_LIMIT)
@@ -33,12 +36,12 @@ class ContestParser(object):
 		contestButton = tabcontent.find("a", class_="button")
 		if contestButton is None:
 			raise CantParseElement("contestButton") 
-		
-		contestIdMatches = re.findall(r"Контест (\d{4})", contestButton.text)
-		if contestIdMatches is None or len(contestIdMatches) != 1:
-			raise CantParseElement("contestIdMatches") 
 
-		contestId = int(contestIdMatches[0])
+		contestIdMatches = re.findall(r"Контест (\d{4})", contestButton.text)
+		if contestIdMatches is not None and len(contestIdMatches) == 1:
+			contestId = int(contestIdMatches[0])
+		else:
+			contestId = -1
 
 		homeworksMathes = tabcontent.find_all("td", string=re.compile(FIO_PATERN))
 		if homeworksMathes is None or len(homeworksMathes) != 1:
@@ -47,7 +50,7 @@ class ContestParser(object):
 		tasks = homeworksMathes[0].parent.find_all(string=re.compile(r"\d"))
 
 		return (contestId, tasks)
-
+	
 	@staticmethod
 	def getAviableHwCount() -> int:
 		response = requests.get(HOME_URL, timeout=REQUEST_TIME_LIMIT)

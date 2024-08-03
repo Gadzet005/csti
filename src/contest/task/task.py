@@ -1,5 +1,3 @@
-from functools import lru_cache
-
 from src.contest.contest_interface import ContestInterface
 from src.contest.parser.task_parser import TaskParser
 from src.contest.task.solution import Solution
@@ -17,7 +15,7 @@ class Task:
 	def getInfo(self) -> map:
 		return TaskParser.getInfo(self._getHtml())
 
-	def getName(self) -> str:
+	def getName(self) -> str:	
 		return TaskParser.getName(self._getHtml())
 
 	def getCondition(self) -> str:

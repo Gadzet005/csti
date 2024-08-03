@@ -1,4 +1,5 @@
 import requests
+import requests_cache
 
 from config import LANG_ID, LOCALE, login, password
 from src.consts import ContestConsts
@@ -69,6 +70,7 @@ class Contest(ContestInterface):
 				"prob_id": taskId
 			}
 		)
+	
 
 	def sendTask(self, taskId: int, file: str) -> requests.Response:
 		return self.session.post(
