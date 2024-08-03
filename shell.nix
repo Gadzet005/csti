@@ -6,5 +6,6 @@ in pkgs.mkShell {
 			requests
 			beautifulsoup4
 		]))
+		pkgs.clang-tools
 	];
-}
+}	
