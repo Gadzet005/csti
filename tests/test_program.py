@@ -39,9 +39,6 @@ class TestProgram(unittest.TestCase):
         output = add.run("-4 -8")
         self.assertEqual(output, "-12\n")
 
-        with self.assertRaises(TimeoutError):
-            add.run(timeout=0.1)
-
         add.clear()
 
         with self.assertRaises(RunError):
@@ -63,9 +60,6 @@ class TestProgram(unittest.TestCase):
         self.assertEqual(output, "2\n")
         output = divide.run("18 -3")
         self.assertEqual(output, "-6\n")
-
-        with self.assertRaises(TimeoutError):
-            divide.run(timeout=0.1)
         
         with self.assertRaises(RunError):
             divide.run("10 0")
@@ -132,19 +126,28 @@ class TestProgram(unittest.TestCase):
             ("9 3", "3"),
             ("10 1", "2"),
             ("10 0", "0"),
-            ("", ""),
         ]
 
         divide = Program(Language.cpp, "tests/programs/divide.cpp")
         divide.compile()
         results = divide.test(testCases, timeout=1)
 
-        self.assertEqual(results.testsTotal, 5)
+        self.assertEqual(results.testsTotal, 4)
         self.assertEqual(results.testsPassed, 2)
         self.assertEqual(results[0].status, TestStatus.ok)
         self.assertEqual(results[1].status, TestStatus.ok)
         self.assertEqual(results[2].status, TestStatus.wrongAnswer)
         self.assertEqual(results[3].status, TestStatus.runtimeError)
-        self.assertEqual(results[4].status, TestStatus.timeLimit)
 
+        divide.clear()
+    
+    def testTimout(self):
+        """ Тестирование превышения времени ожидания"""
+
+        divide = Program(Language.cpp, "tests/programs/cicle.c")
+        divide.compile()
+        
+        with self.assertRaises(TimeoutError):
+            divide.run(timeout=0.1)
+        
         divide.clear()
