@@ -1,4 +1,4 @@
-COMPILER := nasm-x86
+COMPILER := nasm
 FLAGS := -DUNIX -f elf -Werror
 
 compile:
