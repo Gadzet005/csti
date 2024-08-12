@@ -7,5 +7,6 @@ in pkgs.mkShell {
 			beautifulsoup4
 			requests-cache
 		]))
+		pkgs.clang-tools
 	];
 }
