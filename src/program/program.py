@@ -9,7 +9,7 @@ from src.program.exceptions import (
     TimeoutError
 )
 from src.program.test_result import TestResultList, TestStatus
-from src.program.make_info import MakeInfo
+from src.program.make import LangInfo, MakeTarget
 from src.program.utils import normalizeText
 
 
@@ -23,15 +23,23 @@ class Program:
         self.lang = lang
         self.filePath = filePath
 
+    def __enter__(self):
+        if self._langInfo.canBeCompiled:
+            self.compile()
+        return self
+    
+    def __exit__(self, *args):
+        self.clear()
+
 
     def compile(self):
         """ Компилирует программу """
 
-        if not self._makeInfo.canBeCompiled:
+        if not self._langInfo.canBeCompiled:
             raise NotSupportedLanguage(self.lang)
 
-        result = subprocess.run([
-            "make", MakeInfo.Target.compile.value, "-f", self._makeInfo.makefile, 
+        result: subprocess.CompletedProcess = subprocess.run([
+            "make", MakeTarget.compile.value, "-f", self._langInfo.makefile, 
             f"DIR={self.dir}", 
             f"FILE={self.file}", 
             f"COMPILED_FILE={self.compiledFile}"
@@ -50,8 +58,8 @@ class Program:
         inputBuffer = input.encode() if input else None
 
         try:
-            result = subprocess.run([
-                    "make", MakeInfo.Target.run.value, "-f", self._makeInfo.makefile,
+            result: subprocess.CompletedProcess = subprocess.run([
+                    "make", MakeTarget.run.value, "-f", self._langInfo.makefile,
                     f"DIR={self.dir}",
                     f"COMPILED_FILE={self.compiledFile}", 
                     f"OUTPUT_FILE={self.outputFile}",
@@ -75,12 +83,12 @@ class Program:
         Program для отформатированного файла 
         """
 
-        if not self._makeInfo.canBeFormatted:
+        if not self._langInfo.canBeFormatted:
             raise NotSupportedLanguage(self.lang)
 
-        result = subprocess.run([
-                "make", MakeInfo.Target.format.name, "-f", self._makeInfo.makefile,
-                f"FORMAT_CONFIG={self._makeInfo.formatConfig}",
+        result: subprocess.CompletedProcess = subprocess.run([
+                "make", MakeTarget.format.name, "-f", self._langInfo.makefile,
+                f"FORMAT_CONFIG={self._langInfo.formatConfig}",
                 f"DIR={self.dir}", 
                 f"FILE={self.file}", 
                 f"FORMATTED_FILE={self.formattedFile}"
@@ -92,16 +100,22 @@ class Program:
 
         return Program(self.lang, os.path.join(self.dir, self.formattedFile))
 
-    def clear(self):
-        """ Очистка временных файлов """
+    def clear(self, clearSelf=False):
+        """ 
+        Очистка временных файлов 
+        clearSelf: Требуется ли очистка самой программы?
+        """
 
         subprocess.run([
-            "make", MakeInfo.Target.clear.name, "-f", self._makeInfo.makefile, 
+            "make", MakeTarget.clear.name, "-f", self._langInfo.makefile, 
             f"DIR={self.dir}",
             f"COMPILED_FILE={self.compiledFile}", 
             f"OUTPUT_FILE={self.outputFile}"
         ], capture_output=True
         )
+
+        if clearSelf:
+            os.remove(self.filePath)
 
     def test(self, testCases: list[tuple[str, str]], timeout: str|None = None) -> TestResultList:
         """
@@ -186,4 +200,4 @@ class Program:
     @lang.setter
     def lang(self, lang: Language):
         self._lang = lang
-        self._makeInfo = MakeInfo(lang)
+        self._langInfo = LangInfo.fromLang(lang)

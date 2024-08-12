@@ -1,4 +1,3 @@
-import os
 import unittest
 
 from src.program import *
@@ -101,11 +100,9 @@ class TestProgram(unittest.TestCase):
 
         program.compile()
         original_output = program.run()
-        program.clear()
 
         formatted.compile()
         formatted_output = formatted.run()
-        formatted.clear()
 
         self.assertEqual(original_output, formatted_output)
 
@@ -116,8 +113,9 @@ class TestProgram(unittest.TestCase):
 
         self.assertEqual(expected_code, formatted_code)
 
-        os.remove(formatted.filePath)
-    
+        program.clear()
+        formatted.clear(clearSelf=True)
+
     def testProgramTest(self):
         """ Тестирование запуска тестов для программы """
 
