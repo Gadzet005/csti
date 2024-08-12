@@ -1,11 +1,9 @@
 import re
 
-import requests
 from bs4 import BeautifulSoup
 
-from config import FIO_PATERN, HOME_URL
-from src.consts import PARSER_TYPE, REQUEST_TIME_LIMIT
-from src.contest.exceptions import CantParseElement
+from app.consts import PARSER_TYPE
+from app.contest.exceptions import CantParseElement
 
 
 class ContestParser(object):
@@ -26,9 +24,8 @@ class ContestParser(object):
 		 Если тип дз не является контестом то возвращается -1.
 	"""
 	@staticmethod
-	def getHomework(localContestId: int) -> tuple[int, map]:
-		response = requests.get(HOME_URL, timeout=REQUEST_TIME_LIMIT)
-		soup = BeautifulSoup(response.content, PARSER_TYPE)
+	def getHomework(html: bytes, namePattern: str, localContestId: int) -> tuple[int, map]:
+		soup = BeautifulSoup(html, PARSER_TYPE)
 		tabcontent = soup.find("div", id=f"block_hw{localContestId}")
 		if tabcontent is None:
 			raise CantParseElement("tabcontent") 
@@ -43,7 +40,7 @@ class ContestParser(object):
 		else:
 			contestId = -1
 
-		homeworksMathes = tabcontent.find_all("td", string=re.compile(FIO_PATERN))
+		homeworksMathes = tabcontent.find_all("td", string=re.compile(namePattern))
 		if homeworksMathes is None or len(homeworksMathes) != 1:
 			raise CantParseElement("homework")
 		
@@ -52,9 +49,8 @@ class ContestParser(object):
 		return (contestId, tasks)
 	
 	@staticmethod
-	def getAviableHwCount() -> int:
-		response = requests.get(HOME_URL, timeout=REQUEST_TIME_LIMIT)
-		soup = BeautifulSoup(response.content, PARSER_TYPE)
+	def getAviableHwCount(html: bytes) -> int:
+		soup = BeautifulSoup(html, PARSER_TYPE)
 		nav = soup.find("nav")
 		if nav is None:
 			raise CantParseElement("nav")

@@ -1,7 +1,7 @@
 import unittest
 
-from src.contest.parser import TaskParser
-from src.contest.task.solution import Solution, SolutionStatus
+from app.contest.parser import TaskParser
+from app.contest.task.solution import Solution, SolutionStatus
 
 condition = "На вход программе подаётся беззнаковое 32-битное целое число N и натуральное число K  (1 ≤ K ≤ 31).  Требуется циклически сдвинуть биты числа N вправо на K битов и вывести полученное таким образом число.Примечание: в системе команд процессоров семейства x86 для выполнения этой операции есть готовая инструкция — ROR.Запрещается использовать инструкции условной передачи данных и управления."
 
