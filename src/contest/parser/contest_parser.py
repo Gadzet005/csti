@@ -2,8 +2,8 @@ import re
 
 from bs4 import BeautifulSoup
 
-from app.consts import PARSER_TYPE
-from app.contest.exceptions import CantParseElement
+from src.consts import PARSER_TYPE
+from src.contest.exceptions import CantParseElement
 
 
 class ContestParser(object):
@@ -49,7 +49,7 @@ class ContestParser(object):
 		return (contestId, tasks)
 	
 	@staticmethod
-	def getAviableHwCount(html: bytes) -> int:
+	def getAviableHomeworkCount(html: bytes) -> int:
 		soup = BeautifulSoup(html, PARSER_TYPE)
 		nav = soup.find("nav")
 		if nav is None:

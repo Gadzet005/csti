@@ -1,11 +1,11 @@
 import requests
 
-from app.config import HOME_URL, LANG_ID, LOCALE
-from app.consts import ContestConsts
-from app.utils import Singleton
+from src.config import HOME_URL, LANG_ID, LOCALE
+from src.consts import ContestConsts
+from src.utils import Singleton
 
-from app.contest.exceptions import AuthException
-from app.contest.parser import ContestParser
+from src.contest.exceptions import AuthException
+from src.contest.parser import ContestParser
 
 
 class ContestInterface(metaclass=Singleton):
@@ -51,12 +51,8 @@ class ContestInterface(metaclass=Singleton):
 
 
 	# --------------------- Homework -------------------
-	def requestHomeUrl(self) -> bytes:
-		if self._session == None:
-			# TODO: Recconect.
-			raise Exception()
-			
-		response = self._session.get(HOME_URL)
+	def requestHome(self) -> bytes:
+		response = requests.get(HOME_URL)
 
 		"""
 			TODO: Сделать гибкую систему ошибок(особенно проверка на срок 
@@ -65,6 +61,15 @@ class ContestInterface(metaclass=Singleton):
 
 		return response.content
 
+	def getAviableHomeworkCount(self) -> int:
+		homeHtml = ContestInterface().requestHome()
+		homeworkCount = ContestParser.getAviableHomeworkCount(homeHtml)
+		return homeworkCount
+
+	def getHomework(self, namePattern: str, localContestId: int) -> tuple[int, map]:
+		homeHtml = ContestInterface().requestHome()
+		homework = ContestParser.getHomework(homeHtml, namePattern, localContestId)
+		return homework
 
 	# --------------------- Task -----------------------
 	def requestTask(self, taskId: int) -> bytes:

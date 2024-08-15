@@ -2,9 +2,9 @@ from inspect import cleandoc
 
 from bs4 import BeautifulSoup
 
-from app.consts import PARSER_TYPE
-from app.contest.exceptions import CantParseElement
-from app.contest.task.solution import Solution, SolutionStatus
+from src.consts import PARSER_TYPE
+from src.contest.exceptions import CantParseElement
+from src.contest.task.solution import Solution, SolutionStatus
 
 
 class TaskParser(object):

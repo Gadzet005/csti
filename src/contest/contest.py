@@ -1,7 +1,7 @@
 from typing import List
 
-from app.contest.contest_interface import ContestInterface
-from app.contest.task.task import Task
+from src.contest.contest_interface import ContestInterface
+from src.contest.task.task import Task
 
 
 class Contest:

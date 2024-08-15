@@ -2,8 +2,8 @@ import unittest
 
 import requests
 
-from app.consts import ContestConsts
-from app.contest.parser import ContestParser
+from src.consts import ContestConsts
+from src.contest.parser import ContestParser
 
 
 class TestContestParser(unittest.TestCase):
