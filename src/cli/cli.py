@@ -57,7 +57,7 @@ def selectContest(id: int|None):
 	homeworksCount = ContestInterface().getAviableHomeworkCount()
 	if isinstance(id, int) and id in range(1, homeworksCount):
 		homework = ContestInterface().getHomework(namePattern, id)
-		if homework[0] == -1:
+		if homework[0] == "-1":
 			print("Warning: Выбран не допустимый контест.")
 			return
 
@@ -90,9 +90,6 @@ def selectContest(id: int|None):
 		).execute()
 	
 	DataManager.saveContest1(homework[0], homework[1])
-
-
-
 
 
 cli.add_command(selectContest)
