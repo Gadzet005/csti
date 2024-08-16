@@ -9,6 +9,7 @@ in pkgs.mkShell {
 			click
 			inquirerpy
 			platformdirs
+			pyyaml
 		]))
 		pkgs.clang-tools
 	];

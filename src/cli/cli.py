@@ -2,7 +2,7 @@ import click
 from InquirerPy import inquirer
 
 from src.cli.data_manager import DataManager
-from src.config import namePattern
+from src.config import ConfigManager 
 from src.consts import NO_CONTEST_SUPPORT
 from src.contest.contest_interface import ContestInterface
 from src.contest.task.solution import SolutionStatus
@@ -21,7 +21,7 @@ def selectContest(local_id: int|None = None):
 	homework = None
 	homeworksCount = ContestInterface().getAviableHomeworkCount()
 	if isinstance(local_id, int) and local_id in range(1, homeworksCount + 1):
-		homework = ContestInterface().getHomework(namePattern, local_id)
+		homework = ContestInterface().getHomework(ConfigManager().name, local_id)
 		if homework[0] == "-1":
 			print("Warning: Выбран не допустимый контест.")
 			return
@@ -39,7 +39,7 @@ def selectContest(local_id: int|None = None):
 		homeworks = list()
 		lastElementIndex = 0
 		for index in range(1, homeworksCount + 1):
-			homework = ContestInterface().getHomework(namePattern, index)
+			homework = ContestInterface().getHomework(ConfigManager().name, index)
 			
 			# NOTE: Заглушка, убирает не работающий пока что status.
 			homeworkAdapter = (homework[0], list())

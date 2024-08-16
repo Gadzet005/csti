@@ -1,6 +1,6 @@
 import requests
 
-from src.config import HOME_URL, LANG_ID, LOCALE
+from src.config import ConfigManager, LANG_ID, LOCALE
 from src.consts import ContestConsts
 from src.contest.exceptions import AuthException, ContestInterfaceException
 from src.contest.parser.contest_parser import ContestParser
@@ -49,7 +49,7 @@ class ContestInterface(metaclass=Singleton):
 
 	# --------------------- Homework -------------------
 	def requestHome(self) -> bytes:
-		response = requests.get(HOME_URL)
+		response = requests.get(ConfigManager().homeUrl)
 
 		"""
 			TODO: Сделать гибкую систему ошибок(особенно проверка на срок 
