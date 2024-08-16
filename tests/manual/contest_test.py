@@ -1,8 +1,10 @@
-import unittest
 import os
+import unittest
 
-from src.contest import Contest, ContestInterface
-from src.config import login, password, namePattern
+from src.config import login, namePattern, password
+from src.contest.contest import Contest
+from src.contest.contest_interface import ContestInterface
+
 
 # NOTE: Тестировать только при рабочем config.
 class TestContest(unittest.TestCase):
@@ -14,14 +16,14 @@ class TestContest(unittest.TestCase):
 		for localId in range(1, aviableHomeworkCount):
 			homework = ContestInterface().getHomework(namePattern, localId)
 			id = homework[0]
-			if id == -1:
+			if id == "-1":
 				continue
 
 			tasksId = list(range(1, 13))
-			contest = Contest(id, tasksId)
+			contest = Contest(id, [ str(taskId) for taskId in tasksId])
 			for taskLocalId in range(1, len(tasksId) + 1):
 				contest.selectTask(taskLocalId)
-				task = contest.getTask()
+				task = contest.currentTask
 				print(task.getName())
 				print(list(task.getInfo()))
 				print(task.getCondition())

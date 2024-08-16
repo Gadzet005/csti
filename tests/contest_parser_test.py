@@ -3,7 +3,8 @@ import unittest
 import requests
 
 from src.consts import ContestConsts
-from src.contest.parser import ContestParser
+from src.contest.contest_interface import ContestInterface
+from src.contest.parser.contest_parser import ContestParser
 
 
 class TestContestParser(unittest.TestCase):
@@ -14,9 +15,5 @@ class TestContestParser(unittest.TestCase):
 			ContestConsts.NON_AUTHENTICATED_SESSION_ID
 		)
 	
-#	def testGetAviableHwCount(self):
-#		self.assertTrue(0 <= ContestParser.getAviableHwCount())
-#
-#	def testAllHomework(self):
-#		for index in range(1, ContestParser.getAviableHwCount() + 1):
-#			ContestParser.getHomework(index)
+	def testGetAviableHwCount(self):
+		self.assertTrue(0 <= ContestInterface().getAviableHomeworkCount())

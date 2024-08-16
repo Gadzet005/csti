@@ -1,11 +1,11 @@
 import requests
 
+from src.contest.task.solution import SolutionStatus
 from src.config import HOME_URL, LANG_ID, LOCALE
 from src.consts import ContestConsts
-from src.utils import Singleton
-
 from src.contest.exceptions import AuthException, ContestInterfaceException
-from src.contest.parser import ContestParser
+from src.contest.parser.contest_parser import ContestParser
+from src.utils import Singleton
 
 
 class ContestInterface(metaclass=Singleton):
@@ -13,12 +13,11 @@ class ContestInterface(metaclass=Singleton):
 		self._login: str = login
 		self._password: str = password
 		
-		self._contestId: int|None = None
 		self._sessionId: str|None = None
 		self._cookieSessionId: str|None = None
 		self._session: requests.Session|None = None
 	
-	def selectContest(self, globalId):
+	def selectContest(self, globalId: str):
 		if self._login is None or self._password is None:
 			raise AuthException("Логин или пароль не проинициализирован.")
 
@@ -47,13 +46,6 @@ class ContestInterface(metaclass=Singleton):
 				Проверьте номер контеста, лоигин и пароль.")
 
 		self._sessionId = sessionId
-		self._contestId = globalId
-
-	def _recconect(self):
-		if self._contestId == None:
-			raise ContestInterfaceException("Контест не выбран.")
-		self.selectContest(self._contestId)
-
 
 	# --------------------- Homework -------------------
 	def requestHome(self) -> bytes:
@@ -71,15 +63,15 @@ class ContestInterface(metaclass=Singleton):
 		homeworkCount = ContestParser.getAviableHomeworkCount(homeHtml)
 		return homeworkCount
 
-	def getHomework(self, namePattern: str, localContestId: int) -> tuple[int, map]:
+	def getHomework(self, namePattern: str, localContestId: int) -> tuple[str, list[tuple[str, SolutionStatus]]]:
 		homeHtml = ContestInterface().requestHome()
 		homework = ContestParser.getHomework(homeHtml, namePattern, localContestId)
 		return homework
 
 	# --------------------- Task -----------------------
-	def requestTask(self, taskId: int) -> bytes:
+	def requestTask(self, taskId: str) -> bytes:
 		if self._session == None:
-			self._recconect()
+			raise ContestInterfaceException("Сессия не инициализирована.")
 
 		response = self._session.get(
 			ContestConsts.getRequestsUrl(),
@@ -97,9 +89,9 @@ class ContestInterface(metaclass=Singleton):
 
 		return response.content
 
-	def sendTask(self, taskId: int, file: str):
+	def sendTask(self, taskId: str, file: str):
 		if self._session == None:
-			self._recconect()
+			raise ContestInterfaceException("Сессия не инициализирована.")
 
 		response = self._session.post(
 			ContestConsts.getRequestsUrl(),

@@ -6,6 +6,8 @@ in pkgs.mkShell {
 			requests
 			beautifulsoup4
 			requests-cache
+			click
+			inquirerpy
 		]))
 		pkgs.clang-tools
 	];

@@ -1,13 +1,16 @@
-from src.contest import ContestInterface
-from src.contest.parser import TaskParser
+from src.contest.contest_interface import ContestInterface
+from src.contest.parser.task_parser import TaskParser
 from src.contest.task.solution import Solution
 
 
 # TODO: Добавить кеширование и проверку возвращаемого значения в функциях.
 class Task:
-	def __init__(self, id_: int) -> None:
-		self._id: int = id_
-	
+	def __init__(self, id_: str) -> None:
+		self._id: str = id_
+
+	@property
+	def id(self) -> str:
+		return self._id
 
 	def getInfo(self) -> map:
 		return TaskParser.getInfo(ContestInterface().requestTask(self._id))

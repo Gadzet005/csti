@@ -6,7 +6,6 @@ from enum import Enum
 from src.consts import Language
 from src.program.exceptions import UnexpectedLanguage
 
-
 MAKE_DIR = "src/program/make"
 FORMAT_CONFIGS_DIR = "src/program/format_configs"
 

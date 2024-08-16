@@ -1,6 +1,4 @@
+from .exceptions import (CompileError, FormatError, NotSupportedLanguage,
+                         RunError, TimeoutError)
 from .program import Program
-from .exceptions import (
-    RunError, TimeoutError, CompileError, FormatError,
-    NotSupportedLanguage
-)
-from .test_result import TestResultList, TestResult, TestStatus
+from .test_result import TestResult, TestResultList, TestStatus

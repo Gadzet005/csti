@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 
 from src.consts import PARSER_TYPE
 from src.contest.exceptions import CantParseElement
+from src.contest.task.solution import SolutionStatus
 
 
 class ContestParser(object):
@@ -24,7 +25,9 @@ class ContestParser(object):
 		 Если тип дз не является контестом то возвращается -1.
 	"""
 	@staticmethod
-	def getHomework(html: bytes, namePattern: str, localContestId: int) -> tuple[int, map]:
+	def getHomework(html: bytes, namePattern: str, localContestId: int) \
+		-> tuple[str, list[tuple[str, SolutionStatus]]]:
+		
 		soup = BeautifulSoup(html, PARSER_TYPE)
 		tabcontent = soup.find("div", id=f"block_hw{localContestId}")
 		if tabcontent is None:
@@ -36,15 +39,18 @@ class ContestParser(object):
 
 		contestIdMatches = re.findall(r"Контест (\d{4})", contestButton.text)
 		if contestIdMatches is not None and len(contestIdMatches) == 1:
-			contestId = int(contestIdMatches[0])
+			contestId = contestIdMatches[0]
 		else:
-			contestId = -1
+			contestId = "-1"
 
 		homeworksMathes = tabcontent.find_all("td", string=re.compile(namePattern))
 		if homeworksMathes is None or len(homeworksMathes) != 1:
 			raise CantParseElement("homework")
 		
-		tasks = homeworksMathes[0].parent.find_all(string=re.compile(r"\d"))
+		tasks = list()
+		for taskId in homeworksMathes[0].parent.find_all(string=re.compile(r"\d")):
+			task = (taskId, SolutionStatus.unclassified_error)
+			tasks.append(task)
 
 		return (contestId, tasks)
 	

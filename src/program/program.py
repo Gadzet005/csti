@@ -4,12 +4,11 @@ import os
 import subprocess
 
 from src.consts import Language
-from src.program.exceptions import (
-    CompileError, FormatError, NotSupportedLanguage, RunError,
-    TimeoutError
-)
-from src.program.test_result import TestResultList, TestStatus
+from src.program.exceptions import (CompileError, FormatError,
+                                    NotSupportedLanguage, RunError,
+                                    TimeoutError)
 from src.program.make import LangInfo, MakeTarget
+from src.program.test_result import TestResultList, TestStatus
 from src.program.utils import normalizeText
 
 

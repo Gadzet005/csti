@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class TestStatus(Enum):
     ok = "ОК"
     timeLimit = "Превышено максимальное время ожидания"
