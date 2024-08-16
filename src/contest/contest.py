@@ -7,7 +7,7 @@ from src.contest.task.task import Task
 class Contest:
 	def __init__(self, id: str, tasksId: List[str]):
 		self._tasks: List[Task] = list()
-		self._curentTaskId: int = 0
+		self._curentTaskLocalId: int = 0
 		for taskId in tasksId:
 			task = Task(taskId)
 			self._tasks.append(task)
@@ -16,21 +16,19 @@ class Contest:
 
 		ContestInterface().selectContest(self._id)
 
-	def getTasksId(self) -> list[str]:
-		tasksId = list()
-		for task in self._tasks:
-			tasksId.append(task.id)
-		return tasksId
+	@property
+	def tasks(self) -> List[Task]:
+		return self._tasks
 
 	def selectTask(self, taskLocalId: int):
 		taskLocalId -= 1
 		if taskLocalId not in range(0, len(self._tasks)):
 			raise 
-		self._curentTaskId = taskLocalId
+		self._curentTaskLocalId = taskLocalId
 
 	@property
 	def currentTask(self) -> Task:
-		return self._tasks[self._curentTaskId]
+		return self._tasks[self._curentTaskLocalId]
 
 	@property
 	def id(self) -> str:

@@ -18,17 +18,17 @@ class TaskParser(object):
 		return nameElement.text
 
 	@staticmethod
-	def getInfo(html: bytes) -> map:
+	def getInfo(html: bytes) -> list[tuple[str, ...]]:
 		soup = BeautifulSoup(html, PARSER_TYPE)
 		infoContainer = soup.find("table", class_="line-table-wb")
 		if infoContainer is None:
 			raise CantParseElement("info") 
 		
 		infoStrings = cleandoc(infoContainer.text).split("\n")
-		info = map(
+		info = list(map(
 			lambda infoString: tuple(infoString.split(":", 1)),
 			infoStrings
-		)
+		))
 
 		return info
 
@@ -52,7 +52,7 @@ class TaskParser(object):
 		return cleandoc(condition)
 
 	@staticmethod
-	def getTests(html: bytes) -> zip:
+	def getTests(html: bytes) -> list[tuple[str, str]]:
 		soup = BeautifulSoup(html, PARSER_TYPE)
 		testsElements = soup.find_all("pre")
 		if testsElements is None:
@@ -61,7 +61,7 @@ class TaskParser(object):
 		testsUnparse = map(lambda testElement: testElement.text, testsElements)
 		testsIterator = iter(testsUnparse)
 		
-		return zip(testsIterator, testsIterator)
+		return list(zip(testsIterator, testsIterator))
 
 	@staticmethod
 	def getLastSolution(html: bytes) -> Solution|None:

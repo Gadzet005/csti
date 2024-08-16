@@ -1,67 +1,43 @@
 import click
-import os
+from src.cli.data_manager import DataManager
 from InquirerPy import inquirer
 
 from src.config import namePattern
-from src.contest.contest import Contest
 from src.contest.contest_interface import ContestInterface
+from src.contest.task.solution import SolutionStatus
+from src.consts import NO_CONTEST_SUPPORT
 
 
-NO_CONTEST_SUPPORT = "Не поддерживаемый контест"
-ARRAY_SEPARATOR = ", "
 
-
-class DataManager:
-	programmDirectory = ".csti"
-	contestDirectory =   f"{programmDirectory}/contest"
-	contestIdPath =		 f"{contestDirectory}/id"
-	contestTasksIdPath = f"{contestDirectory}/tasksId"
-
-
-	@staticmethod
-	def saveContest(contest: Contest):
-		DataManager.saveContest1(contest.id, contest.getTasksId())
-
-	# TODO: Сделать нормальный overide функции.
-	@staticmethod
-	def saveContest1(id: str, tasksId: list[str]):
-		os.makedirs(os.path.dirname(DataManager.contestIdPath), exist_ok=True)
-		os.makedirs(os.path.dirname(DataManager.contestTasksIdPath), exist_ok=True)
-	
-		with open(DataManager.contestIdPath, "w") as file:
-			file.write(id)
-		with open(DataManager.contestTasksIdPath, "w") as file:
-			file.write(ARRAY_SEPARATOR.join(tasksId))
-		
-	
-	@staticmethod
-	def loadContest():
-		with open(DataManager.contestIdPath, "r") as file:
-			id = file.read()
-		with open(DataManager.contestTasksIdPath, "r") as file:
-			tasksId = file.read().split(ARRAY_SEPARATOR)
-		print(id, list(tasksId))
-		contest = Contest(id, list(tasksId))
-		return contest
-
+# TODO: Сделать инициализацию, чтобы программа не мусорила, где не нужно.
 
 @click.group()
 def cli():
 	pass
 
 
-@click.command("select-contest")
-@click.argument("id", type=int, required=False)
-def selectContest(id: int|None):
+
+@cli.command("select-contest")
+@click.argument("local-id", type=int, required=False)
+def selectContest(local_id: int|None = None):
 	homework = None
 	homeworksCount = ContestInterface().getAviableHomeworkCount()
-	if isinstance(id, int) and id in range(1, homeworksCount):
-		homework = ContestInterface().getHomework(namePattern, id)
+	if isinstance(local_id, int) and local_id in range(1, homeworksCount + 1):
+		homework = ContestInterface().getHomework(namePattern, local_id)
 		if homework[0] == "-1":
 			print("Warning: Выбран не допустимый контест.")
 			return
 
+		# NOTE: Заглушка, убирает не работающий пока что status.
+		homeworkAdapter = (homework[0], list())
+		for i in range(0, len(homework[1])):
+			homeworkAdapter[1].append(homework[1][i][0]) 
+		homework = homeworkAdapter
+
 	else:
+		if local_id != None:
+			print("Warning: Контест отсутствует. Выберите из списка.")
+
 		homeworks = list()
 		lastElementIndex = 0
 		for index in range(1, homeworksCount + 1):
@@ -81,15 +57,86 @@ def selectContest(id: int|None):
 			lastElementIndex = len(homeworks)
 
 		homework = inquirer.rawlist(
-			message="Контест:",
-			choices=homeworks,
-			default=lastElementIndex,
-			validate=lambda result: result != NO_CONTEST_SUPPORT,
-			invalid_message="Не поддерживается!",
-			vi_mode=True,
+			message = "Контест:",
+			choices = homeworks,
+			default = lastElementIndex,
+			validate = lambda result: result != NO_CONTEST_SUPPORT,
+			invalid_message = "Не поддерживается!",
+			vi_mode = True,
 		).execute()
 	
-	DataManager.saveContest1(homework[0], homework[1])
+	DataManager.saveContest(homework[0], homework[1])
 
 
-cli.add_command(selectContest)
+
+@cli.command("select-task")
+@click.argument("local-id", type=int, required=False)
+def selectTask(local_id: int|None = None):
+	contest = DataManager.loadContest()
+	taskLocalId = None
+	tasksCount = len(contest.tasks)
+	if isinstance(local_id, int) and local_id in range(1, tasksCount + 1):
+		taskLocalId = str(local_id)
+
+	else: 
+		if local_id != None:
+			print("Warning: Задача отсутствует. Выберите из списка.")
+
+		tasks = contest.tasks
+		tasksName = list(map(lambda task: task.getName(), tasks))
+
+		lastSucsess = 0
+		for task in tasks:
+			solution = task.getSolution()
+			if solution and solution.status != SolutionStatus.accepted_for_review:
+				break
+			lastSucsess += 1
+		
+		task = inquirer.rawlist(
+			message = "Задача: ",
+			choices = tasksName,
+			default = (lastSucsess + 1) % tasksCount,
+			vi_mode = True,
+			
+		).execute()
+
+		taskLocalId = str(tasksName.index(task) + 1)
+	DataManager.saveContest(taskLocalId=taskLocalId)
+
+
+
+@cli.command("task")
+@click.option("--name", is_flag=True, default = False)
+@click.option("--cond", is_flag=True, default = False)
+@click.option("--info", is_flag=True, default = False)
+@click.option("--tests", is_flag=True, default = False)
+@click.option("--solution", is_flag=True, default = False)
+def taskInterface(name: bool, info: bool, cond: bool, tests: bool, \
+				  solution: bool):
+	contest = DataManager.loadContest()
+	task = contest.currentTask
+	if name:
+		print(task.getName())
+	
+	if info:
+		print(task.getInfo())
+
+	if cond:
+		print(task.getCondition())
+
+	if tests:
+		print(task.getTests())
+
+	if solution:
+		print(task.getSolution())
+
+
+
+@cli.command("send-task")
+@click.argument("file", type=click.Path(exists=True), required=False)
+def sendTask(file: str):
+	with open(file, "r") as file_:
+		programm = file_.read()
+	contest = DataManager.loadContest()
+	contest.currentTask.sendSolution(programm)
+

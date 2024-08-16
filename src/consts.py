@@ -25,3 +25,6 @@ class ContestConsts(object):
 # TODO: Не работает если в ссылке ошибка.
 REQUEST_TIME_LIMIT = 10 
 PARSER_TYPE = "html.parser"
+
+
+NO_CONTEST_SUPPORT = "Не поддерживаемый контест"

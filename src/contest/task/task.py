@@ -1,6 +1,6 @@
 from src.contest.contest_interface import ContestInterface
 from src.contest.parser.task_parser import TaskParser
-from src.contest.task.solution import Solution
+from src.contest.task.solution import Solution, SolutionStatus
 
 
 # TODO: Добавить кеширование и проверку возвращаемого значения в функциях.
@@ -12,7 +12,7 @@ class Task:
 	def id(self) -> str:
 		return self._id
 
-	def getInfo(self) -> map:
+	def getInfo(self) -> list:
 		return TaskParser.getInfo(ContestInterface().requestTask(self._id))
 
 	def getName(self) -> str:	
@@ -21,10 +21,10 @@ class Task:
 	def getCondition(self) -> str:
 		return TaskParser.getCondition(ContestInterface().requestTask(self._id))
 
-	def getTests(self) -> zip:
+	def getTests(self) -> list[tuple[str, str]]:
 		return TaskParser.getTests(ContestInterface().requestTask(self._id))
 
-	def getStatus(self) -> Solution|None:
+	def getSolution(self) -> Solution|None:
 		return TaskParser.getLastSolution(ContestInterface().requestTask(self._id))
 
 	def sendSolution(self, file: str):
