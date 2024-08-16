@@ -4,26 +4,25 @@ from src.config import HOME_URL, LANG_ID, LOCALE
 from src.consts import ContestConsts
 from src.utils import Singleton
 
-from src.contest.exceptions import AuthException
+from src.contest.exceptions import AuthException, ContestInterfaceException
 from src.contest.parser import ContestParser
 
 
 class ContestInterface(metaclass=Singleton):
-	def __init__(self, login: str|None = None, password: str|None = None):
-		if login:
-			self._login: str = login
-		if password:
-			self._password: str = password
+	def signIn(self, login: str, password: str):
+		self._login: str = login
+		self._password: str = password
 		
-		self._sessionId = None
-		self._cookieSessionId = None
+		self._contestId: int|None = None
+		self._sessionId: str|None = None
+		self._cookieSessionId: str|None = None
 		self._session: requests.Session|None = None
 	
 	def selectContest(self, globalId):
 		if self._login is None or self._password is None:
-			raise AuthException("Логин или пароль не проинициализирован")
+			raise AuthException("Логин или пароль не проинициализирован.")
 
-		self._session = requests.Session() # TODO: Перенести в конструктор мб.
+		self._session = requests.Session()
 		response = self._session.post(
 			ContestConsts.getRequestsUrl(),
 			headers={
@@ -36,7 +35,7 @@ class ContestInterface(metaclass=Singleton):
 				"locale_id": LOCALE
 			}
 		)
-
+		
 		"""
 			TODO: Сделать гибкую систему ошибок(особенно проверка на срок 
 			годность сессии).
@@ -48,6 +47,12 @@ class ContestInterface(metaclass=Singleton):
 				Проверьте номер контеста, лоигин и пароль.")
 
 		self._sessionId = sessionId
+		self._contestId = globalId
+
+	def _recconect(self):
+		if self._contestId == None:
+			raise ContestInterfaceException("Контест не выбран.")
+		self.selectContest(self._contestId)
 
 
 	# --------------------- Homework -------------------
@@ -74,8 +79,7 @@ class ContestInterface(metaclass=Singleton):
 	# --------------------- Task -----------------------
 	def requestTask(self, taskId: int) -> bytes:
 		if self._session == None:
-			# TODO: Recconect.
-			raise Exception()
+			self._recconect()
 
 		response = self._session.get(
 			ContestConsts.getRequestsUrl(),
@@ -95,8 +99,7 @@ class ContestInterface(metaclass=Singleton):
 
 	def sendTask(self, taskId: int, file: str):
 		if self._session == None:
-			# TODO: Recconect.
-			raise Exception()
+			self._recconect()
 
 		response = self._session.post(
 			ContestConsts.getRequestsUrl(),

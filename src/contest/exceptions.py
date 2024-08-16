@@ -1,12 +1,9 @@
-class AuthException(Exception):
+class ContestInterfaceException(Exception):
     pass
 
-class ContestException(Exception):
+class AuthException(ContestInterfaceException):
     pass
  
-class RequestTimeLimit(Exception):
-	pass
-
 
 class ParserError(Exception):
 	pass

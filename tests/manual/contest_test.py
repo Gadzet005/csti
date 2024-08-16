@@ -4,10 +4,10 @@ import os
 from src.contest import Contest, ContestInterface
 from src.config import login, password, namePattern
 
-# TODO: Крайне нестабильно и тестировать только при рабочем config.
+# NOTE: Тестировать только при рабочем config.
 class TestContest(unittest.TestCase):
 	def testAll(self):
-		ContestInterface(login, password)
+		ContestInterface().signIn(login, password)
 		isSkipNext = False
 
 		aviableHomeworkCount = ContestInterface().getAviableHomeworkCount()
