@@ -2,7 +2,6 @@ import os
 
 from src.contest.contest import Contest
 
-
 ARRAY_SEPARATOR = ", "
 
 class DataManager:

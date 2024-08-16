@@ -1,13 +1,11 @@
 import click
-from src.cli.data_manager import DataManager
 from InquirerPy import inquirer
 
+from src.cli.data_manager import DataManager
 from src.config import namePattern
+from src.consts import NO_CONTEST_SUPPORT
 from src.contest.contest_interface import ContestInterface
 from src.contest.task.solution import SolutionStatus
-from src.consts import NO_CONTEST_SUPPORT
-
-
 
 # TODO: Сделать инициализацию, чтобы программа не мусорила, где не нужно.
 

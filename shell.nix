@@ -8,6 +8,7 @@ in pkgs.mkShell {
 			requests-cache
 			click
 			inquirerpy
+			platformdirs
 		]))
 		pkgs.clang-tools
 	];

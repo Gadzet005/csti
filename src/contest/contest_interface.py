@@ -1,10 +1,10 @@
 import requests
 
-from src.contest.task.solution import SolutionStatus
 from src.config import HOME_URL, LANG_ID, LOCALE
 from src.consts import ContestConsts
 from src.contest.exceptions import AuthException, ContestInterfaceException
 from src.contest.parser.contest_parser import ContestParser
+from src.contest.task.solution import SolutionStatus
 from src.utils import Singleton
 
 
