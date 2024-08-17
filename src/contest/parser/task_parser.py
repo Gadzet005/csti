@@ -2,7 +2,7 @@ from inspect import cleandoc
 
 from bs4 import BeautifulSoup
 
-from src.consts import PARSER_TYPE
+from src.consts import ContestConsts
 from src.contest.exceptions import CantParseElement
 from src.contest.task.solution import Solution, SolutionStatus
 
@@ -10,7 +10,7 @@ from src.contest.task.solution import Solution, SolutionStatus
 class TaskParser(object):
 	@staticmethod
 	def getName(html: bytes) -> str:
-		soup = BeautifulSoup(html, PARSER_TYPE)
+		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		nameElement = soup.find("h3")
 		if nameElement is None:
 			raise CantParseElement("name")
@@ -19,7 +19,7 @@ class TaskParser(object):
 
 	@staticmethod
 	def getInfo(html: bytes) -> list[tuple[str, ...]]:
-		soup = BeautifulSoup(html, PARSER_TYPE)
+		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		infoContainer = soup.find("table", class_="line-table-wb")
 		if infoContainer is None:
 			raise CantParseElement("info") 
@@ -34,7 +34,7 @@ class TaskParser(object):
 
 	@staticmethod
 	def getCondition(html: bytes) -> str:
-		soup = BeautifulSoup(html, PARSER_TYPE)
+		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		taskContainer = soup.find("div", id="probNavTaskArea-ins")
 		if taskContainer is None:
 			raise CantParseElement("condition")
@@ -53,7 +53,7 @@ class TaskParser(object):
 
 	@staticmethod
 	def getTests(html: bytes) -> list[tuple[str, str]]:
-		soup = BeautifulSoup(html, PARSER_TYPE)
+		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		testsElements = soup.find_all("pre")
 		if testsElements is None:
 			raise CantParseElement("tests")
@@ -65,7 +65,7 @@ class TaskParser(object):
 
 	@staticmethod
 	def getLastSolution(html: bytes) -> Solution|None:
-		soup = BeautifulSoup(html, PARSER_TYPE)
+		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		statusTable = soup.find("table", class_="table")
 		if statusTable is None:
 			return None

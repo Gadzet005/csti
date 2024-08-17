@@ -1,6 +1,23 @@
 from enum import Enum
 
 
+APP_NAME = "csti"
+
+
+class ContestConsts(object):
+	URL = "https://contest.solutions"
+	PARSER_TYPE = "html.parser"
+	NON_AUTHENTICATED_SESSION_ID = "0000000000000000"
+	
+	@staticmethod
+	def getRequestsUrl():
+		return f"{ContestConsts.URL}/cgi-bin/new-client"
+
+
+class CliConsts(object):
+	NO_CONTEST_SUPPORT = "Не поддерживаемый контест"
+
+
 class Locale(Enum):
     english = 0
     russian = 1
@@ -13,18 +30,3 @@ class Language(Enum):
     cpp = 2
     asm = 50
 
-
-class ContestConsts(object):
-	URL = "https://contest.solutions"
-	NON_AUTHENTICATED_SESSION_ID = "0000000000000000"
-	
-	@staticmethod
-	def getRequestsUrl():
-		return f"{ContestConsts.URL}/cgi-bin/new-client"
-
-# TODO: Не работает если в ссылке ошибка.
-REQUEST_TIME_LIMIT = 10 
-PARSER_TYPE = "html.parser"
-APP_NAME = "csti"
-
-NO_CONTEST_SUPPORT = "Не поддерживаемый контест"

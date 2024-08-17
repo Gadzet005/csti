@@ -2,7 +2,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from src.consts import PARSER_TYPE
+from src.consts import ContestConsts
 from src.contest.exceptions import CantParseElement
 from src.contest.task.solution import SolutionStatus
 
@@ -10,7 +10,7 @@ from src.contest.task.solution import SolutionStatus
 class ContestParser(object):
 	@staticmethod
 	def getSessionId(html: bytes) -> str:
-		soup = BeautifulSoup(html, PARSER_TYPE)
+		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		script = soup.find("script", string=re.compile("var SID="))
 		if script is None:
 			raise CantParseElement("script")
@@ -28,7 +28,7 @@ class ContestParser(object):
 	def getHomework(html: bytes, namePattern: str, localContestId: int) \
 		-> tuple[str, list[tuple[str, SolutionStatus]]]:
 		
-		soup = BeautifulSoup(html, PARSER_TYPE)
+		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		tabcontent = soup.find("div", id=f"block_hw{localContestId}")
 		if tabcontent is None:
 			raise CantParseElement("tabcontent") 
@@ -56,7 +56,7 @@ class ContestParser(object):
 	
 	@staticmethod
 	def getAviableHomeworkCount(html: bytes) -> int:
-		soup = BeautifulSoup(html, PARSER_TYPE)
+		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		nav = soup.find("nav")
 		if nav is None:
 			raise CantParseElement("nav")

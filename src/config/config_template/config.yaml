@@ -2,6 +2,7 @@ user:
   login: 0000000 
   password: пароль
   name: Фамилия
+
 home-url: "https://contest.solutions/..."
 
 # Возможные варианты:

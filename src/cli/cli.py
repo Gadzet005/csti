@@ -2,17 +2,20 @@ import click
 from InquirerPy import inquirer
 
 from src.cli.data_manager import DataManager
-from src.config import ConfigManager 
-from src.consts import NO_CONTEST_SUPPORT
+from src.config import ConfigManager
+from src.consts import CliConsts
 from src.contest.contest_interface import ContestInterface
 from src.contest.task.solution import SolutionStatus
 
-# TODO: Сделать инициализацию, чтобы программа не мусорила, где не нужно.
 
 @click.group()
 def cli():
 	pass
 
+
+@cli.command("init")
+def init():
+	DataManager.init()
 
 
 @cli.command("select-contest")
@@ -48,7 +51,7 @@ def selectContest(local_id: int|None = None):
 			homework = homeworkAdapter
 			
 			if homework[0] == "-1":
-				homeworks.append(NO_CONTEST_SUPPORT)
+				homeworks.append(CliConsts.NO_CONTEST_SUPPORT)
 				continue
 			
 			homeworks.append(homework)
@@ -58,7 +61,7 @@ def selectContest(local_id: int|None = None):
 			message = "Контест:",
 			choices = homeworks,
 			default = lastElementIndex,
-			validate = lambda result: result != NO_CONTEST_SUPPORT,
+			validate = lambda result: result != CliConsts.NO_CONTEST_SUPPORT,
 			invalid_message = "Не поддерживается!",
 			vi_mode = True,
 		).execute()

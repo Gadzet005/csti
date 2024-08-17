@@ -1,13 +1,15 @@
+import os
+import shutil
+
+import yaml
+from platformdirs import user_config_dir
+
 from src.consts import APP_NAME, Language, Locale
+from src.utils import Singleton
 
 # LANG_ID = Language.asm
 
 
-from platformdirs import user_config_dir
-from src.utils import Singleton
-import yaml
-import os
-import shutil
 
 appConfigDir = user_config_dir(APP_NAME)
 configPath = f"{appConfigDir}/config.yaml"
