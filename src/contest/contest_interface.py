@@ -1,6 +1,6 @@
 import requests
 
-from src.config import ConfigManager, LANG_ID, LOCALE
+from src.config import ConfigManager
 from src.consts import ContestConsts
 from src.contest.exceptions import AuthException, ContestInterfaceException
 from src.contest.parser.contest_parser import ContestParser
@@ -12,12 +12,13 @@ class ContestInterface(metaclass=Singleton):
 	def signIn(self, login: str, password: str):
 		self._login: str = login
 		self._password: str = password
-		
+
+		self._contestId: str|None = None
 		self._sessionId: str|None = None
 		self._cookieSessionId: str|None = None
 		self._session: requests.Session|None = None
 	
-	def selectContest(self, globalId: str):
+	def selectContest(self, id: str):
 		if self._login is None or self._password is None:
 			raise AuthException("Логин или пароль не проинициализирован.")
 
@@ -28,10 +29,10 @@ class ContestInterface(metaclass=Singleton):
 				"Content-Type": "multipart/form-data",
 			},
 			data={
-				"contest_id": globalId,
+				"contest_id": id,
 				"login": self._login,
 				"password": self._password,
-				"locale_id": LOCALE
+				"locale_id": ConfigManager().locale.value 
 			}
 		)
 		
@@ -44,7 +45,8 @@ class ContestInterface(metaclass=Singleton):
 		if sessionId == ContestConsts.NON_AUTHENTICATED_SESSION_ID:
 			raise AuthException("В доступе к контесту отказано. \
 				Проверьте номер контеста, лоигин и пароль.")
-
+		
+		self._contestId = id
 		self._sessionId = sessionId
 
 	# --------------------- Homework -------------------
@@ -69,6 +71,12 @@ class ContestInterface(metaclass=Singleton):
 		return homework
 
 	# --------------------- Task -----------------------
+	@property
+	def langId(self):
+		if self._contestId == None:
+			raise ContestInterfaceException("ContestId не инициализирован.")
+		return f"{self._contestId[2]}0"
+
 	def requestTask(self, taskId: str) -> bytes:
 		if self._session == None:
 			raise ContestInterfaceException("Сессия не инициализирована.")
@@ -101,7 +109,7 @@ class ContestInterface(metaclass=Singleton):
 			data={
 				"SID": self._sessionId,
 				"prob_id": taskId,
-				"lang_id": LANG_ID.value,
+				"lang_id": self.langId,
 				"file": file,
 				"action_40": ""
 			}

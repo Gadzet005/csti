@@ -1,2 +1,11 @@
-name: "Сталин"
+user:
+  login: 0000000 
+  password: пароль
+  name: Фамилия
 home-url: "https://contest.solutions/..."
+
+# Возможные варианты:
+locale: russian
+# locale: english
+# locale: kazakh
+# locale: ukrainian
