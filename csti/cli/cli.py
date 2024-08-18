@@ -1,11 +1,11 @@
 import click
 from InquirerPy import inquirer
 
-from src.cli.data_manager import DataManager
-from src.config import ConfigManager
-from src.consts import CliConsts
-from src.contest.contest_interface import ContestInterface
-from src.contest.task.solution import SolutionStatus
+from cli.data_manager import DataManager
+from config import ConfigManager
+from consts import CliConsts
+from contest.contest_interface import ContestInterface
+from contest.task.solution import SolutionStatus
 
 
 @click.group()
@@ -23,7 +23,7 @@ def init():
 def selectContest(local_id: int|None = None):
 	homework = None
 	homeworksCount = ContestInterface().getAviableHomeworkCount()
-	if isinstance(local_id, int) and local_id in range(1, homeworksCount + 1):
+	if isinstance(local_id, int) and local_id in range(1 + 6, homeworksCount + 1 + 6):
 		homework = ContestInterface().getHomework(ConfigManager().name, local_id)
 		if homework[0] == "-1":
 			print("Warning: Выбран не допустимый контест.")
@@ -41,7 +41,7 @@ def selectContest(local_id: int|None = None):
 
 		homeworks = list()
 		lastElementIndex = 0
-		for index in range(1, homeworksCount + 1):
+		for index in range(1 + 6, homeworksCount + 1 + 6):
 			homework = ContestInterface().getHomework(ConfigManager().name, index)
 			
 			# NOTE: Заглушка, убирает не работающий пока что status.

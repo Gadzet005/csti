@@ -4,16 +4,13 @@ import shutil
 import yaml
 from platformdirs import user_config_dir
 
-from src.consts import APP_NAME, Language, Locale
-from src.utils import Singleton
-
-# LANG_ID = Language.asm
-
+from consts import APP_NAME, Locale
+from utils import Singleton
 
 
 appConfigDir = user_config_dir(APP_NAME)
 configPath = f"{appConfigDir}/config.yaml"
-configTemplateDir = "src/config/config_template"
+configTemplateDir = "config/config_template"
 
 
 def generateConfig():
@@ -26,7 +23,7 @@ def generateConfig():
 class ConfigManager(metaclass=Singleton):
 	def __init__(self):
 		isConfigExist = os.path.exists(configPath)
-		if isConfigExist == False:
+		if not isConfigExist:
 			generateConfig()
 
 		with open(configPath, "r") as file:

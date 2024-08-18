@@ -1,9 +1,9 @@
 import os
 import unittest
 
-from src.config import ConfigManager 
-from src.contest.contest import Contest
-from src.contest.contest_interface import ContestInterface
+from config import ConfigManager 
+from contest.contest import Contest
+from contest.contest_interface import ContestInterface
 
 
 # NOTE: Тестировать только при рабочем config.

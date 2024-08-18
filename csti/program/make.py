@@ -3,11 +3,11 @@ from __future__ import annotations
 import os
 from enum import Enum
 
-from src.consts import Language
-from src.program.exceptions import UnexpectedLanguage
+from consts import Language
+from program.exceptions import UnexpectedLanguage
 
-MAKE_DIR = "src/program/make"
-FORMAT_CONFIGS_DIR = "src/program/format_configs"
+MAKE_DIR = "program/make"
+FORMAT_CONFIGS_DIR = "program/format_configs"
 
 class MakeTarget(Enum):
     compile = "compile"

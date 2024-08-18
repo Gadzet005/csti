@@ -3,13 +3,13 @@ from __future__ import annotations
 import os
 import subprocess
 
-from src.consts import Language
-from src.program.exceptions import (CompileError, FormatError,
+from consts import Language
+from program.exceptions import (CompileError, FormatError,
                                     NotSupportedLanguage, RunError,
                                     TimeoutError)
-from src.program.make import LangInfo, MakeTarget
-from src.program.test_result import TestResultList, TestStatus
-from src.program.utils import normalizeText
+from program.make import LangInfo, MakeTarget
+from program.test_result import TestResultList, TestStatus
+from program.utils import normalizeText
 
 
 class Program:

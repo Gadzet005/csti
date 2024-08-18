@@ -1,11 +1,11 @@
 import requests
 
-from src.config import ConfigManager
-from src.consts import ContestConsts
-from src.contest.exceptions import AuthException, ContestInterfaceException
-from src.contest.parser.contest_parser import ContestParser
-from src.contest.task.solution import SolutionStatus
-from src.utils import Singleton
+from config import ConfigManager
+from consts import ContestConsts
+from contest.exceptions import AuthException, ContestInterfaceException
+from contest.parser.contest_parser import ContestParser
+from contest.task.solution import SolutionStatus
+from utils import Singleton
 
 
 class ContestInterface(metaclass=Singleton):
