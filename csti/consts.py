@@ -19,15 +19,15 @@ class CliConsts:
 
 
 class Locale(Enum):
-    english = 0
-    russian = 1
-    ukrainian = 2
-    kazakh = 3
+	english = 0
+	russian = 1
+	ukrainian = 2
+	kazakh = 3
 
 
 class Language(Enum):
 	# TODO: добавить все возможные языки
-    c = 1 # TODO: найти id для c и c++
-    cpp = 2
-    asm = 50
+	c = 1 # TODO: найти id для c и c++
+	cpp = 2
+	asm = 50
 

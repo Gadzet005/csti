@@ -16,14 +16,27 @@ class ContestInterface(metaclass=Singleton):
 		self._contestId: str|None = None
 		self._sessionId: str|None = None
 		self._cookieSessionId: str|None = None
+
+		"""
+		Переменная для кэширования сессии, не использовать!
+		Вместо этого можно использовать Self.session
+		"""
 		self._session: requests.Session|None = None
+
+	@property
+	def session(self) -> requests.Session|None:
+		if self._cookieSessionId is None:
+			return None
+		if self._session is None:
+			self._session = requests.Session()
+			self._session.cookies.set("EJSID", self._cookieSessionId)
+		return self._session
 	
 	def selectContest(self, id: str):
 		if self._login is None or self._password is None:
 			raise AuthException("Логин или пароль не проинициализирован.")
 
-		self._session = requests.Session()
-		response = self._session.post(
+		response = requests.post(
 			ContestConsts.getRequestsUrl(),
 			headers={
 				"Content-Type": "multipart/form-data",
@@ -32,7 +45,7 @@ class ContestInterface(metaclass=Singleton):
 				"contest_id": id,
 				"login": self._login,
 				"password": self._password,
-				"locale_id": ConfigManager().locale.value 
+				"locale_id": ConfigManager().locale.value
 			}
 		)
 		
@@ -43,11 +56,14 @@ class ContestInterface(metaclass=Singleton):
 		
 		sessionId = ContestParser.getSessionId(response.content)
 		if sessionId == ContestConsts.NON_AUTHENTICATED_SESSION_ID:
-			raise AuthException("В доступе к контесту отказано. \
-				Проверьте номер контеста, лоигин и пароль.")
+			raise AuthException(
+				"В доступе к контесту отказано. "
+				"Проверьте номер контеста, логин и пароль."
+			)
 		
 		self._contestId = id
 		self._sessionId = sessionId
+		self._cookieSessionId = response.cookies.get("EJSID")
 
 	# --------------------- Homework -------------------
 	def requestHome(self) -> bytes:
@@ -60,13 +76,13 @@ class ContestInterface(metaclass=Singleton):
 
 		return response.content
 
-	def getAviableHomeworkCount(self) -> int:
-		homeHtml = ContestInterface().requestHome()
-		homeworkCount = ContestParser.getAviableHomeworkCount(homeHtml)
+	def getAvailableHomeworkCount(self) -> int:
+		homeHtml = self.requestHome()
+		homeworkCount = ContestParser.getAvailableHomeworkCount(homeHtml)
 		return homeworkCount
 
 	def getHomework(self, namePattern: str, localContestId: int) -> tuple[str, list[tuple[str, SolutionStatus]]]:
-		homeHtml = ContestInterface().requestHome()
+		homeHtml = self.requestHome()
 		homework = ContestParser.getHomework(homeHtml, namePattern, localContestId)
 		return homework
 
@@ -78,10 +94,10 @@ class ContestInterface(metaclass=Singleton):
 		return f"{self._contestId[2]}0"
 
 	def requestTask(self, taskId: str) -> bytes:
-		if self._session == None:
+		if self.session is None:
 			raise ContestInterfaceException("Сессия не инициализирована.")
 
-		response = self._session.get(
+		response = self.session.get(
 			ContestConsts.getRequestsUrl(),
 			params = {
 				"SID": self._sessionId,
@@ -98,10 +114,10 @@ class ContestInterface(metaclass=Singleton):
 		return response.content
 
 	def sendTask(self, taskId: str, file: str):
-		if self._session == None:
+		if self.session == None:
 			raise ContestInterfaceException("Сессия не инициализирована.")
 
-		response = self._session.post(
+		response = self.session.post(
 			ContestConsts.getRequestsUrl(),
 			headers={
 				"Content-Type": "multipart/form-data",
@@ -121,4 +137,3 @@ class ContestInterface(metaclass=Singleton):
 		"""
 
 		return response
-

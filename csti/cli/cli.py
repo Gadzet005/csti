@@ -22,7 +22,7 @@ def init():
 @click.argument("local-id", type=int, required=False)
 def selectContest(local_id: int|None = None):
 	homework = None
-	homeworksCount = ContestInterface().getAviableHomeworkCount()
+	homeworksCount = ContestInterface().getAvailableHomeworkCount()
 	if isinstance(local_id, int) and local_id in range(1 + 6, homeworksCount + 1 + 6):
 		homework = ContestInterface().getHomework(ConfigManager().name, local_id)
 		if homework[0] == "-1":
@@ -80,7 +80,7 @@ def selectTask(local_id: int|None = None):
 		taskLocalId = str(local_id)
 
 	else: 
-		if local_id != None:
+		if local_id:
 			print("Warning: Задача отсутствует. Выберите из списка.")
 
 		tasks = contest.tasks

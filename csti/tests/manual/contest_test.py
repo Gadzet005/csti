@@ -12,7 +12,7 @@ class TestContest(unittest.TestCase):
 		ContestInterface().signIn(ConfigManager().login, ConfigManager().password)
 		isSkipNext = False
 
-		aviableHomeworkCount = ContestInterface().getAviableHomeworkCount()
+		aviableHomeworkCount = ContestInterface().getAvailableHomeworkCount()
 		for localId in range(1, aviableHomeworkCount):
 			homework = ContestInterface().getHomework(ConfigManager().name, localId)
 			id = homework[0]

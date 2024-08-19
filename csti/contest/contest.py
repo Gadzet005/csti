@@ -1,12 +1,10 @@
-from typing import List
-
 from contest.contest_interface import ContestInterface
 from contest.task.task import Task
 
 
 class Contest:
-	def __init__(self, id: str, tasksId: List[str]):
-		self._tasks: List[Task] = list()
+	def __init__(self, id: str, tasksId: list[str]):
+		self._tasks: list[Task] = list()
 		self._curentTaskLocalId: int = 0
 		for taskId in tasksId:
 			task = Task(taskId)
@@ -17,7 +15,7 @@ class Contest:
 		ContestInterface().selectContest(self._id)
 
 	@property
-	def tasks(self) -> List[Task]:
+	def tasks(self) -> list[Task]:
 		return self._tasks
 
 	def selectTask(self, taskLocalId: int):

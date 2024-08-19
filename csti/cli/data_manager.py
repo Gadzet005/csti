@@ -26,7 +26,7 @@ class DataManager:
 	def saveContest(id: str|None = None, tasksId: list[str]|None = None, taskLocalId: str = "1"):
 		for dir in DataManager.dirs.values():
 			isDirExsist = os.path.exists(dir)
-			if isDirExsist == False:
+			if not isDirExsist:
 				raise DataManagerException(f"Не проинициализированны директории: {dir}.")
 
 		if id:
@@ -44,7 +44,7 @@ class DataManager:
 	def loadContest() -> Contest:
 		for path in DataManager.paths.values():
 			isFileExsist = os.path.exists(path)
-			if isFileExsist == False:
+			if not isFileExsist:
 				raise DataManagerException(f"Не проинициализированны данные: {path}.")
 		
 

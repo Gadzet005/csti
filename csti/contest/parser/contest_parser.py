@@ -55,7 +55,7 @@ class ContestParser(object):
 		return (contestId, tasks)
 	
 	@staticmethod
-	def getAviableHomeworkCount(html: bytes) -> int:
+	def getAvailableHomeworkCount(html: bytes) -> int:
 		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		nav = soup.find("nav")
 		if nav is None:
