@@ -76,10 +76,10 @@ class ContestInterface(metaclass=Singleton):
 
 		return response.content
 
-	def getAvailableHomeworkCount(self) -> int:
+	def getAvailableHomeworksLocalId(self) -> list[int]:
 		homeHtml = self.requestHome()
-		homeworkCount = ContestParser.getAvailableHomeworkCount(homeHtml)
-		return homeworkCount
+		homeworksLocalId = ContestParser.getAvailableHomeworksLocalId(homeHtml)
+		return homeworksLocalId
 
 	def getHomework(self, namePattern: str, localContestId: int) -> tuple[str, list[tuple[str, SolutionStatus]]]:
 		homeHtml = self.requestHome()
