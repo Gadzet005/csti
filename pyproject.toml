@@ -15,6 +15,8 @@ click = "^8.1.7"
 beautifulsoup4 = "^4.12.3"
 requests = "^2.32.3"
 
+[tool.poetry.scripts]
+csti = "csti.__main__:main"
 
 [build-system]
 requires = ["poetry-core"]
