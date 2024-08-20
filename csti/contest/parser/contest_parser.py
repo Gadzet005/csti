@@ -55,14 +55,14 @@ class ContestParser(object):
 		return (contestId, tasks)
 	
 	@staticmethod
-	def getAvailableHomeworkCount(html: bytes) -> int:
+	def getAvailableHomeworksLocalId(html: bytes) -> list[int]:
 		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		nav = soup.find("nav")
 		if nav is None:
 			raise CantParseElement("nav")
 
-		hwContestButtons = nav.find_all("a", href=re.compile(r"#hw\d+"))
+		hwContestButtons = list(map(int, re.findall(r"\d+", nav.text)))
 		if hwContestButtons is None:
 			raise CantParseElement("hwContestButtons")
 
-		return len(hwContestButtons)
+		return hwContestButtons

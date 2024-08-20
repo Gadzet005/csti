@@ -23,8 +23,8 @@ def init():
 @click.argument("local-id", type=int, required=False)
 def selectContest(local_id: int|None = None):
 	homework = None
-	homeworksCount = ContestInterface().getAvailableHomeworkCount()
-	if isinstance(local_id, int) and local_id in range(1 + 6, homeworksCount + 1 + 6):
+	homeworsLocalId = ContestInterface().getAvailableHomeworksLocalId()
+	if isinstance(local_id, int) and local_id in homeworsLocalId:
 		homework = ContestInterface().getHomework(ConfigManager().name, local_id)
 		if homework[0] == "-1":
 			print("Warning: Выбран не допустимый контест.")
@@ -42,7 +42,7 @@ def selectContest(local_id: int|None = None):
 
 		homeworks = list()
 		lastElementIndex = 0
-		for index in range(1 + 6, homeworksCount + 1 + 6):
+		for index in homeworsLocalId:
 			homework = ContestInterface().getHomework(ConfigManager().name, index)
 			
 			# NOTE: Заглушка, убирает не работающий пока что status.
