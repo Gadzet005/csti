@@ -34,11 +34,11 @@ class LangInfo:
 	def fromLang(lang: Language) -> LangInfo:
 		match lang:
 			case Language.c:
-				return LangInfo(True, True, "c.mk", "cformat.yaml")
+				return LangInfo(True, True, "c/makefile", "cformat.yaml")
 			case Language.cpp:
-				return LangInfo(True, True, "cpp.mk", "cformat.yaml")
+				return LangInfo(True, True, "cpp/makefile", "cformat.yaml")
 			case Language.asm:
-				return LangInfo(True, False, "asm.mk", None)
+				return LangInfo(True, False, "asm/makefile", None)
 			case _:
 				raise UnexpectedLanguage(lang)
 	

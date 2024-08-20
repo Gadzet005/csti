@@ -11,6 +11,12 @@ in pkgs.mkShell {
 			platformdirs
 			pyyaml
 		]))
+
 		pkgs.clang-tools
 	];
+
+	  nativeBuildInputs = with pkgs.buildPackages; [
+		pkgsi686Linux.gcc
+		pkgsi686Linux.nasm
+  	];
 }

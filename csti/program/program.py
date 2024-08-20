@@ -15,21 +15,12 @@ from program.utils import normalizeText
 class Program:
 	""" 
 	Выполняет запуск, компиляцию, форматирование и 
-	тестирование программы на заданном языке 
+	тестирование программы на заданном языке.
 	"""
 
 	def __init__(self, lang: Language, filePath: str):
 		self.lang = lang
 		self.filePath = filePath
-
-	def __enter__(self):
-		if self._langInfo.canBeCompiled:
-			self.compile()
-		return self
-	
-	def __exit__(self, *args):
-		self.clear()
-
 
 	def compile(self):
 		""" Компилирует программу """
@@ -200,3 +191,19 @@ class Program:
 	def lang(self, lang: Language):
 		self._lang = lang
 		self._langInfo = LangInfo.fromLang(lang)
+	
+	@property
+	def code(self):
+		""" Код программы """
+		with open(self.filePath, 'r') as file:
+			return file.read()
+		
+	@property
+	def canBeCompiled(self):
+		""" Компилируемый ли язык """
+		return self._langInfo.canBeCompiled
+	
+	@property
+	def canBeFormatted(self):
+		""" Форматируемый ли язык """
+		return self._langInfo.canBeFormatted

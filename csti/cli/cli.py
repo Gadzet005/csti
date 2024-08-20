@@ -6,6 +6,7 @@ from config import ConfigManager
 from consts import CliConsts
 from contest.contest_interface import ContestInterface
 from contest.task.solution import SolutionStatus
+from program import Program, prepareProgram, formatProgram, CompileError
 
 
 @click.group()
@@ -134,10 +135,32 @@ def taskInterface(name: bool, info: bool, cond: bool, tests: bool, \
 
 
 @cli.command("send-task")
-@click.argument("file", type=click.Path(exists=True), required=False)
+@click.argument("file", type=click.Path(exists=True), required=True)
 def sendTask(file: str):
-	with open(file, "r") as file_:
-		programm = file_.read()
 	contest = DataManager.loadContest()
-	contest.currentTask.sendSolution(programm)
+	program = Program(contest.lang, file)
+	shouldSendSolution = True
 
+	try:
+		with prepareProgram(program) as ready:
+			print("Запуск тестов")
+			testCases = contest.currentTask.getTests()
+			testResults = ready.test(testCases, 1)
+
+			print(f"Пройдено тестов: {testResults.passed} из {testResults.total}")
+			for idx, testResult in enumerate(testResults, 1):
+				print(f"[{idx}/{testResults.total}] {testResult}")
+			
+			if not testResults.arePassedAll:
+				shouldSendSolution = False
+
+	except CompileError as error:
+		print(f"Ошибка компиляции файла '{file}':\n{error}")
+		shouldSendSolution = False
+
+	if shouldSendSolution:
+		print("Решение успешно отправлено")
+		with formatProgram(program) as formatted:
+			contest.currentTask.sendSolution(formatted.code)
+	else:
+		print("Решение не было отправлено")

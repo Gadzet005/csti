@@ -41,16 +41,20 @@ class TestResultList:
 		return self._results[key]
 
 	@property
-	def testsTotal(self) -> int:
+	def total(self) -> int:
 		return len(self._results)
 	
 	@property
-	def testsPassed(self) -> int:
+	def passed(self) -> int:
 		count = 0
 		for result in self._results:
 			if result.status == TestStatus.ok:
 				count += 1
 		return count
+	
+	@property
+	def arePassedAll(self):
+		return self.passed == self.total
 
 	def append(self, *args, **kwargs):
 		self._results.append(TestResult(*args, **kwargs))

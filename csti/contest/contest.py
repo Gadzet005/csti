@@ -1,5 +1,6 @@
 from contest.contest_interface import ContestInterface
 from contest.task.task import Task
+from consts import Language
 
 
 class Contest:
@@ -31,3 +32,8 @@ class Contest:
 	@property
 	def id(self) -> str:
 		return self._id
+	
+	@property
+	def lang(self) -> Language:
+		langId = int(ContestInterface().langId)
+		return Language(langId)

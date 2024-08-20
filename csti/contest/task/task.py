@@ -1,6 +1,6 @@
 from contest.contest_interface import ContestInterface
 from contest.parser.task_parser import TaskParser
-from contest.task.solution import Solution, SolutionStatus
+from contest.task.solution import Solution
 
 
 # TODO: Добавить кеширование и проверку возвращаемого значения в функциях.

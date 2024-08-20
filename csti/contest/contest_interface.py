@@ -9,6 +9,10 @@ from utils import Singleton
 
 
 class ContestInterface(metaclass=Singleton):
+	def init(self):
+		config = ConfigManager()
+		self.signIn(config.login, config.password)
+
 	def signIn(self, login: str, password: str):
 		self._login: str = login
 		self._password: str = password
@@ -89,7 +93,7 @@ class ContestInterface(metaclass=Singleton):
 	# --------------------- Task -----------------------
 	@property
 	def langId(self):
-		if self._contestId == None:
+		if self._contestId is None:
 			raise ContestInterfaceException("ContestId не инициализирован.")
 		return f"{self._contestId[2]}0"
 
@@ -114,7 +118,7 @@ class ContestInterface(metaclass=Singleton):
 		return response.content
 
 	def sendTask(self, taskId: str, file: str):
-		if self.session == None:
+		if self.session is None:
 			raise ContestInterfaceException("Сессия не инициализирована.")
 
 		response = self.session.post(
