@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "csti"
+version = "0.1.0"
+description = ""
+authors = ["firefenix <kitotavrik.media@gmail.com>"]
+readme = "README.md"
+# license = "BSD"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pyyaml = "^6.0.2"
+platformdirs = "^4.2.2"
+inquirerpy = "^0.3.4"
+click = "^8.1.7"
+beautifulsoup4 = "^4.12.3"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

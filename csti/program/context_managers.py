@@ -1,4 +1,4 @@
-from program.program import Program
+from csti.program.program import Program
 
 
 class prepareProgram:

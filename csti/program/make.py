@@ -4,9 +4,8 @@ import os
 from enum import Enum
 from pathlib import Path
 
-from consts import Language
-from program.exceptions import UnexpectedLanguage
-
+from csti.consts import Language
+from csti.program.exceptions import UnexpectedLanguage
 
 CUR_DIR = Path(__file__).parent.resolve()
 MAKE_DIR = CUR_DIR / "make"

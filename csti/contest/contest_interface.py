@@ -1,11 +1,11 @@
 import requests
 
-from config import ConfigManager
-from consts import ContestConsts
-from contest.exceptions import AuthException, ContestInterfaceException
-from contest.parser.contest_parser import ContestParser
-from contest.task.solution import SolutionStatus
-from utils import Singleton
+from csti.config import ConfigManager
+from csti.consts import ContestConsts
+from csti.contest.exceptions import AuthException, ContestInterfaceException
+from csti.contest.parser.contest_parser import ContestParser
+from csti.contest.task.solution import SolutionStatus
+from csti.utils import Singleton
 
 
 class ContestInterface(metaclass=Singleton):

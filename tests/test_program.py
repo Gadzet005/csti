@@ -1,7 +1,8 @@
 import unittest
 
-from program import *
-from consts import Language
+from csti.consts import Language
+from csti.program import *
+
 
 class TestProgram(unittest.TestCase):
 	def testCompile(self):

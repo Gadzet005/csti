@@ -2,9 +2,9 @@ import unittest
 
 import requests
 
-from consts import ContestConsts
-from contest.contest_interface import ContestInterface
-from contest.parser.contest_parser import ContestParser
+from csti.consts import ContestConsts
+from csti.contest.contest_interface import ContestInterface
+from csti.contest.parser.contest_parser import ContestParser
 
 
 class TestContestParser(unittest.TestCase):

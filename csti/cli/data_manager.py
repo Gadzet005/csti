@@ -1,8 +1,8 @@
 import os
 
-from cli.exceptions import DataManagerException
-from consts import APP_NAME
-from contest.contest import Contest
+from csti.cli.exceptions import DataManagerException
+from csti.consts import APP_NAME
+from csti.contest import Contest
 
 ARRAY_SEPARATOR = ", "
 

@@ -4,9 +4,8 @@ import shutil
 import yaml
 from platformdirs import user_config_dir
 
-from consts import APP_NAME, Locale
-from utils import Singleton
-
+from csti.consts import APP_NAME, Locale
+from csti.utils import Singleton
 
 appConfigDir = user_config_dir(APP_NAME)
 configPath = f"{appConfigDir}/config.yaml"

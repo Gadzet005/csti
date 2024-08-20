@@ -1,6 +1,6 @@
-from contest.contest_interface import ContestInterface
-from contest.task.task import Task
-from consts import Language
+from csti.consts import Language
+from csti.contest.contest_interface import ContestInterface
+from csti.contest.task.task import Task
 
 
 class Contest:

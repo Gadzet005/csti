@@ -3,13 +3,13 @@ from __future__ import annotations
 import os
 import subprocess
 
-from consts import Language
-from program.exceptions import (CompileError, FormatError,
-									NotSupportedLanguage, RunError,
-									TimeoutError)
-from program.make import LangInfo, MakeTarget
-from program.test_result import TestResultList, TestStatus
-from program.utils import normalizeText
+from csti.consts import Language
+from csti.program.exceptions import (CompileError, FormatError,
+                                     NotSupportedLanguage, RunError,
+                                     TimeoutError)
+from csti.program.make import LangInfo, MakeTarget
+from csti.program.test_result import TestResultList, TestStatus
+from csti.program.utils import normalizeText
 
 
 class Program:

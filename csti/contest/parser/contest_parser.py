@@ -2,9 +2,9 @@ import re
 
 from bs4 import BeautifulSoup
 
-from consts import ContestConsts
-from contest.exceptions import CantParseElement
-from contest.task.solution import SolutionStatus
+from csti.consts import ContestConsts
+from csti.contest.exceptions import CantParseElement
+from csti.contest.task.solution import SolutionStatus
 
 
 class ContestParser(object):

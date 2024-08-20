@@ -1,12 +1,11 @@
 import click
 from InquirerPy import inquirer
 
-from cli.data_manager import DataManager
-from config import ConfigManager
-from consts import CliConsts
-from contest.contest_interface import ContestInterface
-from contest.task.solution import SolutionStatus
-from program import Program, prepareProgram, formatProgram, CompileError
+from csti.cli.data_manager import DataManager
+from csti.config import ConfigManager
+from csti.consts import CliConsts
+from csti.contest import ContestInterface, SolutionStatus
+from csti.program import CompileError, Program, formatProgram, prepareProgram
 
 
 @click.group()
