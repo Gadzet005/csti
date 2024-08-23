@@ -32,9 +32,6 @@
 		
 		in {
 			default = pkgs.${system}.mkShellNoCC {
-				shellHook = ''
-					exec $SHELL 
-				'';
 				packages = with pkgs.${system}; [
 					(mkPoetryEnv { projectDir = self; })
 					poetry

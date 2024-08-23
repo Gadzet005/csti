@@ -21,4 +21,4 @@ jobs:
         nix_path: nixpkgs=channel:nixos-unstable
     
     - name: Run tests
-      run: nix-shell --command "cd csti && python -m unittest discover tests"
+      run: nix develop --command bash -c "python -m unittest discover tests"
