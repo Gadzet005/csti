@@ -18,14 +18,14 @@ class TaskParser(object):
 		return nameElement.text
 
 	@staticmethod
-	def getInfo(html: bytes) -> list[tuple[str, ...]]:
+	def getInfo(html: bytes) -> dict[str, str]:
 		soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
 		infoContainer = soup.find("table", class_="line-table-wb")
 		if infoContainer is None:
 			raise CantParseElement("info") 
 		
 		infoStrings = cleandoc(infoContainer.text).split("\n")
-		info = list(map(
+		info = dict(map(
 			lambda infoString: tuple(infoString.split(":", 1)),
 			infoStrings
 		))

@@ -4,9 +4,10 @@ import os
 import subprocess
 
 from csti.consts import Language
-from csti.program.exceptions import (CompileError, FormatError,
-                                     NotSupportedLanguage, RunError,
-                                     TimeoutError)
+from csti.program.exceptions import (
+	CompileError, FormatError, NotSupportedLanguage, 
+	RunError, TimeoutError
+)
 from csti.program.make import LangInfo, MakeTarget
 from csti.program.test_result import TestResultList, TestStatus
 from csti.program.utils import normalizeText
@@ -37,6 +38,7 @@ class Program:
 		)
 
 		if result.returncode != 0:
+			self.clear()
 			raise CompileError(result.stderr.decode())
 	
 	def run(self, input: str|None = None, timeout: str|None = None) -> str:
@@ -85,15 +87,21 @@ class Program:
 			], capture_output=True
 		)
 
+		formattedPath = os.path.join(self.dir, self.formattedFile)
+
 		if result.returncode != 0:
+			try:
+				os.remove(formattedPath)
+			except FileNotFoundError:
+				pass
 			raise FormatError(result.stderr.decode())
 
-		return Program(self.lang, os.path.join(self.dir, self.formattedFile))
+		return Program(self.lang, formattedPath)
 
 	def clear(self, clearSelf=False):
 		""" 
-		Очистка временных файлов 
-		clearSelf: Требуется ли очистка самой программы?
+		Очистка временных файлов \n
+		@param clearSelf: Требуется ли очистка самой программы?
 		"""
 
 		subprocess.run([
@@ -107,16 +115,22 @@ class Program:
 		if clearSelf:
 			os.remove(self.filePath)
 
-	def test(self, testCases: list[tuple[str, str]], timeout: str|None = None) -> TestResultList:
+	# TODO: добавить ограничение занимаемой памяти при выполнении теста
+	def test(
+			self, testCases: list[tuple[str, str]], timeLimit: int|None = None, 
+			memoryLimit: int|None = None
+		) -> TestResultList:
 		"""
 		Запуск тестов. Если язык компилируемый, то требуется вызов метода compile\n
-		testCases: [(вход, ожидаемый выход), ...]
+		@param testCases: [(вход, ожидаемый выход), ...]
+		@param timeLimit: Максимальное время в секундах для выполнения теста
+		@param memoryLimit: Максимальное количество памяти в мегабайтах для выполнения теста
 		"""
 
 		results = TestResultList()
 		for input, expected in testCases:
 			try:
-				output = normalizeText(self.run(input, timeout))
+				output = normalizeText(self.run(input, timeLimit))
 				expected = normalizeText(expected)
 
 				if output == expected:
@@ -124,14 +138,18 @@ class Program:
 				else:
 					results.append(
 						TestStatus.wrongAnswer, 
-						f"Входные данные:\n{input}\n"
-						f"Выходные данные:\n{output}\n"
-						f"Ожидаемые выходные данные:\n{expected}"
+						input=input,
+						output=output,
+                        expected=expected
 					)
 			except RunError as error:
-				results.append(TestStatus.runtimeError, error.__str__())
+				results.append(
+					TestStatus.runtimeError, input=input, message=error.__str__()
+				)
 			except TimeoutError:
-				results.append(TestStatus.timeLimit)
+				results.append(
+					TestStatus.timeLimit, input=input
+				)
 
 		return results
 

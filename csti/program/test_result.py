@@ -9,19 +9,35 @@ class TestStatus(Enum):
 	runtimeError = "Ошибка выполнения"
 
 class TestResult:
-	def __init__(self, status: TestStatus, message: str|None = None):
-		self._status: TestStatus = status
-		self._message: str|None = message
-
-	def __str__(self):
-		if not self._message:
-			return self._status.value
-		return f"{self._status.value}:\n{self._message}"
+	def __init__(
+			self, status: TestStatus, 
+			input: str|None = None, 
+			output: str|None = None, 
+			expected: str|None = None,
+			message: str|None = None
+		):
+		self._status = status
+		self._input = input
+		self._output = output
+		self._expected = expected
+		self._message = message
 
 	@property
 	def status(self) -> TestStatus:
 		return self._status
+	
+	@property
+	def input(self) -> str|None:
+		return self._input
 
+	@property
+	def output(self) -> str|None:
+		return self._output
+
+	@property
+	def expected(self) -> str|None:
+		return self._expected
+	
 	@property
 	def message(self) -> str|None:
 		return self._message

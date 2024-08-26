@@ -2,10 +2,12 @@ import click
 from InquirerPy import inquirer
 
 from csti.cli.data_manager import DataManager
+from csti.cli.print import cprint, ncprint
 from csti.config import ConfigManager
-from csti.consts import CliConsts
+from csti.consts import CliConsts, Language
 from csti.contest import ContestInterface, SolutionStatus
 from csti.program import CompileError, Program, formatProgram, prepareProgram
+from csti.program.test_result import TestStatus, TestResultList
 
 
 @click.group()
@@ -13,12 +15,22 @@ def cli():
 	pass
 
 
-@cli.command("init")
+@cli.command("init", help="Инициализировать папку для работы с контестом.")
 def init():
 	DataManager.init()
+	cprint.success("Инициализация завершена.")
 
 
-@cli.command("select-contest")
+@cli.command("init-config", help="Настроить глобальный конфиг csti.")
+def initConfig():
+	login = inquirer.text("Введите логин: ").execute()
+	password = inquirer.secret("Введите пароль: ").execute()
+	name = inquirer.text("Введите фамилию: ").execute().capitalize()
+	homeUrl = inquirer.text("Введите URL домашней страницы: ").execute()
+
+	cprint.success("Настройка успешно закончена")
+
+@cli.command("select-contest", help="Выбрать контест.")
 @click.argument("local-id", type=int, required=False)
 def selectContest(local_id: int|None = None):
 	homework = None
@@ -26,7 +38,7 @@ def selectContest(local_id: int|None = None):
 	if isinstance(local_id, int) and local_id in homeworsLocalId:
 		homework = ContestInterface().getHomework(ConfigManager().name, local_id)
 		if homework[0] == "-1":
-			print("Warning: Выбран не допустимый контест.")
+			cprint.warning("Warning: Выбран не допустимый контест.")
 			return
 
 		# NOTE: Заглушка, убирает не работающий пока что status.
@@ -37,7 +49,7 @@ def selectContest(local_id: int|None = None):
 
 	else:
 		if local_id != None:
-			print("Warning: Контест отсутствует. Выберите из списка.")
+			cprint.warning("Warning: Контест отсутствует. Выберите из списка.")
 
 		homeworks = list()
 		lastElementIndex = 0
@@ -69,8 +81,7 @@ def selectContest(local_id: int|None = None):
 	DataManager.saveContest(homework[0], homework[1])
 
 
-
-@cli.command("select-task")
+@cli.command("select-task", help="Выбрать задачу.")
 @click.argument("local-id", type=int, required=False)
 def selectTask(local_id: int|None = None):
 	contest = DataManager.loadContest()
@@ -81,15 +92,14 @@ def selectTask(local_id: int|None = None):
 
 	else: 
 		if local_id:
-			print("Warning: Задача отсутствует. Выберите из списка.")
+			cprint.warning("Warning: Задача отсутствует. Выберите из списка.")
 
 		tasks = contest.tasks
-		tasksName = list(map(lambda task: task.getName(), tasks))
+		tasksName = list(map(lambda task: task.name, tasks))
 
 		lastSucsess = 0
 		for task in tasks:
-			solution = task.getSolution()
-			if solution and solution.status != SolutionStatus.accepted_for_review:
+			if task.solution and task.solution.status != SolutionStatus.accepted_for_review:
 				break
 			lastSucsess += 1
 		
@@ -98,68 +108,181 @@ def selectTask(local_id: int|None = None):
 			choices = tasksName,
 			default = (lastSucsess + 1) % tasksCount,
 			vi_mode = True,
-			
 		).execute()
 
 		taskLocalId = str(tasksName.index(task) + 1)
 	DataManager.saveContest(taskLocalId=taskLocalId)
 
 
-
-@cli.command("task")
-@click.option("--name", is_flag=True, default = False)
-@click.option("--cond", is_flag=True, default = False)
-@click.option("--info", is_flag=True, default = False)
-@click.option("--tests", is_flag=True, default = False)
-@click.option("--solution", is_flag=True, default = False)
-def taskInterface(name: bool, info: bool, cond: bool, tests: bool, \
-				  solution: bool):
+@cli.command("task", help="Показать информацию о выбранной задаче.")
+@click.option(
+	"-n", "--name", is_flag=True, default = False, 
+	help="Показать название задачи."
+)
+@click.option(
+	"-c", "--cond", is_flag=True, default = False, 
+	help="Показать условие задачи."
+)
+@click.option(
+	"-i", "--info", is_flag=True, default = False, 
+	help="Показать вспомогательную информацию."
+)
+@click.option(
+	"-t", "--tests", is_flag=True, default = False,
+	help="Показать базовые тесты."
+)
+@click.option(
+	"-s", "--solution", is_flag=True, default = False,
+	help="Показать последнее отправленное решение."
+)
+def showTask(
+	name: bool, info: bool, cond: bool, tests: bool,
+	solution: bool
+):
 	contest = DataManager.loadContest()
 	task = contest.currentTask
-	if name:
-		print(task.getName())
-	
-	if info:
-		print(task.getInfo())
 
-	if cond:
-		print(task.getCondition())
+	flags = [name, info, cond, tests, solution]
+	shouldPrintAll = not any(flags) or all(flags)
+	taskPrint = cprint if shouldPrintAll else ncprint
 
-	if tests:
-		print(task.getTests())
+	if name or shouldPrintAll:
+		taskPrint.primary(task.name, end="\n\n")
 
-	if solution:
-		print(task.getSolution())
+	if info or shouldPrintAll:
+		for key, value in task.info.items():
+			taskPrint.info(f"{key}: {value}")
+		taskPrint()
+
+	if cond or shouldPrintAll:
+		taskPrint(task.condition, end="\n\n")
+
+	if tests or shouldPrintAll:
+		for input, output in task.tests:
+			taskPrint.info(f"Входные данные:")
+			taskPrint(input)
+			taskPrint.info(f"Результат:")
+			taskPrint(output)
+			taskPrint()
+
+	if (solution or shouldPrintAll) and task.solution:
+		taskPrint.primary("Последнее отправленное решение:")
+		taskPrint.byFlag(
+			f"{task.solution.status.value}. Тестов пройдено: {task.solution.testsPassed}",
+			flag=task.solution.status == SolutionStatus.accepted_for_review
+		)
 
 
+def printTestResults(testResults: TestResultList):
+	""" Выводит результаты тестирования программы """
 
-@cli.command("send-task")
+	cprint.byFlag(
+		f"Пройдено тестов: {testResults.passed} из {testResults.total}.", 
+		flag=testResults.arePassedAll
+	)
+
+	for idx, testResult in enumerate(testResults, 1):
+		cprint.byFlag(
+			f"[{idx}/{testResults.total}] {testResult.status.value}",
+			flag=testResult.status == TestStatus.ok
+		)
+
+		match testResult.status:
+			case TestStatus.wrongAnswer:
+				cprint.info("Входные данные:")
+				cprint.text(testResult.input)
+				cprint.info("Вывод:")
+				cprint.text(testResult.output)
+				cprint.info("Ожидаемый результат:")
+				cprint.text(testResult.expected)
+			case TestStatus.runtimeError:
+				cprint.info("Входные данные:")
+				cprint.text(testResult.input)
+				cprint.info("Ошибка:")
+				cprint.text(testResult.message)
+			case TestStatus.timeLimit:
+				cprint.info("Входные данные:")
+				cprint.text(testResult.input)
+				cprint.error("Превышено время выполнения.")
+			case TestStatus.memoryLimit:
+				cprint.info("Входные данные:")
+				cprint.text(testResult.input)
+				cprint.error("Превышено лимит памяти.")
+			case _:
+				pass
+
+
+@cli.command("send-task", help="Отправить задачу на проверку.")
 @click.argument("file", type=click.Path(exists=True), required=True)
-def sendTask(file: str):
+@click.option(
+	"-l", "--lang", type=str, default="auto", show_default="Автоматический",
+	help="Язык программирования."
+)
+@click.option(
+	"-t", "--no-tests", is_flag=True, default=False, 
+	help="Отключает выполнение тестов."
+)
+@click.option(
+	"-f", "--no-format", is_flag=True, default=False, 
+	help="Отключает форматирование файла."
+)
+@click.option(
+	"-c", "--no-confirm", is_flag=True, default=False, 
+	help="Отключает подтверждение отправки решения."
+)
+def sendTask(
+	file: str, lang: str, no_tests: bool, no_format: bool, no_confirm: bool
+):
 	contest = DataManager.loadContest()
-	program = Program(contest.lang, file)
+
+	contestLang = contest.lang
+	if lang != "auto":
+		contestLang = Language.fromName(lang)
+	if contestLang is None:
+		cprint.warning(f"Неизвестный язык программирования: {lang}.")
+		return
+
+	program = Program(contestLang, file)
+
+	# Тестирование
+	if not no_tests:
+		allTestsPassed = True
+		try:
+			cprint.primary("Запуск тестов...")
+			with prepareProgram(program):
+				testResults = program.test(
+					contest.currentTask.tests,
+					contest.currentTask.timeLimit,
+					contest.currentTask.memoryLimit
+				)
+				allTestsPassed = testResults.arePassedAll
+				printTestResults(testResults)
+		except CompileError as error:
+			cprint.error(f"Ошибка компиляции файла '{file}':")
+			cprint(error)
+			allTestsPassed = False
+
+		if not allTestsPassed:
+			cprint.primary("Решение не было отправлено.")
+			return
+
+	# Подтверждение отправки решения
 	shouldSendSolution = True
-
-	try:
-		with prepareProgram(program) as ready:
-			print("Запуск тестов")
-			testCases = contest.currentTask.getTests()
-			testResults = ready.test(testCases, 1)
-
-			print(f"Пройдено тестов: {testResults.passed} из {testResults.total}")
-			for idx, testResult in enumerate(testResults, 1):
-				print(f"[{idx}/{testResults.total}] {testResult}")
-			
-			if not testResults.arePassedAll:
-				shouldSendSolution = False
-
-	except CompileError as error:
-		print(f"Ошибка компиляции файла '{file}':\n{error}")
-		shouldSendSolution = False
+	if not no_confirm:
+		shouldSendSolution = inquirer.confirm(
+			"Вы уверены что хотите отправить решение на проверку? "
+			f"Оставшееся количество попыток: {contest.currentTask.remainingAttemps}.\n",
+			default=False,
+		).execute()
 
 	if shouldSendSolution:
-		print("Решение успешно отправлено")
-		with formatProgram(program) as formatted:
-			contest.currentTask.sendSolution(formatted.code)
+		# Форматирование кода
+		if no_format or not program.canBeFormatted:
+			contest.currentTask.sendSolution(program.code)
+		else:
+			cprint.primary("Форматирование кода...")
+			with formatProgram(program) as formatted:
+				contest.currentTask.sendSolution(formatted.code)
+		cprint.success("Решение успешно отправлено.")
 	else:
-		print("Решение не было отправлено")
+		cprint.primary("Решение не было отправлено.")

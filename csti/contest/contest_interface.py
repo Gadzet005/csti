@@ -1,3 +1,5 @@
+from functools import cached_property
+
 import requests
 
 from csti.config import ConfigManager
@@ -21,20 +23,11 @@ class ContestInterface(metaclass=Singleton):
 		self._sessionId: str|None = None
 		self._cookieSessionId: str|None = None
 
-		"""
-		Переменная для кэширования сессии, не использовать!
-		Вместо этого можно использовать Self.session
-		"""
-		self._session: requests.Session|None = None
-
-	@property
+	@cached_property
 	def session(self) -> requests.Session|None:
-		if self._cookieSessionId is None:
-			return None
-		if self._session is None:
-			self._session = requests.Session()
-			self._session.cookies.set("EJSID", self._cookieSessionId)
-		return self._session
+		session = requests.Session()
+		session.cookies.set("EJSID", self._cookieSessionId)
+		return session
 	
 	def selectContest(self, id: str):
 		if self._login is None or self._password is None:

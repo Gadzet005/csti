@@ -6,7 +6,8 @@ class prepareProgram:
     Контекстный менеджер подготовки программы для запуска (компиляция, если требуется).
     Очищает временные файлы при выходе.
 
-    with prepareProgram(program) as prepared:
+    with prepareProgram(program):
+		program.run()
 		...
 	"""
 

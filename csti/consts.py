@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 
 APP_NAME = "csti"
@@ -9,7 +11,7 @@ class ContestConsts:
 	NON_AUTHENTICATED_SESSION_ID = "0000000000000000"
 	
 	@staticmethod
-	def getRequestsUrl():
+	def getRequestsUrl() -> str:
 		return f"{ContestConsts.URL}/cgi-bin/new-client"
 
 
@@ -30,3 +32,9 @@ class Language(Enum):
 	cpp = 2
 	asm = 50
 
+	@staticmethod
+	def fromName(lang: str) -> Language|None:
+		try:
+			return Language[lang]
+		except KeyError:
+			return None

@@ -24,11 +24,11 @@ class TestContest(unittest.TestCase):
 			for taskLocalId in range(1, len(tasksId) + 1):
 				contest.selectTask(taskLocalId)
 				task = contest.currentTask
-				print(task.getName())
-				print(list(task.getInfo()))
-				print(task.getCondition())
-				print(task.getSolution())
-				print(list(task.getTests()))
+				print(task.name)
+				print(task.info)
+				print(task.condition)
+				print(task.solution)
+				print(list(task.tests))
 				if isSkipNext == False:
 					input_ = input("Skip next ask: yes/no(default): ")
 					if input_ == "yes" or input_ == "y":

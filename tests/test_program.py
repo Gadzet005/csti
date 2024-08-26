@@ -126,7 +126,7 @@ class TestProgram(unittest.TestCase):
 
 		divide = Program(Language.cpp, "tests/programs/divide.cpp")
 		divide.compile()
-		results = divide.test(testCases, timeout=1)
+		results = divide.test(testCases, timeLimit=1)
 
 		self.assertEqual(results.total, 4)
 		self.assertEqual(results.passed, 2)
