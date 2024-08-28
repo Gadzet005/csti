@@ -9,7 +9,7 @@ from csti.utils import Singleton
 
 appConfigDir = user_config_dir(APP_NAME)
 configPath = f"{appConfigDir}/config.yaml"
-configTemplateDir = "config/config_template"
+configTemplateDir = "csti/config/config_template"
 
 
 def generateConfig():
