@@ -21,8 +21,8 @@ def init():
 	cprint.success("Инициализация завершена.")
 
 
-@cli.command("init-config", help="Настроить глобальный конфиг csti.")
-def initConfig():
+@cli.command("configure", help="Настроить глобальный конфиг csti.")
+def configure():
 	login = inquirer.text("Введите логин: ").execute()
 	password = inquirer.secret("Введите пароль: ").execute()
 	name = inquirer.text("Введите фамилию: ").execute().capitalize()
@@ -114,7 +114,7 @@ def selectTask(local_id: int|None = None):
 	DataManager.saveContest(taskLocalId=taskLocalId)
 
 
-@cli.command("task", help="Показать информацию о выбранной задаче.")
+@cli.command("get-task", help="Показать информацию о выбранной задаче.")
 @click.option(
 	"-n", "--name", is_flag=True, default = False, 
 	help="Показать название задачи."
@@ -135,7 +135,7 @@ def selectTask(local_id: int|None = None):
 	"-s", "--solution", is_flag=True, default = False,
 	help="Показать последнее отправленное решение."
 )
-def showTask(
+def getTask(
 	name: bool, info: bool, cond: bool, tests: bool,
 	solution: bool
 ):
@@ -231,7 +231,11 @@ def printTestResults(testResults: TestResultList):
 	help="Отключает подтверждение отправки решения."
 )
 def sendTask(
-	file: str, lang: str, no_tests: bool, no_format: bool, no_confirm: bool
+	file: str,
+	lang: str,
+	no_tests: bool,
+	no_format: bool,
+	no_confirm: bool
 ):
 	contest = DataManager.loadContest()
 
