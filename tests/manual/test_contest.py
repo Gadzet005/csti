@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from csti.config import ConfigManager
+from csti.config import GlobalConfig
 from csti.contest.contest import Contest
 from csti.contest.contest_interface import ContestInterface
 
@@ -9,12 +9,12 @@ from csti.contest.contest_interface import ContestInterface
 # NOTE: Тестировать только при рабочем config.
 class TestContest(unittest.TestCase):
 	def testAll(self):
-		ContestInterface().signIn(ConfigManager().login, ConfigManager().password)
+		ContestInterface().signIn(GlobalConfig().login, GlobalConfig().password)
 		isSkipNext = False
 
 		homeworksLocalId = ContestInterface().getAvailableHomeworksLocalId()
 		for localId in homeworksLocalId:
-			homework = ContestInterface().getHomework(ConfigManager().name, localId)
+			homework = ContestInterface().getHomework(GlobalConfig().name, localId)
 			id = homework[0]
 			if id == "-1":
 				continue
