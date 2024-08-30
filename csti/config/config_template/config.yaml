@@ -1,12 +1,16 @@
 user:
-  login: 0000000 
-  password: пароль
+  login: Логин
+  password: Пароль
   name: Фамилия
 
-home-url: "https://contest.solutions/..."
+home-url: "https://contest.solutions/.../..."
 
-# Возможные варианты:
+# Язык в контесте. Возможные варианты:
 locale: russian
 # locale: english
 # locale: kazakh
 # locale: ukrainian
+
+features:
+  enable-auto-tests: true # Нужно ли запускать тесты при отправке?
+  enable-auto-formatting: true # Нужно ли запускать форматирование при отправке?

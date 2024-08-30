@@ -2,7 +2,7 @@ from functools import cached_property
 
 import requests
 
-from csti.config import ConfigManager
+from csti.config import GlobalConfig
 from csti.consts import ContestConsts
 from csti.contest.exceptions import AuthException, ContestInterfaceException
 from csti.contest.parser.contest_parser import ContestParser
@@ -12,7 +12,7 @@ from csti.utils import Singleton
 
 class ContestInterface(metaclass=Singleton):
 	def init(self):
-		config = ConfigManager()
+		config = GlobalConfig()
 		self.signIn(config.login, config.password)
 
 	def signIn(self, login: str, password: str):
@@ -42,7 +42,7 @@ class ContestInterface(metaclass=Singleton):
 				"contest_id": id,
 				"login": self._login,
 				"password": self._password,
-				"locale_id": ConfigManager().locale.value
+				"locale_id": GlobalConfig().locale.value
 			}
 		)
 		
@@ -64,7 +64,7 @@ class ContestInterface(metaclass=Singleton):
 
 	# --------------------- Homework -------------------
 	def requestHome(self) -> bytes:
-		response = requests.get(ConfigManager().homeUrl)
+		response = requests.get(GlobalConfig().homeUrl)
 
 		"""
 			TODO: Сделать гибкую систему ошибок(особенно проверка на срок 
