@@ -22,11 +22,13 @@ def init():
 def change():
     config = GlobalConfig()
 
-    cprint.info("Чтобы не изменять поле нажмите enter.")
+    cprint.info("Чтобы пропустить изменение поля нажмите enter.")
     login = inquirer.text("Логин: ", default=config.login).execute()
     config.login = login
 
-    password = inquirer.secret("Пароль: ").execute()
+    password = inquirer.secret(
+        "Пароль: ", transformer=lambda res: "*" * len(res or config.password)
+    ).execute()
     if password: config.password = password
 
     name = inquirer.text("Фамилия: ", default=config.name).execute().capitalize()
@@ -38,7 +40,7 @@ def change():
     localeName = inquirer.select(
         "Выберите язык:",
         choices=list(map(lambda x: x.name, Locale)),
-        default=config.locale.name,
+        default=config.locale.name, vi_mode=True
     ).execute()
     config.locale = Locale[localeName]
 
@@ -55,7 +57,7 @@ def change():
         )
     ]
     enabledFeatures = inquirer.checkbox(
-        message="Настройка функций.", choices=featureChoices
+        message="Настройка функций.", choices=featureChoices, vi_mode=True
     ).execute()
 
     features = config.get("features")
