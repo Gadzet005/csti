@@ -5,6 +5,7 @@ from csti.cli.cli import cli
 from csti.cli.data_manager import DataManager
 from csti.cli.print import cprint, ncprint
 from csti.cli.utils import printTestResults
+from csti.config import GlobalConfig
 from csti.consts import Language
 from csti.contest import SolutionStatus
 from csti.program import CompileError, Program, formatProgram, prepareProgram
@@ -133,6 +134,12 @@ def sendTask(
 	no_confirm: bool
 ):
 	contest = DataManager.loadContest()
+	config = GlobalConfig()
+
+	if not no_tests:
+		no_tests = not config.enableAutoTests
+	if not no_format:
+		no_format = not config.enableAutoFormatting
 
 	contestLang = contest.lang
 	if lang != "auto":
