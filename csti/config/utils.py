@@ -1,9 +1,10 @@
-from typing import Callable, Type
+from typing import Callable, Type, Any
 
 def configField(
 	name: str,
 	type: Type,
 	nestedIn: list|None = None,
+	defaultValue: Any = None,
 	serializer: Callable = lambda x: x,
 	deserializer: Callable = lambda x: x
 ):
@@ -13,6 +14,7 @@ def configField(
 	@param type: Тип поля в конфиге.
 	@param nestedIn: Список полей в которые данное поле вложено. \
 		Например, для user.info.login: nestedIn = [user, info].
+	@param defaultValue: Значение поля по умолчанию.
 	@param serializer: Функция преобразования примитивного типа в объект.
 	@param deserializer: Функция преобразования объекта обратно в примитивный тип.
 	"""
@@ -24,7 +26,8 @@ def configField(
 
 	@property
 	def attr(self):
-		return serializer(type(self.get(name, nestedIn)))
+		raw = self.get(name, nestedIn, defaultValue)
+		return serializer(type(raw))
 	
 	@attr.setter
 	def attr(self, value):

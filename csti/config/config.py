@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import Any
 
 import yaml
 from platformdirs import user_config_dir
@@ -15,18 +16,7 @@ globalConfigPath = f"{appConfigDir}/config.yaml"
 configTemplateDir = "csti/config/config_template"
 
 
-@configField("login", str, nestedIn=["user"])
-@configField("password", str, nestedIn=["user"])
-@configField("name", str, nestedIn=["user"])
-@configField("home-url", str)
-@configField(
-	"locale", str,
-	serializer=lambda x: Locale[x],
-	deserializer=lambda x: x.name
-)
-@configField("enable-auto-tests", bool, nestedIn=["features"])
-@configField("enable-auto-formatting", bool, nestedIn=["features"])
-class GlobalConfig(metaclass=Singleton):
+class Config(metaclass=Singleton):
 	def __init__(self):
 		self._data: dict = {}
 
@@ -65,18 +55,52 @@ class GlobalConfig(metaclass=Singleton):
 		
 		return data
 
-	def get(self, key: str, nestedIn: list|None = None):
+	def get(
+		self, 
+		key: str, 
+		nestedIn: list|None = None, 
+		defaultValue: Any = None
+	):
 		""" 
 		Получение значения поля в конфиге.\n
 		@param key: Имя поля в конфиге.
-		@param nestedIn: Список полей в которые данное поле вложено. \
-			Например для user.info.login: nestedIn = [user, info].
+		@param nestedIn: Список полей в которые данное поле вложено.
+		Например для user.info.login: nestedIn = [user, info].
+		@param defaultValue: Значение поля по умолчанию. \
+			Будет возвращено, если поле не найдено. \
+			Если defaultValue = None и поле не найдено, то метод выбрасывает ошибку.
 		"""
-		data = self._pull(key, nestedIn)
-		return data[key]
+		try:
+			data = self._pull(key, nestedIn)
+			return data[key]
+		except KeyError as error:
+			if defaultValue is None:
+				raise error
+			return defaultValue
 
 	def set(self, key: str, value, nestedIn: list|None = None):
 		""" Выставление значения поля в конфиге. Работает по аналогии с get. """
 
 		data = self._pull(key, nestedIn)
 		data[key] = value
+
+
+@configField("login", str, nestedIn=["user"])
+@configField("password", str, nestedIn=["user"])
+@configField("name", str, nestedIn=["user"])
+@configField("home-url", str)
+@configField(
+	"locale", str,
+	serializer=lambda x: Locale[x],
+	deserializer=lambda x: x.name,
+	defaultValue=Locale.russian
+)
+@configField(
+	"enable-auto-tests", bool, nestedIn=["features"], defaultValue=True
+)
+@configField(
+	"enable-auto-formatting", bool, nestedIn=["features"], defaultValue=True
+)
+@configField("debug", bool, defaultValue=False)
+class GlobalConfig(Config):
+	pass

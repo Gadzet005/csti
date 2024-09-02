@@ -28,7 +28,8 @@ class Locale(enum.IntEnum):
 
 
 class Language(enum.Enum):
-	# TODO: добавить все возможные языки
+	""" Перечисление языков программирования. """
+	# TODO: добавить все возможные языки.
 
 	c = {
 		"id": 1, # Заглушка
@@ -59,6 +60,7 @@ class Language(enum.Enum):
 
 	@staticmethod
 	def fromName(name: str) -> Language|None:
+		""" Получить язык по имени. Возвращает None, если такого нет. """
 		try:
 			return Language[name]
 		except KeyError:
@@ -66,6 +68,7 @@ class Language(enum.Enum):
 	
 	@staticmethod
 	def fromId(id: int) -> Language|None:
+		""" Получить язык по id. Возвращает None, если такого нет. """
 		for lang in Language:
 			if lang.id == id:
 				return lang
@@ -73,24 +76,33 @@ class Language(enum.Enum):
 	
 	@property
 	def id(self):
+		""" id языка на contest.solutions. """
 		return self.value["id"]
 
 	@property
 	def fullName(self) -> str:
+		""" Полное назание языка. """
 		return self.value["fullName"]
 	
 	@property
 	def fileExtension(self) -> str:
+		""" 
+		Расширение файла, которое используется для 
+		программ на этом языке. Например: ".py".
+		"""
 		return self.value["fileExtension"]
 
 	@property
 	def comment(self) -> str:
+		""" Символы, которые используются для комментариев. """
 		return self.value["comment"]
 
 	@property
 	def canBeCompiled(self) -> bool:
+		""" Компилируемый ли язык? """
 		return self.value["canBeCompiled"]
 
 	@property
 	def canBeFormatted(self) -> bool:
+		""" Доступно ли форматирование? """
 		return self.value["canBeFormatted"]

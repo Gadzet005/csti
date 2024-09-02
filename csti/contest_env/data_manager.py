@@ -8,6 +8,8 @@ from csti.contest import Contest
 
 
 class DataManager:
+	""" Управляет директорией с данными """
+
 	FOLDER = "." + APP_NAME
 	ARRAY_SEPARATOR = ", "
 
@@ -25,7 +27,8 @@ class DataManager:
 		self._dir = dir
 
 	@staticmethod
-	def create(dir: str) -> DataManager:
+	def init(dir: str) -> DataManager:
+		""" Создание директории. Возвращает экземпляр DataManager. """
 		for groupDir in DataManager.groups.values():
 			os.makedirs(os.path.join(dir, groupDir), exist_ok=True)
 		return DataManager(dir)
@@ -70,3 +73,7 @@ class DataManager:
 		contest.selectTask(selectedTaskId)
 		
 		return contest
+
+	@property
+	def dir(self):
+		return self._dir

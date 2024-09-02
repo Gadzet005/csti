@@ -14,14 +14,11 @@ def contest():
     pass
 
 
-@contest.command("init", help="Инициализировать папку для работы с контестом.")
-def init():
-	cprint.success("Инициализация завершена.")
-
-
 @contest.command("select", help="Выбрать контест.")
 @click.argument("local-id", type=int, required=False)
 def select(local_id: int|None = None):
+	env = ContestEnv.inCurrentDir()
+
 	homework = None
 	homeworsLocalId = ContestInterface().getAvailableHomeworksLocalId()
 	if local_id and local_id in homeworsLocalId:
@@ -68,6 +65,6 @@ def select(local_id: int|None = None):
 		).execute()
 	
 	contest = Contest(homework[0], homework[1])
-	ContestEnv.createInCurrentDir(contest)
+	env.selectContest(contest)
 
-	cprint.success(f"Рабочая папка успешно создана.")
+	cprint.success(f"Контест успешно выбран.")
