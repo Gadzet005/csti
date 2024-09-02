@@ -21,11 +21,9 @@ class MakeTarget(Enum):
 
 class LangInfo:
 	def __init__(
-			self, canBeCompiled: bool, canBeFormatted: bool, 
-			makefile: str|None, formatConfig: str|None
+			self, lang: Language, makefile: str|None, formatConfig: str|None
 		):
-		self._canBeCompiled = canBeCompiled
-		self._canBeFormatted = canBeFormatted
+		self._lang = lang
 		self._makefile = makefile
 		self._formatConfig = formatConfig
 
@@ -33,21 +31,21 @@ class LangInfo:
 	def fromLang(lang: Language) -> LangInfo:
 		match lang:
 			case Language.c:
-				return LangInfo(True, True, "c/makefile", "cformat.yaml")
+				return LangInfo(lang, "c/makefile", "cformat.yaml")
 			case Language.cpp:
-				return LangInfo(True, True, "cpp/makefile", "cformat.yaml")
+				return LangInfo(lang, "cpp/makefile", "cformat.yaml")
 			case Language.asm:
-				return LangInfo(True, False, "asm/makefile", None)
+				return LangInfo(lang, "asm/makefile", None)
 			case _:
 				raise UnexpectedLanguage(lang)
 	
 	@property
 	def canBeCompiled(self) -> bool:
-		return self._canBeCompiled
+		return self._lang.canBeCompiled
 	
 	@property
 	def canBeFormatted(self) -> bool:
-		return self._canBeFormatted
+		return self._lang.canBeFormatted
 	
 	@property
 	def makefile(self) -> str|None:

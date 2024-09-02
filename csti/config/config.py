@@ -15,17 +15,17 @@ globalConfigPath = f"{appConfigDir}/config.yaml"
 configTemplateDir = "csti/config/config_template"
 
 
-@configField(name="login", nestedIn=["user"])
-@configField(name="password", nestedIn=["user"])
-@configField(name="name", nestedIn=["user"])
-@configField(name="home-url")
+@configField("login", str, nestedIn=["user"])
+@configField("password", str, nestedIn=["user"])
+@configField("name", str, nestedIn=["user"])
+@configField("home-url", str)
 @configField(
-	name="locale",
+	"locale", str,
 	serializer=lambda x: Locale[x],
 	deserializer=lambda x: x.name
 )
-@configField(name="enable-auto-tests", nestedIn=["features"])
-@configField(name="enable-auto-formatting", nestedIn=["features"])
+@configField("enable-auto-tests", bool, nestedIn=["features"])
+@configField("enable-auto-formatting", bool, nestedIn=["features"])
 class GlobalConfig(metaclass=Singleton):
 	def __init__(self):
 		self._data: dict = {}
@@ -37,13 +37,15 @@ class GlobalConfig(metaclass=Singleton):
 	@staticmethod
 	def createDefaultConfig():
 		""" Генерация конфигурационного файла из шаблона. """
-		shutil.copytree(configTemplateDir, appConfigDir)
+		shutil.copytree(configTemplateDir, appConfigDir, dirs_exist_ok=True)
 
 	def load(self):
+		""" Получение данных из конфигурационного файла."""
 		with open(globalConfigPath, "r") as file:
 			self._data = yaml.safe_load(file)
 
 	def save(self):
+		""" Сохранение данных в конфигурационный файл. """
 		with open(globalConfigPath, "w") as file:
 			yaml.dump(self._data, file, allow_unicode=True, sort_keys=False)
 
@@ -65,9 +67,9 @@ class GlobalConfig(metaclass=Singleton):
 
 	def get(self, key: str, nestedIn: list|None = None):
 		""" 
-		Получение значения поля в конфиге.
+		Получение значения поля в конфиге.\n
 		@param key: Имя поля в конфиге.
-        @param nestedIn: Список полей в которые данное поле вложено. \
+		@param nestedIn: Список полей в которые данное поле вложено. \
 			Например для user.info.login: nestedIn = [user, info].
 		"""
 		data = self._pull(key, nestedIn)

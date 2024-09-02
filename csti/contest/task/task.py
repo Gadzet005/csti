@@ -60,6 +60,6 @@ class Task:
 		""" Последнее отправленное решение """
 		return TaskParser.getLastSolution(self._task)
 
-	def sendSolution(self, file: str):
+	def sendSolution(self, file: str, langId: str):
 		""" Отправка решения """
-		return ContestInterface().sendTask(self._id, file)
+		return ContestInterface().sendTask(self._id, file, langId)

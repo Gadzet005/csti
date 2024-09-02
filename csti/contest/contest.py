@@ -1,16 +1,16 @@
 from csti.consts import Language
 from csti.contest.contest_interface import ContestInterface
 from csti.contest.task.task import Task
+from csti.contest.exceptions import ContestException
 
 
 class Contest:
 	def __init__(self, id: str, tasksId: list[str]):
 		self._tasks: list[Task] = list()
-		self._curentTaskLocalId: int = 0
 		for taskId in tasksId:
-			task = Task(taskId)
-			self._tasks.append(task)
+			self._tasks.append(Task(taskId))
 
+		self._curentTaskLocalId: int = 0
 		self._id: str = id
 
 		ContestInterface().selectContest(self._id)
@@ -22,7 +22,7 @@ class Contest:
 	def selectTask(self, taskLocalId: int):
 		taskLocalId -= 1
 		if taskLocalId not in range(0, len(self._tasks)):
-			raise 
+			raise ContestException(f"Невалидный id задания: {taskLocalId}")
 		self._curentTaskLocalId = taskLocalId
 
 	@property
@@ -35,5 +35,5 @@ class Contest:
 	
 	@property
 	def lang(self) -> Language:
-		langId = int(ContestInterface().langId)
-		return Language(langId)
+		langId = int(self.id[2] + "0")
+		return Language.fromId(langId)

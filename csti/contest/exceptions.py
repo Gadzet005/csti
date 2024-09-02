@@ -15,3 +15,4 @@ class CantParseElement(ParserError):
 	def __str__(self) -> str:
 		return f"Не удалочь получить элемент задачи: {self.element}."
 
+class ContestException(Exception): pass

@@ -84,11 +84,6 @@ class ContestInterface(metaclass=Singleton):
 		return homework
 
 	# --------------------- Task -----------------------
-	@property
-	def langId(self):
-		if self._contestId is None:
-			raise ContestInterfaceException("ContestId не инициализирован.")
-		return f"{self._contestId[2]}0"
 
 	def requestTask(self, taskId: str) -> bytes:
 		if self.session is None:
@@ -110,7 +105,7 @@ class ContestInterface(metaclass=Singleton):
 
 		return response.content
 
-	def sendTask(self, taskId: str, file: str):
+	def sendTask(self, taskId: str, file: str, langId: str):
 		if self.session is None:
 			raise ContestInterfaceException("Сессия не инициализирована.")
 
@@ -122,7 +117,7 @@ class ContestInterface(metaclass=Singleton):
 			data={
 				"SID": self._sessionId,
 				"prob_id": taskId,
-				"lang_id": self.langId,
+				"lang_id": langId,
 				"file": file,
 				"action_40": ""
 			}

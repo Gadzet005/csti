@@ -18,8 +18,8 @@ def init():
     cprint.success("Конфиг успешно инициализирован.")
 
 
-@config.command("change", help="Изменить конфиг.")
-def change():
+@config.command("setup", help="Изменить конфиг.")
+def setup():
     config = GlobalConfig()
 
     cprint.info("Чтобы пропустить изменение поля нажмите enter.")

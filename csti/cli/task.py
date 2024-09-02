@@ -2,12 +2,12 @@ import click
 from InquirerPy import inquirer
 
 from csti.cli.cli import cli
-from csti.cli.data_manager import DataManager
 from csti.cli.print import cprint, ncprint
 from csti.cli.utils import printTestResults
 from csti.config import GlobalConfig
 from csti.consts import Language
 from csti.contest import SolutionStatus
+from csti.contest_env import ContestEnv
 from csti.program import CompileError, Program, formatProgram, prepareProgram
 
 
@@ -19,7 +19,9 @@ def task():
 @task.command("select", help="Выбрать задачу.")
 @click.argument("local-id", type=int, required=False)
 def selectTask(local_id: int|None = None):
-	contest = DataManager.loadContest()
+	env = ContestEnv.inCurrentDir()
+	contest = env.dataManager.loadContest()
+
 	taskLocalId = None
 	tasksCount = len(contest.tasks)
 	if isinstance(local_id, int) and local_id in range(1, tasksCount + 1):
@@ -46,7 +48,8 @@ def selectTask(local_id: int|None = None):
 		).execute()
 
 		taskLocalId = str(tasksName.index(task) + 1)
-	DataManager.saveContest(taskLocalId=taskLocalId)
+
+	env.dataManager.saveContest(taskLocalId=taskLocalId)
 
 
 @task.command("get", help="Показать информацию о выбранной задаче.")
@@ -73,8 +76,9 @@ def selectTask(local_id: int|None = None):
 def getTask(
 	name: bool, info: bool, cond: bool, tests: bool,
 	solution: bool
-):
-	contest = DataManager.loadContest()
+):	
+	env = ContestEnv.inCurrentDir()
+	contest = env.dataManager.loadContest()
 	task = contest.currentTask
 
 	flags = [name, info, cond, tests, solution]
@@ -111,8 +115,12 @@ def getTask(
 @task.command("send", help="Отправить задачу на проверку.")
 @click.argument("file", type=click.Path(exists=True), required=True)
 @click.option(
-	"-l", "--lang", type=str, default="auto", show_default="Автоматический",
-	help="Язык программирования."
+	"-l", "--lang", type=str, default="auto", 
+	show_default="Автоматический выбор языка",
+	help=(
+		f"Язык программирования. Возможные варианты: "
+		f"{list(map(lambda x: x.name, Language))}"
+	)
 )
 @click.option(
 	"-t", "--no-tests", is_flag=True, default=False, 
@@ -133,7 +141,8 @@ def sendTask(
 	no_format: bool,
 	no_confirm: bool
 ):
-	contest = DataManager.loadContest()
+	env = ContestEnv.inCurrentDir()
+	contest = env.dataManager.loadContest()
 	config = GlobalConfig()
 
 	if not no_tests:
@@ -184,11 +193,11 @@ def sendTask(
 	if shouldSendSolution:
 		# Форматирование кода
 		if no_format or not program.canBeFormatted:
-			contest.currentTask.sendSolution(program.code)
+			contest.currentTask.sendSolution(program.code, program.lang.id)
 		else:
 			cprint.primary("Форматирование кода...")
 			with formatProgram(program) as formatted:
-				contest.currentTask.sendSolution(formatted.code)
+				contest.currentTask.sendSolution(formatted.code, formatted.lang.id)
 		cprint.success("Решение успешно отправлено.")
 	else:
 		cprint.primary("Решение не было отправлено.")

@@ -1,0 +1,1 @@
+class ContestEnvException(Exception): pass
