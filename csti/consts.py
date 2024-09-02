@@ -37,7 +37,8 @@ class Language(enum.Enum):
 		"fileExtension": ".c",
 		"comment": "//",
 		"canBeCompiled": True,
-		"canBeFormatted": True,
+		"makefile": "csti/program/make/c/makefile",
+		"formatConfig": "csti/program/format_configs/cformat.yaml",
 	}
 
 	cpp = {
@@ -46,7 +47,8 @@ class Language(enum.Enum):
 		"fileExtension": ".cpp",
 		"comment": "//",
 		"canBeCompiled": True,
-		"canBeFormatted": True,
+		"makefile": "csti/program/make/cpp/makefile",
+		"formatConfig": "csti/program/format_configs/cformat.yaml",
 	}
 
 	asm = {
@@ -55,7 +57,8 @@ class Language(enum.Enum):
 		"fileExtension": ".asm",
 		"comment": ";",
 		"canBeCompiled": True,
-		"canBeFormatted": False,
+		"makefile": "csti/program/make/asm/makefile",
+		"formatConfig": None,
 	}
 
 	@staticmethod
@@ -105,4 +108,14 @@ class Language(enum.Enum):
 	@property
 	def canBeFormatted(self) -> bool:
 		""" Доступно ли форматирование? """
-		return self.value["canBeFormatted"]
+		return self.value["formatConfig"] is not None
+	
+	@property
+	def makefile(self) -> str:
+		""" Путь к makefile. """
+		return self.value["makefile"]
+
+	@property
+	def formatConfig(self) -> str|None:
+		""" Путь к конфигу для форматирования. """
+		return self.value["formatConfig"]

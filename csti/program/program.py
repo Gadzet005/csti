@@ -8,7 +8,7 @@ from csti.program.exceptions import (
 	CompileError, FormatError, NotSupportedLanguage, 
 	RunError, TimeoutError
 )
-from csti.program.make import LangInfo, MakeTarget
+from csti.program.make import MakeTarget
 from csti.program.test_result import TestResultList, TestStatus
 from csti.program.utils import normalizeText
 
@@ -26,11 +26,11 @@ class Program:
 	def compile(self):
 		""" Компилирует программу """
 
-		if not self._langInfo.canBeCompiled:
+		if not self.lang.canBeCompiled:
 			raise NotSupportedLanguage(self.lang)
 
 		result: subprocess.CompletedProcess = subprocess.run([
-			"make", MakeTarget.compile.value, "-f", self._langInfo.makefile, 
+			"make", MakeTarget.compile.value, "-f", self.lang.makefile, 
 			f"DIR={self.dir}", 
 			f"FILE={self.file}", 
 			f"COMPILED_FILE={self.compiledFile}"
@@ -51,7 +51,7 @@ class Program:
 
 		try:
 			result: subprocess.CompletedProcess = subprocess.run([
-					"make", MakeTarget.run.value, "-f", self._langInfo.makefile,
+					"make", MakeTarget.run.value, "-f", self.lang.makefile,
 					f"DIR={self.dir}",
 					f"COMPILED_FILE={self.compiledFile}", 
 					f"OUTPUT_FILE={self.outputFile}",
@@ -75,12 +75,12 @@ class Program:
 		Program для отформатированного файла 
 		"""
 
-		if not self._langInfo.canBeFormatted:
+		if not self.lang.canBeFormatted:
 			raise NotSupportedLanguage(self.lang)
 
 		result: subprocess.CompletedProcess = subprocess.run([
-				"make", MakeTarget.format.name, "-f", self._langInfo.makefile,
-				f"FORMAT_CONFIG={self._langInfo.formatConfig}",
+				"make", MakeTarget.format.name, "-f", self.lang.makefile,
+				f"FORMAT_CONFIG={self.lang.formatConfig}",
 				f"DIR={self.dir}", 
 				f"FILE={self.file}", 
 				f"FORMATTED_FILE={self.formattedFile}"
@@ -105,7 +105,7 @@ class Program:
 		"""
 
 		subprocess.run([
-			"make", MakeTarget.clear.name, "-f", self._langInfo.makefile, 
+			"make", MakeTarget.clear.name, "-f", self.lang.makefile, 
 			f"DIR={self.dir}",
 			f"COMPILED_FILE={self.compiledFile}", 
 			f"OUTPUT_FILE={self.outputFile}"
@@ -208,7 +208,6 @@ class Program:
 	@lang.setter
 	def lang(self, lang: Language):
 		self._lang = lang
-		self._langInfo = LangInfo.fromLang(lang)
 	
 	@property
 	def code(self):
@@ -219,9 +218,9 @@ class Program:
 	@property
 	def canBeCompiled(self):
 		""" Компилируемый ли язык """
-		return self._langInfo.canBeCompiled
+		return self.lang.canBeCompiled
 	
 	@property
 	def canBeFormatted(self):
 		""" Форматируемый ли язык """
-		return self._langInfo.canBeFormatted
+		return self.lang.canBeFormatted
