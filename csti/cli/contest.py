@@ -20,8 +20,8 @@ def select(local_id: int|None = None):
 	env = ContestEnv.inCurrentDir()
 
 	homework = None
-	homeworsLocalId = ContestInterface().getAvailableHomeworksLocalId()
-	if local_id and local_id in homeworsLocalId:
+	homeworkIds = ContestInterface().getAvailableHomeworkIds()
+	if local_id and local_id in homeworkIds:
 		homework = ContestInterface().getHomework(GlobalConfig().name, local_id)
 		if homework[0] == "-1":
 			cprint.warning("Warning: Выбран не допустимый контест.")
@@ -39,7 +39,7 @@ def select(local_id: int|None = None):
 
 		homeworks = list()
 		lastElementIndex = 0
-		for index in homeworsLocalId:
+		for index in homeworkIds:
 			homework = ContestInterface().getHomework(GlobalConfig().name, index)
 			
 			# NOTE: Заглушка, убирает не работающий пока что status.

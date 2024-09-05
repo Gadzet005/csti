@@ -82,8 +82,8 @@ class Printer:
 		**kwargs
 	):
 		""" 
-		Если flag == True, то выведется flagOn.\n
-		Если flag == False, то выведется flagOff.
+		Если flag=True, то выведется flagOn.\n
+		Если flag=False, то выведется flagOff.
 		"""
 
 		colorBy = flagOn if flag else flagOff

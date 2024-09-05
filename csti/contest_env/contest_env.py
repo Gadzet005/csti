@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import os
 
-from csti.contest_env.data_manager import DataManager
-from csti.contest_env.exceptions import ContestEnvException
+from csti.contest_env.data_storage import EnvDataStorage
 from csti.contest import Contest
+from csti.contest_env.exceptions import ContestEnvException
 
 
 class ContestEnv:
@@ -12,7 +12,7 @@ class ContestEnv:
 
 	def __init__(self, dir: str):
 		self._dir = dir
-		self._dataManager = DataManager(os.path.join(self.dir, DataManager.FOLDER))
+		self._storage = EnvDataStorage(dir)
 	
 	@staticmethod
 	def init(dir: str|None = None) -> ContestEnv:
@@ -24,17 +24,16 @@ class ContestEnv:
 		
 		if dir is None:
 			dir = os.getcwd()
-		DataManager.init(os.path.join(dir, DataManager.FOLDER))
+		EnvDataStorage.init(envDir=dir)
 		return ContestEnv(dir)
 
 	def selectContest(self, contest: Contest):
 		""" Смена контеста в рабочей директории. """
 
-		self.dataManager.saveContest(
-			contest.id, 
-			list(map(lambda x: x.id, contest.tasks)), 
-			contest.currentTask.id
-		)
+		tasks = list(map(lambda x: x.id, contest.tasks))
+		self.storage.set("contest", "id", value=contest.id)
+		self.storage.set("contest", "tasks", value=tasks)
+		self.storage.set("contest", "selectedTask", value=contest.currentTask.id)
 
 		for task in contest.tasks:
 			fileName = task.id + contest.lang.fileExtension
@@ -60,10 +59,10 @@ class ContestEnv:
 		return self._dir
 
 	@property
-	def dataManager(self) -> DataManager:
-		return self._dataManager
+	def storage(self) -> EnvDataStorage:
+		return self._storage
 
 	@property
 	def isEnvValid(self) -> bool:
 		""" Инициализирована ли рабочая директория? """
-		return os.path.exists(self.dataManager.dir)
+		return os.path.exists(self.storage.dir)

@@ -2,4 +2,4 @@ __pycache__
 .vscode
 .csti
 .venv
-contest-*
+contest

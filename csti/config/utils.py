@@ -1,5 +1,12 @@
 from typing import Callable, Type, Any
 
+
+def configCaseToCamel(name: str) -> str:
+	""" Конвертирует camel-case в CamelCase. """
+	words = name.split("-")
+	return words[0] + "".join(word.capitalize() for word in words[1:])
+
+
 def configField(
 	name: str,
 	type: Type,
@@ -19,10 +26,7 @@ def configField(
 	@param deserializer: Функция преобразования объекта обратно в примитивный тип.
 	"""
 
-	raw = name.split("-")
-	for i in range(1, len(raw)):
-		raw[i] = raw[i].capitalize()
-	attrName = "".join(raw)
+	attrName = configCaseToCamel(name)
 
 	@property
 	def attr(self):
@@ -33,8 +37,8 @@ def configField(
 	def attr(self, value):
 		self.set(name, type(deserializer(value)), nestedIn)
 
-	def decorator(cls):
+	def wrapper(cls):
 		setattr(cls, attrName, attr)
 		return cls
 
-	return decorator
+	return wrapper

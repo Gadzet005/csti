@@ -20,7 +20,7 @@ def task():
 @click.argument("local-id", type=int, required=False)
 def selectTask(local_id: int|None = None):
 	env = ContestEnv.inCurrentDir()
-	contest = env.dataManager.loadContest()
+	contest = env.storage.loadContest()
 
 	taskLocalId = None
 	tasksCount = len(contest.tasks)
@@ -49,7 +49,7 @@ def selectTask(local_id: int|None = None):
 
 		taskLocalId = str(tasksName.index(task) + 1)
 
-	env.dataManager.saveContest(taskLocalId=taskLocalId)
+	env.storage.set("contest", "selectedTask", value=taskLocalId)
 
 
 @task.command("get", help="Показать информацию о выбранной задаче.")
@@ -78,7 +78,7 @@ def getTask(
 	solution: bool
 ):	
 	env = ContestEnv.inCurrentDir()
-	contest = env.dataManager.loadContest()
+	contest = env.storage.loadContest()
 	task = contest.currentTask
 
 	flags = [name, info, cond, tests, solution]
@@ -142,7 +142,7 @@ def sendTask(
 	no_confirm: bool
 ):
 	env = ContestEnv.inCurrentDir()
-	contest = env.dataManager.loadContest()
+	contest = env.storage.loadContest()
 	config = GlobalConfig()
 
 	if not no_tests:
