@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import os
 
+from csti.consts import Language
+from csti.contest import Contest, ContestInterface
 from csti.contest_env.data_storage import EnvDataStorage
-from csti.contest import Contest
-from csti.contest_env.exceptions import ContestEnvException
+from csti.contest_env.exceptions import ContestEnvException, EnvStorageException
 
 
 class ContestEnv:
@@ -26,21 +27,34 @@ class ContestEnv:
 			dir = os.getcwd()
 		EnvDataStorage.init(envDir=dir)
 		return ContestEnv(dir)
+	
+	def getTaskFilePath(self, taskId: str, lang: Language):
+		return os.path.join(self.dir, taskId + lang.fileExtension)
+
+	def clearTaskFiles(self):
+		""" Очистка всех файлов с заданиями. """
+		try:
+			contest = self.storage.loadContest()
+			for task in contest.tasks:
+				path = self.getTaskFilePath(task.id, contest.lang)
+				if os.path.isfile(path):
+					os.remove(path)
+		except EnvStorageException:
+			pass
 
 	def selectContest(self, contest: Contest):
 		""" Смена контеста в рабочей директории. """
 
-		tasks = list(map(lambda x: x.id, contest.tasks))
-		self.storage.set("contest", "id", value=contest.id)
-		self.storage.set("contest", "tasks", value=tasks)
-		self.storage.set("contest", "selectedTask", value=contest.currentTask.id)
+		self.clearTaskFiles()
+		ContestInterface().selectContest(contest.id)
 
 		for task in contest.tasks:
-			fileName = task.id + contest.lang.fileExtension
-
-			with open(os.path.join(self.dir, fileName), "w") as f:
+			path = self.getTaskFilePath(task.id, contest.lang)
+			with open(path, "w") as f:
 				f.write(contest.lang.comment + " " + task.name + "\n")
-	
+		
+		self.storage.saveContest(contest)
+
 	@staticmethod
 	def inCurrentDir() -> ContestEnv:
 		""" 

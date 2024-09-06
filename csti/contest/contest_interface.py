@@ -1,4 +1,4 @@
-from functools import cached_property
+from functools import cache
 
 import requests
 
@@ -14,21 +14,28 @@ class ContestInterface(metaclass=Singleton):
 	def init(self):
 		config = GlobalConfig()
 		self.signIn(config.login, config.password)
+		
+		self._contestId: str|None = None
+		self._sessionId: str|None = None
+		self._cookieSessionId: str|None = None
 
 	def signIn(self, login: str, password: str):
 		self._login: str = login
 		self._password: str = password
 
-		self._contestId: str|None = None
-		self._sessionId: str|None = None
-		self._cookieSessionId: str|None = None
-
-	@cached_property
+	@cache
 	def session(self) -> requests.Session|None:
+		if self._cookieSessionId is None:
+			return None
 		session = requests.Session()
 		session.cookies.set("EJSID", self._cookieSessionId)
 		return session
 	
+	def changeSession(self, sessionId: str, cookieSessionId: str):
+		self._sessionId = sessionId
+		self._cookieSessionId = cookieSessionId
+		self.session.cache_clear()
+
 	def selectContest(self, id: str):
 		if self._login is None or self._password is None:
 			raise AuthException("Логин или пароль не проинициализирован.")
@@ -57,10 +64,9 @@ class ContestInterface(metaclass=Singleton):
 				"В доступе к контесту отказано. "
 				"Проверьте номер контеста, логин и пароль."
 			)
-		
+
 		self._contestId = id
-		self._sessionId = sessionId
-		self._cookieSessionId = response.cookies.get("EJSID")
+		self.changeSession(sessionId, response.cookies.get("EJSID"))
 
 	# --------------------- Homework -------------------
 	def requestHome(self) -> bytes:
@@ -86,10 +92,10 @@ class ContestInterface(metaclass=Singleton):
 	# --------------------- Task -----------------------
 
 	def requestTask(self, taskId: str) -> bytes:
-		if self.session is None:
+		if self.session() is None:
 			raise ContestInterfaceException("Сессия не инициализирована.")
 
-		response = self.session.get(
+		response = self.session().get(
 			ContestConsts.getRequestsUrl(),
 			params = {
 				"SID": self._sessionId,
@@ -106,10 +112,10 @@ class ContestInterface(metaclass=Singleton):
 		return response.content
 
 	def sendTask(self, taskId: str, file: str, langId: str):
-		if self.session is None:
+		if self.session() is None:
 			raise ContestInterfaceException("Сессия не инициализирована.")
 
-		response = self.session.post(
+		response = self.session().post(
 			ContestConsts.getRequestsUrl(),
 			headers={
 				"Content-Type": "multipart/form-data",

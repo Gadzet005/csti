@@ -11,7 +11,7 @@ from csti.contest_env import ContestEnv
 
 @cli.group("contest", help="Работа с контестом.")
 def contest():
-    pass
+	pass
 
 
 @contest.command("select", help="Выбрать контест.")
@@ -64,7 +64,14 @@ def select(local_id: int|None = None):
 			vi_mode = True,
 		).execute()
 	
-	contest = Contest(homework[0], homework[1])
+	contestId, tasks = homework
+	
+	currentContestId = env.storage.get("contest", "id", default=None)
+	if currentContestId and currentContestId == contestId:
+		cprint.warning("Этот контест уже выбран.")
+		return
+	
+	contest = Contest(contestId, tasks)
 	env.selectContest(contest)
 
 	cprint.success(f"Контест успешно выбран.")

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 import enum
 
 APP_NAME = "csti"
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
 class ContestConsts:
@@ -113,9 +115,9 @@ class Language(enum.Enum):
 	@property
 	def makefile(self) -> str:
 		""" Путь к makefile. """
-		return self.value["makefile"]
+		return os.path.join(BASE_DIR, self.value["makefile"])
 
 	@property
 	def formatConfig(self) -> str|None:
 		""" Путь к конфигу для форматирования. """
-		return self.value["formatConfig"]
+		return os.path.join(BASE_DIR, self.value["formatConfig"])

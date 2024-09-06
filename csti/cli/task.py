@@ -1,3 +1,5 @@
+import os
+
 import click
 from InquirerPy import inquirer
 
@@ -13,43 +15,40 @@ from csti.program import CompileError, Program, formatProgram, prepareProgram
 
 @cli.group("task", help="Взаимодействие с задачами.")
 def task():
-    pass
+	pass
 
 
 @task.command("select", help="Выбрать задачу.")
-@click.argument("local-id", type=int, required=False)
-def selectTask(local_id: int|None = None):
+@click.argument("task-id", type=str, required=False)
+def selectTask(task_id: str|None = None):
 	env = ContestEnv.inCurrentDir()
 	contest = env.storage.loadContest()
+	tasks = contest.tasks
 
-	taskLocalId = None
-	tasksCount = len(contest.tasks)
-	if isinstance(local_id, int) and local_id in range(1, tasksCount + 1):
-		taskLocalId = str(local_id)
-
-	else: 
-		if local_id:
-			cprint.warning("Warning: Задача отсутствует. Выберите из списка.")
-
-		tasks = contest.tasks
-		tasksName = list(map(lambda task: task.name, tasks))
+	currentTask = task_id
+	if task_id is None or contest.getTask(task_id) is None:
+		if task_id:
+			cprint.warning("Задача отсутствует. Выберите из списка.")
 
 		lastSucsess = 0
 		for task in tasks:
 			if task.solution and task.solution.status != SolutionStatus.accepted_for_review:
 				break
 			lastSucsess += 1
+		defaultTaskIdx = (lastSucsess + 1) % len(tasks)
 		
-		task = inquirer.rawlist(
+		taskNames = list(map(lambda task: task.name, tasks))
+		taskName = inquirer.rawlist(
 			message = "Задача: ",
-			choices = tasksName,
-			default = (lastSucsess + 1) % tasksCount,
+			choices = taskNames,
+			default = defaultTaskIdx,
 			vi_mode = True,
 		).execute()
 
-		taskLocalId = str(tasksName.index(task) + 1)
+		currentTask = tasks[taskNames.index(taskName)].id
 
-	env.storage.set("contest", "selectedTask", value=taskLocalId)
+	cprint.success(f"Задача успешно выбрана: {contest.getTask(currentTask).name}.")
+	env.storage.set("contest", "currentTask", value=currentTask)
 
 
 @task.command("get", help="Показать информацию о выбранной задаче.")
@@ -113,7 +112,7 @@ def getTask(
 
 
 @task.command("send", help="Отправить задачу на проверку.")
-@click.argument("file", type=click.Path(exists=True), required=True)
+@click.argument("file", type=click.Path(exists=True), required=False)
 @click.option(
 	"-l", "--lang", type=str, default="auto", 
 	show_default="Автоматический выбор языка",
@@ -135,7 +134,7 @@ def getTask(
 	help="Отключает подтверждение отправки решения."
 )
 def sendTask(
-	file: str,
+	file: str|None,
 	lang: str,
 	no_tests: bool,
 	no_format: bool,
@@ -144,6 +143,15 @@ def sendTask(
 	env = ContestEnv.inCurrentDir()
 	contest = env.storage.loadContest()
 	config = GlobalConfig()
+
+	if file is None:
+		file = env.getTaskFilePath(contest.currentTask.id, contest.lang)
+		if os.path.exists(file):
+			cprint.info(f"Файл для отправки: '{os.path.basename(file)}'.")
+		else:
+			cprint.warning(f"Файл '{file}' не найден.")
+			return
+
 
 	if not no_tests:
 		no_tests = not config.enableAutoTests

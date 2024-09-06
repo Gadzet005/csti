@@ -5,19 +5,26 @@ from csti.contest.exceptions import ContestException
 
 
 class Contest:
-	def __init__(self, id: str, tasksId: list[str], currentTaskId: int = 0):
-		self._tasks: list[Task] = list()
-		for taskId in tasksId:
-			self._tasks.append(Task(taskId))
+	def __init__(self, id: str, taskIds: list[str], currentTaskId: str|None = None):
+		if len(taskIds) == 0:
+			raise ContestException("Контест должен содержать хотя бы одно задание.")
 
-		self._currentTaskId: int = currentTaskId
+		self._tasks: dict[Task] = {taskId: Task(taskId) for taskId in taskIds}
+
+		if currentTaskId is None:
+			currentTaskId = taskIds[0]
+		self._currentTaskId: str = currentTaskId
+
 		self._id: str = id
 
 		ContestInterface().selectContest(self._id)
 
 	@property
 	def tasks(self) -> list[Task]:
-		return self._tasks
+		return list(self._tasks.values())
+	
+	def getTask(self, id: str) -> Task:
+		return self._tasks.get(id)
 
 	def selectTask(self, taskLocalId: int):
 		taskLocalId -= 1
@@ -26,8 +33,8 @@ class Contest:
 		self._currentTaskId = taskLocalId
 
 	@property
-	def currentTask(self) -> Task:
-		return self._tasks[self._currentTaskId]
+	def currentTask(self) -> Task|None:
+		return self._tasks.get(self._currentTaskId, None)
 
 	@property
 	def id(self) -> str:
