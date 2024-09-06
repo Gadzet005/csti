@@ -12,22 +12,22 @@ class TestProgram(unittest.TestCase):
 		with self.assertRaises(CompileError):
 			program.compile()
 
-		program = Program(Language.asm, "tests/programs/add.c")
+		program = Program(Language.asm, "tests/program/programs/add.c")
 		with self.assertRaises(CompileError):
 			program.compile()
 
-		program = Program(Language.c, "tests/programs/compile_error.c")
+		program = Program(Language.c, "tests/program/programs/compile_error.c")
 		with self.assertRaises(CompileError):
 			program.compile()
 
-		program = Program(Language.c, "tests/programs/add.c")
+		program = Program(Language.c, "tests/program/programs/add.c")
 		program.compile()
 		program.clear()
 
 	def testCAddProgram(self):
 		""" Компиляция и запуск программы, складывающей два числа """
 
-		add = Program(Language.c, "tests/programs/add.c")
+		add = Program(Language.c, "tests/program/programs/add.c")
 
 		with self.assertRaises(RunError):
 			add.run()
@@ -49,7 +49,7 @@ class TestProgram(unittest.TestCase):
 	def testCppDivideProgram(self):
 		""" Компиляция и запуск программы, делящей два числа """
 
-		divide = Program(Language.cpp, "tests/programs/divide.cpp")
+		divide = Program(Language.cpp, "tests/program/programs/divide.cpp")
 
 		with self.assertRaises(RunError):
 			divide.run()
@@ -74,14 +74,14 @@ class TestProgram(unittest.TestCase):
 	def testSwitchProgram(self):
 		""" Тестирование смены языка и пути у программы """
 
-		program = Program(Language.c, "tests/programs/add.c")
+		program = Program(Language.c, "tests/program/programs/add.c")
 		program.lang = Language.asm
 
 		with self.assertRaises(CompileError):
 			program.compile()
 		
 		program.lang = Language.cpp
-		program.filePath = "tests/programs/divide.cpp"
+		program.filePath = "tests/program/programs/divide.cpp"
 
 		program.compile()
 		output = program.run("10 5")
@@ -92,7 +92,7 @@ class TestProgram(unittest.TestCase):
 	def testFormat(self):
 		""" Тестирование форматирования программы """
 
-		program = Program(Language.asm, "tests/programs/some_code.cpp")
+		program = Program(Language.asm, "tests/program/programs/some_code.cpp")
 		with self.assertRaises(NotSupportedLanguage):
 			program.format()
 
@@ -107,7 +107,7 @@ class TestProgram(unittest.TestCase):
 
 		self.assertEqual(original_output, formatted_output)
 			
-		expected = Program(Language.cpp, "tests/programs/expected_some_code.cpp")
+		expected = Program(Language.cpp, "tests/program/programs/expected_some_code.cpp")
 
 		self.assertEqual(expected.code, formatted.code)
 
@@ -124,7 +124,7 @@ class TestProgram(unittest.TestCase):
 			("10 0", "0"),
 		]
 
-		divide = Program(Language.cpp, "tests/programs/divide.cpp")
+		divide = Program(Language.cpp, "tests/program/programs/divide.cpp")
 		divide.compile()
 		results = divide.test(testCases, timeLimit=1)
 
@@ -137,10 +137,10 @@ class TestProgram(unittest.TestCase):
 
 		divide.clear()
 	
-	def testTimout(self):
+	def testTimeout(self):
 		""" Тестирование превышения времени ожидания"""
 
-		divide = Program(Language.cpp, "tests/programs/cicle.c")
+		divide = Program(Language.cpp, "tests/program/programs/cicle.c")
 		divide.compile()
 		
 		with self.assertRaises(TimeoutError):
