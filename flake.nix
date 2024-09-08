@@ -1,48 +1,53 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
     poetry2nix = {
       url = "github:nix-community/poetry2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, poetry2nix, }:
-    let
-      supportedSystems =
+  outputs = inputs@{ self, nixpkgs, poetry2nix, ... }:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems =
         [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
-      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-      pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
 
-    in {
-      packages = forAllSystems (system:
-        let
-          inherit (poetry2nix.lib.mkPoetry2Nix { pkgs = pkgs.${system}; })
+      perSystem = { self', inputs', pkgs, system, config, ... }: {
+        packages = let
+          inherit (poetry2nix.lib.mkPoetry2Nix { inherit pkgs; })
             mkPoetryApplication;
-
         in {
           csti = mkPoetryApplication { projectDir = self; };
           default = self.packages.${system}.csti;
-        });
+        };
 
-      devShells = forAllSystems (system:
-        let
-          inherit (poetry2nix.lib.mkPoetry2Nix { pkgs = pkgs.${system}; })
-            mkPoetryEnv;
-
+        devShells = let
+          inherit (poetry2nix.lib.mkPoetry2Nix { inherit pkgs; }) mkPoetryEnv;
         in {
-          default = pkgs.${system}.mkShellNoCC {
-            packages = with pkgs.${system}; [
+          default = pkgs.mkShellNoCC {
+            packages = with pkgs; [
               (mkPoetryEnv { projectDir = self; })
               poetry
 
               nixfmt
             ];
 
-						shellHook = ''
-							exec fish 
-						'';
+            shellHook = ''
+              exec fish;
+            '';
           };
-        });
+        };
+      };
+
+      flake = {
+        templates = rec {
+          default = {
+            path = ./nix/shell_templates/default;
+            description = "";
+          };
+        };
+      };
     };
 }
