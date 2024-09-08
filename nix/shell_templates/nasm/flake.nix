@@ -9,7 +9,7 @@
   outputs = { self, nixpkgs, ... }@inputs:
     let
       supportedSystems =
-        [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
+        [ "x86_64-linux" "x86_64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
 
@@ -21,7 +21,7 @@
               #	Добавьте необходимые вам пакеты(их названия можно найти на
               # сайте https://mynixos.com).
               nasm
-              gcc
+              gcc_multi
             ] ++ [ inputs.csti.packages.${system}.default ];
 
           # Вместо shell подставьте вашу оболочку командной строки и
