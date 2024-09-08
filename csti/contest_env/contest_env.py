@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import os
 
-from csti.consts import Language
 from csti.contest import Contest, ContestInterface
 from csti.contest_env.data_storage import EnvDataStorage
 from csti.contest_env.exceptions import ContestEnvException, EnvStorageException
+from csti.etc.language import Language
 
 
 class ContestEnv:
@@ -29,7 +29,7 @@ class ContestEnv:
 		return ContestEnv(dir)
 	
 	def getTaskFilePath(self, taskId: str, lang: Language):
-		return os.path.join(self.dir, taskId + lang.fileExtension)
+		return os.path.join(self.dir, taskId + lang.defaultfileExtension)
 
 	def clearTaskFiles(self):
 		""" Очистка всех файлов с заданиями. """

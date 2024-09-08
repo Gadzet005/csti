@@ -5,8 +5,8 @@ from typing import Any
 import yaml
 from platformdirs import user_config_dir
 
-from csti.consts import APP_NAME, Locale
-from csti.utils import Singleton
+from csti.etc.settings import APP_NAME, Locale
+from csti.etc.utils import Singleton
 
 from csti.config.utils import configField
 

@@ -7,10 +7,11 @@ from csti.cli.cli import cli
 from csti.cli.print import cprint, ncprint
 from csti.cli.utils import printTestResults
 from csti.config import GlobalConfig
-from csti.consts import Language
 from csti.contest import SolutionStatus
 from csti.contest_env import ContestEnv
-from csti.program import CompileError, Program, formatProgram, prepareProgram
+from csti.etc.language import Language
+from csti.program_view import (CompileError, ProgramView, format,
+                               prepareForRun)
 
 
 @cli.group("task", help="Взаимодействие с задачами.")
@@ -165,14 +166,14 @@ def sendTask(
 		cprint.warning(f"Неизвестный язык программирования: {lang}.")
 		return
 
-	program = Program(contestLang, file)
+	program = ProgramView(file, contestLang)
 
 	# Тестирование
 	if not no_tests:
 		allTestsPassed = True
 		try:
 			cprint.primary("Запуск тестов...")
-			with prepareProgram(program):
+			with prepareForRun(program):
 				testResults = program.test(
 					contest.currentTask.tests,
 					contest.currentTask.timeLimit,
@@ -200,11 +201,11 @@ def sendTask(
 
 	if shouldSendSolution:
 		# Форматирование кода
-		if no_format or not program.canBeFormatted:
+		if no_format or len(program.lang.availableformatStyles) == 0:
 			contest.currentTask.sendSolution(program.code, program.lang.id)
 		else:
 			cprint.primary("Форматирование кода...")
-			with formatProgram(program) as formatted:
+			with format(program, program.lang.availableformatStyles[0]) as formatted:
 				contest.currentTask.sendSolution(formatted.code, formatted.lang.id)
 		cprint.success("Решение успешно отправлено.")
 	else:

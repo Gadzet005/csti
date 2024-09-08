@@ -1,4 +1,4 @@
-from csti.consts import Language
+from csti.etc.language import Language
 from csti.contest.contest_interface import ContestInterface
 from csti.contest.task.task import Task
 from csti.contest.exceptions import ContestException
@@ -43,4 +43,7 @@ class Contest:
 	@property
 	def lang(self) -> Language:
 		langId = int(self.id[2] + "0")
+		# Временно
+		if langId == 50:
+			return Language.nasm
 		return Language.fromId(langId)

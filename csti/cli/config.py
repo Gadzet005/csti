@@ -4,7 +4,7 @@ from InquirerPy.base.control import Choice
 from csti.cli.cli import cli
 from csti.cli.print import cprint
 from csti.config import GlobalConfig
-from csti.consts import Locale
+from csti.etc.settings import Locale
 
 
 @cli.group("config", help="Настройка приложения.")

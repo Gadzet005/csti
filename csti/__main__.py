@@ -3,7 +3,6 @@ from csti.cli.print import cprint
 from csti.contest import ContestInterface
 from csti.config import GlobalConfig
 
-
 def main():
 	debug = GlobalConfig().debug
 

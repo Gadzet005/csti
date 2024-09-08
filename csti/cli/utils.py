@@ -1,5 +1,5 @@
 from csti.cli.print import cprint
-from csti.program.test_result import TestStatus, TestResultList
+from csti.program_view.test_result import TestStatus, TestResultList
 
 
 def printTestResults(testResults: TestResultList):

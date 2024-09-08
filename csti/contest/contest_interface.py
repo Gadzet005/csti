@@ -3,11 +3,11 @@ from functools import cache
 import requests
 
 from csti.config import GlobalConfig
-from csti.consts import ContestConsts
+from csti.etc.settings import ContestConsts
 from csti.contest.exceptions import AuthException, ContestInterfaceException
 from csti.contest.parser.contest_parser import ContestParser
 from csti.contest.task.solution import SolutionStatus
-from csti.utils import Singleton
+from csti.etc.utils import Singleton
 
 
 class ContestInterface(metaclass=Singleton):

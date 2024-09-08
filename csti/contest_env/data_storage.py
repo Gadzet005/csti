@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any, override
 
-from csti.consts import APP_NAME
+from csti.etc.settings import APP_NAME
 from csti.contest import Contest
 from csti.contest_env.exceptions import EnvStorageException
 from csti.data_storage import DataStorage, Group, StorageTemplate

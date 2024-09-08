@@ -2,7 +2,7 @@ from inspect import cleandoc
 
 from bs4 import BeautifulSoup
 
-from csti.consts import ContestConsts
+from csti.etc.settings import ContestConsts
 from csti.contest.exceptions import CantParseElement
 from csti.contest.task.solution import Solution, SolutionStatus
 
