@@ -1,5 +1,24 @@
 {
   "nodes": {
+    "csti": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "poetry2nix": "poetry2nix"
+      },
+      "locked": {
+        "lastModified": 1725030645,
+        "narHash": "sha256-5DEqlXejXhnU4IK3Lmw0w7Hh67vSCAGsQLfNeW49ASA=",
+        "owner": "Gadzet005",
+        "repo": "csti",
+        "rev": "13eb14555bf65cce07d7960187c6b04465e20ad0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Gadzet005",
+        "repo": "csti",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -21,6 +40,7 @@
     "nix-github-actions": {
       "inputs": {
         "nixpkgs": [
+          "csti",
           "poetry2nix",
           "nixpkgs"
         ]
@@ -41,6 +61,22 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1724177844,
+        "narHash": "sha256-G7Mf9uN9m8FimeP3eMHu/dOC4QS8QAzo0h4ZIlDHcCA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d13fa5a45a34e7c8be33474f58003914430bdc5a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
         "lastModified": 1725634671,
         "narHash": "sha256-v3rIhsJBOMLR8e/RNWxr828tB+WywYIoajrZKFM+0Gg=",
         "owner": "nixos",
@@ -60,6 +96,7 @@
         "flake-utils": "flake-utils",
         "nix-github-actions": "nix-github-actions",
         "nixpkgs": [
+          "csti",
           "nixpkgs"
         ],
         "systems": "systems_2",
@@ -81,8 +118,8 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs",
-        "poetry2nix": "poetry2nix"
+        "csti": "csti",
+        "nixpkgs": "nixpkgs_2"
       }
     },
     "systems": {
@@ -117,6 +154,7 @@
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
+          "csti",
           "poetry2nix",
           "nixpkgs"
         ]
