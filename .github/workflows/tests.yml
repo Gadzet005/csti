@@ -21,4 +21,4 @@ jobs:
         nix_path: nixpkgs=channel:nixos-unstable
     - uses: DeterminateSystems/magic-nix-cache-action@v2
     - name: Run tests
-      run: nix develop --command bash -c "nix-shell nix/shell_templates/all.nix --command 'python -m unittest discover tests'"
+      run: nix develop .#tests --command bash -c "poetry run python -m unittest discover tests"

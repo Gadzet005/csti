@@ -9,12 +9,14 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, poetry2nix, ... }:
+  outputs = inputs@{ self, poetry2nix, ... }:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [ ./nix/templates.nix ];
+
       systems =
         [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
-      perSystem = { self', inputs', pkgs, system, config, ... }: {
+      perSystem = { pkgs, system, ... }: {
         packages = let
           inherit (poetry2nix.lib.mkPoetry2Nix { inherit pkgs; })
             mkPoetryApplication;
@@ -30,28 +32,21 @@
             packages = with pkgs; [
               (mkPoetryEnv { projectDir = self; })
               poetry
-
-              nixfmt-classic
             ];
-
-            shellHook = ''
-              exec fish;
-            '';
           };
-        };
-      };
 
-      flake = {
-        templates = rec {
-          # TODO: Актуализировать команды.
-          default = {
-            path = ./nix/shell_templates/default;
-            description = "Empty template with csti.";
-            welcomeText = ''
-              # Getting started
-              - Run `nix develop`
-              - Run `csti configure`
-            '';
+          nix-shell = pkgs.mkShellNoCC {
+            packages = with pkgs; [ nixfmt-classic deadnix statix ];
+          };
+
+          tests = pkgs.mkShellNoCC {
+            packages = with pkgs; [
+              (mkPoetryEnv { projectDir = self; })
+              poetry
+              cmake
+              gcc
+              clang-tools
+            ];
           };
         };
       };
