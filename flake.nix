@@ -41,11 +41,26 @@
         };
       };
 
-      flake = {
+      flake = { 
         templates = rec {
+          # TODO: Актуализировать команды.
           default = {
             path = ./nix/shell_templates/default;
-            description = "";
+            description = "Empty template with csti.";
+            welcomeText = ''
+              # Getting started
+              - Run `nix develop`
+              - Run `csti configure`
+            '';
+          };
+          c = {
+            path = ./nix/shell_templates/c;
+          };
+          cpp = {
+            path = ./nix/shell_templates/cpp;
+          };
+          nasm = {
+            path = ./nix/shell_templates/nasm;
           };
         };
       };
