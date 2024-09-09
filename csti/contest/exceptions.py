@@ -6,13 +6,13 @@ class AuthException(ContestInterfaceException):
  
 
 class ParserError(Exception):
-	pass
+    pass
 
 class CantParseElement(ParserError):
-	def __init__(self, element: str):
-		self.element = element
-	
-	def __str__(self) -> str:
-		return f"Не удалочь получить элемент задачи: {self.element}."
+    def __init__(self, element: str):
+        self.element = element
+    
+    def __str__(self) -> str:
+        return f"Не удалочь получить элемент задачи: {self.element}."
 
 class ContestException(Exception): pass
