@@ -31,7 +31,7 @@
               (mkPoetryEnv { projectDir = self; })
               poetry
 
-              nixfmt
+              nixfmt-classic
             ];
 
             shellHook = ''
@@ -41,7 +41,7 @@
         };
       };
 
-      flake = { 
+      flake = {
         templates = rec {
           # TODO: Актуализировать команды.
           default = {
@@ -52,15 +52,6 @@
               - Run `nix develop`
               - Run `csti configure`
             '';
-          };
-          c = {
-            path = ./nix/shell_templates/c;
-          };
-          cpp = {
-            path = ./nix/shell_templates/cpp;
-          };
-          nasm = {
-            path = ./nix/shell_templates/nasm;
           };
         };
       };
