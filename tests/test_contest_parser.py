@@ -3,8 +3,7 @@ import unittest
 import requests
 
 from csti.consts import ContestConsts
-from csti.contest.contest_interface import ContestInterface
-from csti.contest.parser.contest_parser import ContestParser
+from csti.contest import ContestParser
 
 
 class TestContestParser(unittest.TestCase):
