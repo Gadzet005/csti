@@ -25,10 +25,10 @@
       imports = [
         inputs.treefmt-nix.flakeModule
 
-        ./flake/dev_shells.nix
-        ./flake/packages.nix
-        ./flake/templates.nix
-        ./flake/treefmt.nix
+        ./nix/dev_shells.nix
+        ./nix/packages.nix
+        ./nix/templates.nix
+        ./nix/treefmt.nix
       ];
     };
 }
