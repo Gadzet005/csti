@@ -11,14 +11,9 @@ class SolutionStatus(Enum):
     unclassified_error = "Не классифицированная ошибка"
     time_limit = "Превышено максимальное время работы"
 
-    @classmethod
-    def _missing_(cls, value):
-        return cls.unclassified_error
-
 
 @dataclass
 class Solution:
-    id_: int
-    status: SolutionStatus
-    testsPassed: int
-
+	id: int
+	status: SolutionStatus
+	testsPassed: int

@@ -2,7 +2,7 @@ import os
 import unittest
 
 from csti.config import GlobalConfig
-from csti.contest.contest import Contest
+from csti.contest.old_contest import Contest
 from csti.contest.contest_interface import ContestInterface
 
 

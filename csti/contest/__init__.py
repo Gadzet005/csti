@@ -1,6 +1,5 @@
 from .contest import Contest
-from .contest_interface import ContestInterface
-from .parser.contest_parser import ContestParser
-from .parser.task_parser import TaskParser
-from .task.solution import Solution, SolutionStatus
-from .task.task import Task
+from .ejudje.parser.contest import ContestParser
+from .ejudje.parser.task import TaskParser
+from .solution import Solution, SolutionStatus
+from .task import Task

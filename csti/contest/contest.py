@@ -1,49 +1,29 @@
-from csti.etc.language import Language
-from csti.contest.contest_interface import ContestInterface
-from csti.contest.task.task import Task
-from csti.contest.exceptions import ContestException
+from csti.contest.api import ContestSystemAPI
+from csti.contest.task import Task
 
 
 class Contest:
-    def __init__(self, id: str, taskIds: list[str], currentTaskId: str|None = None):
-        if len(taskIds) == 0:
-            raise ContestException("Контест должен содержать хотя бы одно задание.")
-
-        self._tasks: dict[Task] = {taskId: Task(taskId) for taskId in taskIds}
-
-        if currentTaskId is None:
-            currentTaskId = taskIds[0]
-        self._currentTaskId: str = currentTaskId
-
-        self._id: str = id
-
-        ContestInterface().selectContest(self._id)
+    def __init__(self, contestId: int, api: ContestSystemAPI):
+        self._id = contestId
+        self._api = api
 
     @property
-    def tasks(self) -> list[Task]:
-        return list(self._tasks.values())
-    
-    def getTask(self, id: str) -> Task:
-        return self._tasks.get(id)
-
-    def selectTask(self, taskLocalId: int):
-        taskLocalId -= 1
-        if taskLocalId not in range(0, len(self._tasks)):
-            raise ContestException(f"Невалидный id задания: {taskLocalId}")
-        self._currentTaskId = taskLocalId
-
-    @property
-    def currentTask(self) -> Task|None:
-        return self._tasks.get(self._currentTaskId, None)
-
-    @property
-    def id(self) -> str:
+    def id(self) -> int:
         return self._id
-    
+
     @property
-    def lang(self) -> Language:
-        langId = int(self.id[2] + "0")
-        # Временно
-        if langId == 50:
-            return Language.nasm
-        return Language.fromId(langId)
+    def info(self) -> dict:
+        return self._api.getContestInfo(self._id)
+
+    @property
+    def name(self) -> str:
+        return self.info["name"]
+
+    def getTasks(self) -> list[Task]:
+        return [
+            self.getTask(taskId)
+            for taskId in self.info["tasks"]
+        ]
+
+    def getTask(self, taskId):
+        return Task(taskId, self._api)

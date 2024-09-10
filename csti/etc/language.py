@@ -6,7 +6,58 @@ from typing import Self
 from csti.etc.settings import BASE_DIR
 
 
-class Language(enum.Enum):
+class ILanguage(enum.Enum):
+    @classmethod
+    def fromName(cls, name: str) -> Self|None:
+        """ Получить язык по имени. Возвращает None, если такого нет. """
+        try:
+            return cls[name]
+        except KeyError:
+            return None
+
+    @classmethod
+    def fromId(cls, id: int) -> Self|None:
+        """ Получить язык по id. Возвращает None, если такого нет. """
+        for lang in cls:
+            if lang.id == id:
+                return lang
+        return None
+
+
+    @property
+    def id(self) -> int:
+        return self.value["id"]
+
+    @property
+    def fullName(self) -> str:
+        return self.value["fullName"]
+
+    @property
+    def isCompiledLanguage(self) -> bool:
+        return self.value["isCompiledLanguage"]
+
+    @property
+    def availableFileExtensions(self) -> list[str]:
+        return self.value["availableFileExtensions"]
+
+    @property
+    def defaultfileExtension(self) -> str:
+        return self.availableFileExtensions[0]
+
+    @property
+    def comment(self) -> str:
+        return self.value["comment"]
+
+    @property
+    def makefile(self) -> str:
+        return BASE_DIR / self.value["makefile"]
+
+    @property
+    def availableformatStyles(self) -> list[str]:
+        return self.value.get("availableformatStyles", [])
+
+
+class Language(ILanguage):
     """ 
     Перечисление языков программирования.
     -------------------------------------
@@ -56,53 +107,3 @@ class Language(enum.Enum):
         "comment": ";",
         "makefile": "csti/etc/make/nasm/makefile",
     }
-
-
-    @classmethod
-    def fromName(cls, name: str) -> Self|None:
-        """ Получить язык по имени. Возвращает None, если такого нет. """
-        try:
-            return cls[name]
-        except KeyError:
-            return None
-
-    @classmethod
-    def fromId(cls, id: int) -> Self|None:
-        """ Получить язык по id. Возвращает None, если такого нет. """
-        for lang in cls:
-            if lang.id == id:
-                return lang
-        return None
-
-
-    @property
-    def id(self) -> int:
-        return self.value["id"]
-
-    @property
-    def fullName(self) -> str:
-        return self.value["fullName"]
-
-    @property
-    def isCompiledLanguage(self) -> bool:
-        return self.value["isCompiledLanguage"]
-
-    @property
-    def availableFileExtensions(self) -> list[str]:
-        return self.value["availableFileExtensions"]
-
-    @property
-    def defaultfileExtension(self) -> str:
-        return self.availableFileExtensions[0]
-
-    @property
-    def comment(self) -> str:
-        return self.value["comment"]
-
-    @property
-    def makefile(self) -> str:
-        return BASE_DIR / self.value["makefile"]
-
-    @property
-    def availableformatStyles(self) -> list[str]:
-        return self.value.get("availableformatStyles", [])

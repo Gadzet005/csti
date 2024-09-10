@@ -2,15 +2,15 @@ import re
 
 from bs4 import BeautifulSoup
 
-from csti.etc.settings import ContestConsts
 from csti.contest.exceptions import CantParseElement
-from csti.contest.task.solution import SolutionStatus
 
 
 class ContestParser(object):
+    TYPE = "html.parser"
+    
     @staticmethod
     def getSessionId(html: bytes) -> str:
-        soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
+        soup = BeautifulSoup(html, ContestParser.TYPE)
         script = soup.find("script", string=re.compile("var SID="))
         if script is None:
             raise CantParseElement("script")
@@ -21,17 +21,19 @@ class ContestParser(object):
         
         return sessionIdMatches[0]
 
-    """
-         Если тип дз не является контестом то возвращается -1.
-    """
     @staticmethod
-    def getHomework(html: bytes, namePattern: str, localContestId: int) \
-        -> tuple[str, list[tuple[str, SolutionStatus]]]:
-        
-        soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
-        tabcontent = soup.find("div", id=f"block_hw{localContestId}")
+    def getContestInfo(html: bytes, name: str, contestLocalId: int) -> dict:
+        """
+        Возвращает информацию о контесте:
+        - "isValid": bool,
+        - "contestGlobalId": int,
+        - "tasks": list[int]
+        """
+
+        soup = BeautifulSoup(html, ContestParser.TYPE)
+        tabcontent = soup.find("div", id=f"block_hw{contestLocalId}")
         if tabcontent is None:
-            raise CantParseElement("tabcontent") 
+            return { "isValid": False }
         
         contestButton = tabcontent.find("a", class_="button")
         if contestButton is None:
@@ -39,24 +41,27 @@ class ContestParser(object):
 
         contestIdMatches = re.findall(r"Контест (\d{4})", contestButton.text)
         if contestIdMatches is not None and len(contestIdMatches) == 1:
-            contestId = contestIdMatches[0]
+            contestId = int(contestIdMatches[0])
         else:
-            contestId = "-1"
+            return { "isValid": False }
 
-        homeworksMathes = tabcontent.find_all("td", string=re.compile(namePattern))
+        homeworksMathes = tabcontent.find_all("td", string=re.compile(name))
         if homeworksMathes is None or len(homeworksMathes) != 1:
             raise CantParseElement("homework")
         
         tasks = list()
         for taskId in homeworksMathes[0].parent.find_all(string=re.compile(r"\d")):
-            task = (taskId, SolutionStatus.unclassified_error)
-            tasks.append(task)
+            tasks.append(int(taskId))
 
-        return (contestId, tasks)
+        return {
+            "isValid": True,
+            "contestGlobalId": contestId,
+            "tasks": tasks,
+        }
     
     @staticmethod
-    def getAvailableHomeworksLocalId(html: bytes) -> list[int]:
-        soup = BeautifulSoup(html, ContestConsts.PARSER_TYPE)
+    def getContestLocalIds(html: bytes) -> list[int]:
+        soup = BeautifulSoup(html, ContestParser.TYPE)
         nav = soup.find("nav")
         if nav is None:
             raise CantParseElement("nav")
