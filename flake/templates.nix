@@ -1,4 +1,6 @@
-{ ... }: {
+_:
+
+{
   flake.templates = rec {
     # TODO: Актуализировать команды.
     default = {
@@ -10,6 +12,5 @@
         - Run `csti configure`
       '';
     };
-
   };
 }

@@ -9,46 +9,12 @@
     };
   };
 
-  outputs = inputs@{ self, poetry2nix, ... }:
+  outputs = inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [ ./nix/templates.nix ];
-
       systems =
         [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
-      perSystem = { pkgs, system, ... }: {
-        packages = let
-          inherit (poetry2nix.lib.mkPoetry2Nix { inherit pkgs; })
-            mkPoetryApplication;
-        in {
-          csti = mkPoetryApplication { projectDir = self; };
-          default = self.packages.${system}.csti;
-        };
-
-        devShells = let
-          inherit (poetry2nix.lib.mkPoetry2Nix { inherit pkgs; }) mkPoetryEnv;
-        in {
-          default = pkgs.mkShellNoCC {
-            packages = with pkgs; [
-              (mkPoetryEnv { projectDir = self; })
-              poetry
-            ];
-          };
-
-          nix-shell = pkgs.mkShellNoCC {
-            packages = with pkgs; [ nixfmt-classic deadnix statix ];
-          };
-
-          tests = pkgs.mkShellNoCC {
-            packages = with pkgs; [
-              (mkPoetryEnv { projectDir = self; })
-              poetry
-              cmake
-              gcc
-              clang-tools
-            ];
-          };
-        };
-      };
+      imports =
+        [ ./flake/dev_shells.nix ./flake/packages.nix ./flake/templates.nix ];
     };
 }
