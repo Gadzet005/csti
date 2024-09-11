@@ -1,4 +1,5 @@
 import abc
+from typing import Self
 
 from csti.etc.language import ILanguage, Language
 
@@ -8,6 +9,11 @@ class ContestSystemAPI(abc.ABC):
     
     """ Перечисление языков программирования. """
     Lang: ILanguage = Language
+
+    @classmethod
+    def getInstance(cls, *args, **kwargs) -> Self:
+        """ Создает экземпляр ContestSystemAPI. Предпочтительнее, чем конструктор. """
+        return cls(*args, **kwargs)
 
     @abc.abstractmethod
     def getContestIds(cls) -> list[int]:
@@ -28,7 +34,7 @@ class ContestSystemAPI(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def getTaskInfo(self, taskId: int) -> dict|None:
+    def getTaskInfo(self, contestId: int, taskId: int) -> dict|None:
         """ 
         Информация о задаче.
         -------------------------------------------------------------------------------
@@ -58,7 +64,14 @@ class ContestSystemAPI(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def sendTaskSolution(self, taskId: int, code: str, languageId: int) -> bool:
+    def sendTaskSolution(
+        self, 
+        contestId: int, 
+        taskId: int, 
+        code: str, 
+        languageId: int
+    ) -> bool:
+
         """ 
         Отправка решения задачи.
         Возвращает True, если решение успешно отправлено, иначе False.

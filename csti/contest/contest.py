@@ -39,4 +39,4 @@ class Contest:
         return tasks
 
     def getTask(self, taskId: int) -> Task:
-        return Task(taskId, self._api)
+        return Task(taskId, self._id, self._api)

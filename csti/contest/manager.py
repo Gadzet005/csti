@@ -1,21 +1,17 @@
 import abc
+from typing import Type
 
 from csti.contest.contest import Contest
 from csti.contest.api import ContestSystemAPI
 
 
 class ContestManager(abc.ABC):
-    @abc.abstractmethod
-    def getAPI(self) -> ContestSystemAPI:
-        """ Получение API. """
-        pass
-    
-    def getAPIForContest(self, contestId: int) -> ContestSystemAPI:
-        """ Получение API конкретного контеста. """
-        return self.getAPI()
+    def __init__(self, apiType: Type[ContestSystemAPI]):
+        self._apiType = apiType
 
     def getContests(self, onlyValid: bool = True) -> list[Contest]:
-        contestIds = self.getAPI().getContestIds()
+        api = self._apiType.getInstance()
+        contestIds = api.getContestIds()
         contests = []
 
         for contestId in contestIds:
@@ -26,4 +22,5 @@ class ContestManager(abc.ABC):
         return contests
 
     def getContest(self, contestId: int) -> Contest:
-        return Contest(contestId, self.getAPIForContest(contestId))
+        api = self._apiType.getInstance(contestId)
+        return Contest(contestId, api)

@@ -5,8 +5,9 @@ from csti.program_view import ProgramView
 
 
 class Task:
-    def __init__(self, id: int, api: ContestSystemAPI):
+    def __init__(self, id: int, contestId: int, api: ContestSystemAPI):
         self._id = id
+        self._contestId = contestId
         self._api = api
 
     @property
@@ -15,7 +16,7 @@ class Task:
     
     @property
     def _info(self) -> dict:
-        return self._api.getTaskInfo(self._id)
+        return self._api.getTaskInfo(self._contestId, self._id)
     
     @property
     def isValid(self) -> bool:
