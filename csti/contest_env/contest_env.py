@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 import os
+from typing import Self
 
-from csti.contest import Contest, ContestInterface
+from csti.contest import Contest
 from csti.contest_env.data_storage import EnvDataStorage
 from csti.contest_env.exceptions import ContestEnvException, EnvStorageException
 from csti.etc.language import Language
@@ -16,7 +15,7 @@ class ContestEnv:
         self._storage = EnvDataStorage(dir)
     
     @staticmethod
-    def init(dir: str|None = None) -> ContestEnv:
+    def init(dir: str|None = None) -> Self:
         """ 
         Инициализирует папку для работы с контестом.\n
         @param dir: Директория для инициализации. Если dir = None,
@@ -28,7 +27,7 @@ class ContestEnv:
         EnvDataStorage.init(envDir=dir)
         return ContestEnv(dir)
     
-    def sgetTaskFilePath(self, taskId: str, lang: Language):
+    def getTaskFilePath(self, taskId: str, lang: Language):
         return os.path.join(self.dir, taskId + lang.defaultfileExtension)
 
     def clearTaskFiles(self):
@@ -46,9 +45,8 @@ class ContestEnv:
         """ Смена контеста в рабочей директории. """
 
         self.clearTaskFiles()
-        ContestInterface().selectContest(contest.id)
 
-        for task in contest.tasks:
+        for task in contest.getTasks():
             path = self.getTaskFilePath(task.id, contest.lang)
             with open(path, "w") as f:
                 f.write(contest.lang.comment + " " + task.name + "\n")
@@ -56,7 +54,7 @@ class ContestEnv:
         self.storage.saveContest(contest)
 
     @staticmethod
-    def inCurrentDir() -> ContestEnv:
+    def inCurrentDir() -> Self:
         """ 
         Проверяет, что рабочая (текущая) директория инициализирована
         и возвращает экземплер ContestEnv.

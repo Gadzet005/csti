@@ -7,6 +7,8 @@ from csti.etc.settings import BASE_DIR
 
 
 class ILanguage(enum.Enum):
+    """ Интерфейс перечисления языков программирования. """
+
     @classmethod
     def fromName(cls, name: str) -> Self|None:
         """ Получить язык по имени. Возвращает None, если такого нет. """
@@ -56,10 +58,10 @@ class ILanguage(enum.Enum):
     def availableformatStyles(self) -> list[str]:
         return self.value.get("availableformatStyles", [])
 
-
+ 
 class Language(ILanguage):
     """ 
-    Перечисление языков программирования.
+    Перечисление языков программирования по умолчанию.
     -------------------------------------
     Атрибуты:
     - id (int):									Идентификатор.

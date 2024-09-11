@@ -22,41 +22,44 @@ class ContestParser(object):
         return sessionIdMatches[0]
 
     @staticmethod
-    def getContestInfo(html: bytes, name: str, contestLocalId: int) -> dict:
+    def getContestInfo(html: bytes, name: str, contestLocalId: int) -> dict|None:
         """
         Возвращает информацию о контесте:
-        - "isValid": bool,
         - "contestGlobalId": int,
-        - "tasks": list[int]
+        - "taskIds": list[int]
+        Возвращает None, если не парсинг не удался.
         """
 
         soup = BeautifulSoup(html, ContestParser.TYPE)
         tabcontent = soup.find("div", id=f"block_hw{contestLocalId}")
         if tabcontent is None:
-            return { "isValid": False }
+            return
         
         contestButton = tabcontent.find("a", class_="button")
         if contestButton is None:
-            raise CantParseElement("contestButton") 
+            return
 
         contestIdMatches = re.findall(r"Контест (\d{4})", contestButton.text)
         if contestIdMatches is not None and len(contestIdMatches) == 1:
             contestId = int(contestIdMatches[0])
         else:
-            return { "isValid": False }
+            return
 
         homeworksMathes = tabcontent.find_all("td", string=re.compile(name))
         if homeworksMathes is None or len(homeworksMathes) != 1:
-            raise CantParseElement("homework")
+            return
         
         tasks = list()
         for taskId in homeworksMathes[0].parent.find_all(string=re.compile(r"\d")):
-            tasks.append(int(taskId))
+            if taskId.startswith("R"):
+                # Reversed задачи имеют id 100 + их локальный id (без R)
+                tasks.append(int(taskId[1:]) + 100)
+            else:
+                tasks.append(int(taskId))
 
         return {
-            "isValid": True,
             "contestGlobalId": contestId,
-            "tasks": tasks,
+            "taskIds": tasks,
         }
     
     @staticmethod

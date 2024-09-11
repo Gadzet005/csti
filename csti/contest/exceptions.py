@@ -2,6 +2,7 @@ class APIException(Exception): pass
 class AuthException(APIException): pass
 
 class ContestException(Exception): pass
+class TaskException(Exception): pass
  
 class ParserError(Exception): pass
 

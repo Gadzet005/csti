@@ -6,5 +6,3 @@ class EjudjeLanguage(ILanguage):
         **Language.nasm.value,
         "id": 50,
     }
-     
-    c = Language.c.value

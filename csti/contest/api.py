@@ -1,27 +1,34 @@
 import abc
 
-from csti.etc.language import Language
+from csti.etc.language import ILanguage, Language
 
 
 class ContestSystemAPI(abc.ABC):
     """ Делает запросы на сервер и обрабатывает результаты. """
     
     """ Перечисление языков программирования. """
-    Lang = Language
+    Lang: ILanguage = Language
 
     @abc.abstractmethod
-    def getContestInfo(self, contestId: int) -> dict:
+    def getContestIds(cls) -> list[int]:
+        """ Возращает список id контестов. """
+        pass
+
+    @abc.abstractmethod
+    def getContestInfo(self, contestId: int) -> dict|None:
         """ 
         Информация о контесте.
         ------------------------------------------------------------
         - name (str):                       Название контеста.
-        - tasks (list[Task]):               Список задач.
+        - taskIds (list[int]):              Список id задач.
         - other (dict):                     Специфичная для api информация.
+
+        Если контест с таким id не найден, то возвращается None.
         """
         pass
 
     @abc.abstractmethod
-    def getTaskInfo(self, taskId: int) -> dict:
+    def getTaskInfo(self, taskId: int) -> dict|None:
         """ 
         Информация о задаче.
         -------------------------------------------------------------------------------
@@ -44,10 +51,16 @@ class ContestSystemAPI(abc.ABC):
         - restrictions (str):                       Ограничения в задаче.
         - isSolved (bool):                          Решена ли задача?
         - other (dict):                             Специфичная для api информация.
+        - languageIds (list):                       id языков, доступных в этой задаче.
+
+        Если задание с таким id не найдено, то возвращается None.
         """
         pass
 
     @abc.abstractmethod
-    def sendTaskSolution(self, taskId: int, code: str, languageId: int):
-        """ Отправка решения задачи. """
+    def sendTaskSolution(self, taskId: int, code: str, languageId: int) -> bool:
+        """ 
+        Отправка решения задачи.
+        Возвращает True, если решение успешно отправлено, иначе False.
+        """
         pass

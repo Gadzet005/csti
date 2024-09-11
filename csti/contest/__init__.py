@@ -1,5 +1,5 @@
+from .manager import ContestManager
+from .api import ContestSystemAPI
 from .contest import Contest
-from .ejudje.parser.contest import ContestParser
-from .ejudje.parser.task import TaskParser
-from .solution import Solution, SolutionStatus
 from .task import Task
+from .solution import Solution, SolutionStatus

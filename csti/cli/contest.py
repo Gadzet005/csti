@@ -4,9 +4,9 @@ from InquirerPy import inquirer
 from csti.cli.cli import cli
 from csti.cli.print import cprint
 from csti.config import GlobalConfig
-from csti.etc.settings import CliConsts
 from csti.contest import Contest, ContestInterface
 from csti.contest_env import ContestEnv
+from csti.etc.contest_group import getGroup
 
 
 @cli.group("contest", help="Работа с контестом.")

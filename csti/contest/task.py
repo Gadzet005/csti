@@ -1,4 +1,6 @@
 from csti.contest.api import ContestSystemAPI
+from csti.contest.exceptions import APIException, TaskException
+from csti.etc.language import ILanguage
 from csti.program_view import ProgramView
 
 
@@ -12,47 +14,73 @@ class Task:
         return self._id
     
     @property
+    def _info(self) -> dict:
+        return self._api.getTaskInfo(self._id)
+    
+    @property
+    def isValid(self) -> bool:
+        return self._info is not None
+    
+    @property
+    def info(self) -> dict:
+        if not self.isValid:
+            raise TaskException("Попытка обращения к полям невалидной задачи.")
+        return self._info
+    
+    @property
     def name(self) -> str:
-        return self._api.getTaskInfo(self._id)["name"]
+        return self.info["name"]
     
     @property
     def description(self) -> str:
-        return self._api.getTaskInfo(self._id)["description"]
+        return self.info["description"]
     
     @property
     def inputFormat(self) -> str:
-        return self._api.getTaskInfo(self._id)["inputFormat"]
+        return self.info["inputFormat"]
     
     @property
     def outputFormat(self) -> str:
-        return self._api.getTaskInfo(self._id)["outputFormat"]
+        return self.info["outputFormat"]
     
     @property
     def inputExample(self) -> list[tuple[str, str]]:
-        return self._api.getTaskInfo(self._id)["inputExample"]
+        return self.info["inputExample"]
     
     @property
     def timeout(self) -> int:
-        return self._api.getTaskInfo(self._id)["timeout"]
+        return self.info["timeout"]
     
     @property
     def memoryLimit(self) -> int:
-        return self._api.getTaskInfo(self._id)["memoryLimit"]
+        return self.info["memoryLimit"]
     
     @property
     def remainingAttempts(self) -> int:
-        return self._api.getTaskInfo(self._id)["remainingAttempts"]
+        return self.info["remainingAttempts"]
     
     @property
     def solutions(self) -> list:
-        pass
+        return self.info["solutions"]
 
     @property
     def isSolved(self) -> bool:
-        return self._api.getTaskInfo(self._id)["isSolved"]
+        return self.info["isSolved"]
     @property
     def restrictions(self) -> str:
-        return self._api.getTaskInfo(self._id)["restrictions"]
+        return self.info["restrictions"]
+    
+    @property
+    def languageIds(self) -> list:
+        return self.info["languageIds"]
+
+    @property
+    def language(self) -> ILanguage:
+        langId = self.languageIds[0]
+        lang = self._api.Lang.fromId(langId)
+        if lang is None:
+            raise APIException(f"Неизвестный язык с id={langId}")
+        return lang
 
     def sendSolution(self, solution: ProgramView):
         self._api.sendTaskSolution(self._id, solution)

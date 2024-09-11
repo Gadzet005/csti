@@ -51,4 +51,4 @@ class format:
 def run(program: ProgramView) -> str:
     """ Запускает программу и возвращает её вывод. """
     with prepareForRun(program):
-           return program.run()
+        return program.run()

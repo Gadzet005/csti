@@ -5,12 +5,10 @@ from typing import Any
 import yaml
 from platformdirs import user_config_dir
 
+from csti.config.utils import configField
 from csti.etc.locale import Locale
 from csti.etc.settings import APP_NAME
 from csti.etc.utils import Singleton
-
-from csti.config.utils import configField
-
 
 appConfigDir = user_config_dir(APP_NAME)
 globalConfigPath = f"{appConfigDir}/config.yaml"
@@ -86,6 +84,7 @@ class Config(metaclass=Singleton):
         data[key] = value
 
 
+@configField("contest-system", str)
 @configField("login", str, nestedIn=["user"])
 @configField("password", str, nestedIn=["user"])
 @configField("name", str, nestedIn=["user"])
