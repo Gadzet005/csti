@@ -1,7 +1,7 @@
 import abc
 from typing import Any, Type, override
 
-from csti.data_storage.template import TemplateMember
+from csti.data_storage.template_member import TemplateMember
 
 
 class Field(abc.ABC, TemplateMember):
