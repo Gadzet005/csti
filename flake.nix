@@ -1,42 +1,34 @@
 {
-	inputs = {
-		nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-		poetry2nix = {
-			url = "github:nix-community/poetry2nix";
-			inputs.nixpkgs.follows = "nixpkgs";
-		};
-	};
+  description = "";
 
-	outputs = { self, nixpkgs, poetry2nix }: let
-		supportedSystems = [
-			"x86_64-linux"
-			"x86_64-darwin"
-			"aarch64-linux"
-			"aarch64-darwin"
-		];
-		forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-		pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
-	
-	in
-	{
-		packages = forAllSystems (system: let
-			inherit (poetry2nix.lib.mkPoetry2Nix { pkgs = pkgs.${system}; }) mkPoetryApplication;
-		
-		in {
-			csti = mkPoetryApplication { projectDir = self; };
-			default = self.packages.${system}.csti;
-		});
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    treefmt-nix.url = "github:numtide/treefmt-nix";
 
-		devShells = forAllSystems (system: let
-			inherit (poetry2nix.lib.mkPoetry2Nix { pkgs = pkgs.${system}; }) mkPoetryEnv;
-		
-		in {
-			default = pkgs.${system}.mkShellNoCC {
-				packages = with pkgs.${system}; [
-					(mkPoetryEnv { projectDir = self; })
-					poetry
-				];
-			};
-		});
-	};
+    poetry2nix = {
+      url = "github:nix-community/poetry2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
+
+      imports = [
+        inputs.treefmt-nix.flakeModule
+
+        ./nix/dev_shells.nix
+        ./nix/packages.nix
+        ./nix/templates.nix
+        ./nix/treefmt.nix
+      ];
+    };
 }
