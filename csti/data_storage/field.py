@@ -61,25 +61,25 @@ class BoolField(TypeField):
 
 
 class ListField(Field):
-    SEPARATOR = ", "
-
     def __init__(
             self, 
             name: str, 
             memberField: Type[Field]=StringField,
+            separator: str = ", ",
             defaultValue=None
         ):
         super().__init__(name, defaultValue)
         self._memberField = memberField(name="")
+        self._separator = separator
 
     @override
     def serialize(self, value: list[Any]):
-        return self.SEPARATOR.join([
+        return self._separator.join([
             self._memberField.serialize(item) for item in value
         ])
     
     @override
     def deserialize(self, value):
         return [
-            self._memberField.deserialize(item) for item in value.split(self.SEPARATOR)
+            self._memberField.deserialize(item) for item in value.split(self._separator)
         ]

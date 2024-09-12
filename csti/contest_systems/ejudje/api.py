@@ -43,8 +43,7 @@ class EjudjeAPI(ContestSystemAPI):
         contestInfo = self.getContestInfo()
         if contestInfo is None:
             raise AuthException(
-                "Не удалось получить доступ к информации о контесте. "
-                "Проверьте home-url."
+                f"Не удалось получить доступ к контесту (id={self._contestId})."
             )
         contestGlobalId = str(contestInfo["other"]["globalId"])
         
@@ -147,7 +146,7 @@ class EjudjeAPI(ContestSystemAPI):
             "inputExample": inputExample,
             "timeLimit": int(info["Ограничение времени"][:-2]),
             "memoryLimit": int(info["Ограничение памяти"][:-1]),
-            "remainingAttemps": int(info["Оставшиеся посылки"]),
+            "remainingAttempts": int(info["Оставшиеся посылки"]),
             "isSolved": False,
             "solutions": solutions,
             "languageIds": [self.Lang.nasm.id],

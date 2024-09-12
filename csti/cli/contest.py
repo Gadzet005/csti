@@ -3,10 +3,9 @@ from InquirerPy import inquirer
 
 from csti.cli.cli import cli
 from csti.cli.print import cprint
-from csti.config import GlobalConfig
-from csti.contest import Contest, ContestInterface
+from csti.contest import Contest
 from csti.contest_env import ContestEnv
-from csti.etc.contest_group import getGroup
+from csti.contest_systems import getManager
 
 
 @cli.group("contest", help="Работа с контестом.")
@@ -15,63 +14,46 @@ def contest():
 
 
 @contest.command("select", help="Выбрать контест.")
-@click.argument("local-id", type=int, required=False)
-def select(local_id: int|None = None):
+@click.argument("id", type=int, required=False)
+@click.option(
+    "-f", "--force", default=False, is_flag=True,
+    help="Выбирает контест, даже если он уже выбран (обновляет данные)."
+)
+def select(id: int|None, force: bool):
     env = ContestEnv.inCurrentDir()
+    manager = getManager()
+    contest = manager.getContest(id) if id is not None else None
 
-    homework = None
-    homeworkIds = ContestInterface().getAvailableHomeworkIds()
-    if local_id and local_id in homeworkIds:
-        homework = ContestInterface().getHomework(GlobalConfig().name, local_id)
-        if homework[0] == "-1":
-            cprint.warning("Warning: Выбран не допустимый контест.")
-            return
+    if contest is None or not contest.isValid:
+        if contest is not None:
+            cprint.warning("Контест с таким id отсутствует. Выберите из списка.")
 
-        # NOTE: Заглушка, убирает не работающий пока что status.
-        homeworkAdapter = (homework[0], list())
-        for i in range(0, len(homework[1])):
-            homeworkAdapter[1].append(homework[1][i][0]) 
-        homework = homeworkAdapter
+        contests = manager.getContests()
+        contestNames = [contest.name for contest in contests]
 
-    else:
-        if local_id:
-            cprint.warning("Warning: Контест отсутствует. Выберите из списка.")
-
-        homeworks = list()
-        lastElementIndex = 0
-        for index in homeworkIds:
-            homework = ContestInterface().getHomework(GlobalConfig().name, index)
-            
-            # NOTE: Заглушка, убирает не работающий пока что status.
-            homeworkAdapter = (homework[0], list())
-            for i in range(0, len(homework[1])):
-                homeworkAdapter[1].append(homework[1][i][0]) 
-            homework = homeworkAdapter
-            
-            if homework[0] == "-1":
-                homeworks.append(CliConsts.NO_CONTEST_SUPPORT)
-                continue
-            
-            homeworks.append(homework)
-            lastElementIndex = len(homeworks)
-
-        homework = inquirer.rawlist(
+        contestIdx = inquirer.rawlist(
             message = "Контест:",
-            choices = homeworks,
-            default = lastElementIndex,
-            validate = lambda result: result != CliConsts.NO_CONTEST_SUPPORT,
-            invalid_message = "Не поддерживается!",
+            choices = [contest.name for contest in contests],
             vi_mode = True,
+            filter=lambda x: contestNames.index(x)
         ).execute()
-    
-    contestId, tasks = homework
-    
-    currentContestId = env.storage.get("contest", "id", default=None)
-    if currentContestId and currentContestId == contestId:
-        cprint.warning("Этот контест уже выбран.")
-        return
-    
-    contest = Contest(contestId, tasks)
-    env.selectContest(contest)
 
+        contest = contests[contestIdx]
+    
+    if not force:
+        currentContestId = env.storage.get("contest", "id", default=None)
+        if currentContestId is not None and currentContestId == contest.id:
+            cprint.warning("Этот контест уже выбран.")
+            return
+    
+    env.selectContest(contest)
     cprint.success(f"Контест успешно выбран.")
+
+@contest.command("info", help="Информация о текущем контесте.")
+def showInfo():
+    env = ContestEnv.inCurrentDir()
+    contest = env.storage.loadContest()
+
+    cprint.primary(contest.name)
+    for task in contest.getTasks():
+        cprint.text("-", task.name)

@@ -4,20 +4,21 @@ import os
 from typing import Any, override
 
 from csti.etc.settings import APP_NAME
-from csti.contest import Contest
+from csti.contest import Contest, Task
 from csti.contest_env.exceptions import EnvStorageException
 from csti.data_storage import DataStorage, Group, StorageTemplate
 from csti.data_storage.exceptions import FieldNotInitialized
-from csti.data_storage.field import ListField, StringField
+from csti.data_storage.field import IntField, ListField
+from csti.contest_systems import getManager
 
 
 class EnvDataStorage(DataStorage):
     FOLDER = "." + APP_NAME
     template = StorageTemplate([
         Group("contest", [
-            StringField("id"),
-            StringField("currentTask"),
-            ListField("tasks")
+            IntField("id"),
+            IntField("currentTaskId"),
+            ListField("taskFiles", defaultValue=[], separator="\n"),
         ])
     ])
 
@@ -54,16 +55,17 @@ class EnvDataStorage(DataStorage):
         return self._dir
     
     def loadContest(self) -> Contest:
+        manager = getManager()
         try:
             id = self.get("contest", "id")
-            tasks = self.get("contest", "tasks")
-            currentTask = self.get("contest", "currentTask")
-            return Contest(id, tasks, currentTask)
+            return manager.getContest(id)
         except FieldNotInitialized:
             raise EnvStorageException("Контест не выбран.")
     
-    def saveContest(self, contest: Contest):
-        tasks = list(map(lambda x: x.id, contest.tasks))
-        self.set("contest", "id", value=contest.id)
-        self.set("contest", "tasks", value=tasks)
-        self.set("contest", "currentTask", value=contest.currentTask.id)
+    def loadCurrentTask(self) -> Task:
+        try:
+            contest = self.loadContest()
+            taskId = self.get("contest", "currentTaskId")
+            return contest.getTask(taskId)
+        except:
+            raise EnvStorageException("Задача не выбрана.")

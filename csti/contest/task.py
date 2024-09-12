@@ -25,7 +25,9 @@ class Task:
     @property
     def info(self) -> dict:
         if not self.isValid:
-            raise TaskException("Попытка обращения к полям невалидной задачи.")
+            raise TaskException(
+                f"Попытка обращения к полям невалидной задачи (id={self._id})."
+            )
         return self._info
     
     @property
@@ -49,8 +51,8 @@ class Task:
         return self.info["inputExample"]
     
     @property
-    def timeout(self) -> int:
-        return self.info["timeout"]
+    def timeLimit(self) -> int:
+        return self.info["timeLimit"]
     
     @property
     def memoryLimit(self) -> int:
@@ -84,4 +86,6 @@ class Task:
         return lang
 
     def sendSolution(self, solution: ProgramView):
-        self._api.sendTaskSolution(self._id, solution)
+        self._api.sendTaskSolution(
+            self._contestId, self._id, solution.code, solution.lang.id
+        )

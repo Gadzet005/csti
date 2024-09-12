@@ -20,39 +20,39 @@ def task():
 
 
 @task.command("select", help="Выбрать задачу.")
-@click.argument("task-id", type=str, required=False)
-def selectTask(task_id: str|None = None):
+@click.argument("id", type=int, required=False)
+def selectTask(id: int|None = None):
     env = ContestEnv.inCurrentDir()
     contest = env.storage.loadContest()
-    tasks = contest.tasks
+    task = contest.getTask(id) if id is not None else None
 
-    currentTask = task_id
-    if task_id is None or contest.getTask(task_id) is None:
-        if task_id:
+    if task is None or not task.isValid:
+        if task is not None:
             cprint.warning("Задача отсутствует. Выберите из списка.")
-
-        lastSucsess = 0
-        for task in tasks:
-            if task.solution and task.solution.status != SolutionStatus.accepted_for_review:
-                break
-            lastSucsess += 1
-        defaultTaskIdx = (lastSucsess + 1) % len(tasks)
         
+        tasks = contest.getTasks()
         taskNames = list(map(lambda task: task.name, tasks))
-        taskName = inquirer.rawlist(
+
+        taskIdx = inquirer.rawlist(
             message = "Задача: ",
             choices = taskNames,
-            default = defaultTaskIdx,
             vi_mode = True,
+            filter = lambda x: taskNames.index(x)
         ).execute()
 
-        currentTask = tasks[taskNames.index(taskName)].id
+        task = tasks[taskIdx]
+    
+    currentTaskId = env.storage.get("contest", "currentTaskId", default=None)
+    if currentTaskId is not None and currentTaskId == task.id:
+        cprint.warning("Эта задача уже выбрана.")
+        return
 
-    cprint.success(f"Задача успешно выбрана: {contest.getTask(currentTask).name}.")
-    env.storage.set("contest", "currentTask", value=currentTask)
+    env.createTaskFiles([task], update=True)
+    env.storage.set("contest", "currentTaskId", value=task.id)
+    cprint.success(f"Задача успешно выбрана: {task.name}.")
 
 
-@task.command("get", help="Показать информацию о выбранной задаче.")
+@task.command("info", help="Показать информацию о выбранной задаче.")
 @click.option(
     "-n", "--name", is_flag=True, default = False, 
     help="Показать название задачи."
@@ -73,13 +73,12 @@ def selectTask(task_id: str|None = None):
     "-s", "--solution", is_flag=True, default = False,
     help="Показать последнее отправленное решение."
 )
-def getTask(
+def showInfo(
     name: bool, info: bool, cond: bool, tests: bool,
     solution: bool
 ):	
     env = ContestEnv.inCurrentDir()
-    contest = env.storage.loadContest()
-    task = contest.currentTask
+    task = env.storage.loadCurrentTask()
 
     flags = [name, info, cond, tests, solution]
     shouldPrintAll = not any(flags) or all(flags)
@@ -89,27 +88,29 @@ def getTask(
         taskPrint.primary(task.name, end="\n\n")
 
     if info or shouldPrintAll:
-        for key, value in task.info.items():
-            taskPrint.info(f"{key}: {value}")
+        taskPrint.info(f"Ограничение по времени: {task.timeLimit} c")
+        taskPrint.info(f"Ограничение по памяти: {task.memoryLimit} MB")
+        taskPrint.info(f"Осталось посылок: {task.remainingAttempts}")
         taskPrint()
 
     if cond or shouldPrintAll:
-        taskPrint(task.condition, end="\n\n")
+        taskPrint(task.description, end="\n\n")
 
     if tests or shouldPrintAll:
-        for input, output in task.tests:
+        for input, output in task.inputExample:
             taskPrint.info(f"Входные данные:")
             taskPrint(input)
             taskPrint.info(f"Результат:")
             taskPrint(output)
             taskPrint()
 
-    if (solution or shouldPrintAll) and task.solution:
-        taskPrint.primary("Последнее отправленное решение:")
-        taskPrint.byFlag(
-            f"{task.solution.status.value}. Тестов пройдено: {task.solution.testsPassed}",
-            flag=task.solution.status == SolutionStatus.accepted_for_review
-        )
+    if len(task.solutions) != 0:
+        taskPrint.primary("Отправленные решения:")
+        for solution in task.solutions:
+            taskPrint.info(f"ID: {solution["id"]}")
+            taskPrint.info(f"Статус: {solution["status"]}")
+            taskPrint.info(f"Тестов пройдено: {solution["testsPassed"]}")
+            taskPrint()
 
 
 @task.command("send", help="Отправить задачу на проверку.")
@@ -142,15 +143,16 @@ def sendTask(
     no_confirm: bool
 ):
     env = ContestEnv.inCurrentDir()
-    contest = env.storage.loadContest()
+    task = env.storage.loadCurrentTask()
     config = GlobalConfig()
 
     if file is None:
-        file = env.getTaskFilePath(contest.currentTask.id, contest.lang)
-        if os.path.exists(file):
-            cprint.info(f"Файл для отправки: '{os.path.basename(file)}'.")
+        file = env.getTaskFile(task)
+        path = os.path.join(env.dir, file)
+        if os.path.exists(path):
+            cprint.info(f"Файл для отправки: '{file}'.")
         else:
-            cprint.warning(f"Файл '{file}' не найден.")
+            cprint.warning(f"Файл по пути '{path}' не найден.")
             return
 
 
@@ -159,14 +161,14 @@ def sendTask(
     if not no_format:
         no_format = not config.enableAutoFormatting
 
-    contestLang = contest.lang
+    taskLang = task.language
     if lang != "auto":
-        contestLang = Language.fromName(lang)
-    if contestLang is None:
+        taskLang = Language.fromName(lang)
+    if taskLang is None:
         cprint.warning(f"Неизвестный язык программирования: {lang}.")
         return
 
-    program = ProgramView(file, contestLang)
+    program = ProgramView(file, taskLang)
 
     # Тестирование
     if not no_tests:
@@ -175,9 +177,9 @@ def sendTask(
             cprint.primary("Запуск тестов...")
             with prepareForRun(program):
                 testResults = program.test(
-                    contest.currentTask.tests,
-                    contest.currentTask.timeLimit,
-                    contest.currentTask.memoryLimit
+                    task.inputExample,
+                    task.timeLimit,
+                    task.memoryLimit,
                 )
                 allTestsPassed = testResults.arePassedAll
                 printTestResults(testResults)
@@ -195,18 +197,18 @@ def sendTask(
     if not no_confirm:
         shouldSendSolution = inquirer.confirm(
             "Вы уверены что хотите отправить решение на проверку? "
-            f"Оставшееся количество попыток: {contest.currentTask.remainingAttemps}.\n",
+            f"Оставшееся количество попыток: {task.remainingAttempts}.\n",
             default=False,
         ).execute()
 
     if shouldSendSolution:
         # Форматирование кода
         if no_format or len(program.lang.availableformatStyles) == 0:
-            contest.currentTask.sendSolution(program.code, program.lang.id)
+            task.sendSolution(program)
         else:
             cprint.primary("Форматирование кода...")
             with format(program, program.lang.availableformatStyles[0]) as formatted:
-                contest.currentTask.sendSolution(formatted.code, formatted.lang.id)
+                task.sendSolution(formatted)
         cprint.success("Решение успешно отправлено.")
     else:
         cprint.primary("Решение не было отправлено.")

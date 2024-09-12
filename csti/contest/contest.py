@@ -23,7 +23,9 @@ class Contest:
     @property
     def info(self) -> dict:
         if not self.isValid:
-            raise ContestException("Попытка обращения к полям невалидного контеста.")
+            raise ContestException(
+                f"Попытка обращения к полям невалидного контеста (id={self._id})."
+            )
         return self._info
 
     @property

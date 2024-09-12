@@ -1,10 +1,10 @@
-import os
-from typing import Self
+from __future__ import annotations
 
-from csti.contest import Contest
+import os
+
+from csti.contest import Contest, Task
 from csti.contest_env.data_storage import EnvDataStorage
-from csti.contest_env.exceptions import ContestEnvException, EnvStorageException
-from csti.etc.language import Language
+from csti.contest_env.exceptions import ContestEnvException
 
 
 class ContestEnv:
@@ -15,7 +15,7 @@ class ContestEnv:
         self._storage = EnvDataStorage(dir)
     
     @staticmethod
-    def init(dir: str|None = None) -> Self:
+    def init(dir: str|None = None) -> ContestEnv:
         """ 
         Инициализирует папку для работы с контестом.\n
         @param dir: Директория для инициализации. Если dir = None,
@@ -27,34 +27,54 @@ class ContestEnv:
         EnvDataStorage.init(envDir=dir)
         return ContestEnv(dir)
     
-    def getTaskFilePath(self, taskId: str, lang: Language):
-        return os.path.join(self.dir, taskId + lang.defaultfileExtension)
+    
+    def getTaskFile(self, task: Task) -> str:
+        return str(task.id) + task.language.defaultfileExtension
 
     def clearTaskFiles(self):
-        """ Очистка всех файлов с заданиями. """
-        try:
-            contest = self.storage.loadContest()
-            for task in contest.tasks:
-                path = self.getTaskFilePath(task.id, contest.lang)
-                if os.path.isfile(path):
-                    os.remove(path)
-        except EnvStorageException:
-            pass
+        """ Очистка файлов с заданиями. """
+
+        taskFiles = self.storage.get("contest", "taskFiles")
+        for file in taskFiles:
+            path = os.path.join(self.dir, file)
+            if os.path.isfile(path):
+                os.remove(path)
+    
+    def createTaskFiles(self, tasks: list[Task], update: bool = False):
+        """ 
+        Создает файлы для заданий в рабочей директории.
+        
+        @param tasks: Список заданий.
+        @param update: Дополнить существующие файлы (True) или перезаписать (False).
+        """
+
+        taskFiles = []
+        for task in tasks:
+            file = self.getTaskFile(task)
+            if os.path.exists(file):
+                continue
+
+            with open(os.path.join(self.dir, file), "w") as f:
+                f.write(task.language.comment + " " + task.name + "\n")
+                taskFiles.append(file)
+
+        if update:
+            taskFiles += self.storage.get("contest", "taskFiles")
+        self.storage.set("contest", "taskFiles", value=taskFiles)
 
     def selectContest(self, contest: Contest):
         """ Смена контеста в рабочей директории. """
 
-        self.clearTaskFiles()
+        tasks = contest.getTasks()
 
-        for task in contest.getTasks():
-            path = self.getTaskFilePath(task.id, contest.lang)
-            with open(path, "w") as f:
-                f.write(contest.lang.comment + " " + task.name + "\n")
-        
-        self.storage.saveContest(contest)
+        self.clearTaskFiles()
+        self.createTaskFiles(tasks)
+        self.storage.set("contest", "id", value=contest.id)
+        self.storage.set("contest", "currentTaskId", value=tasks[0].id)
+
 
     @staticmethod
-    def inCurrentDir() -> Self:
+    def inCurrentDir() -> ContestEnv:
         """ 
         Проверяет, что рабочая (текущая) директория инициализирована
         и возвращает экземплер ContestEnv.
