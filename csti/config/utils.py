@@ -1,8 +1,8 @@
-from typing import Callable, Type, Any
+from typing import Any, Callable, Type
 
 
 def configCaseToCamel(name: str) -> str:
-    """ Конвертирует camel-case в CamelCase. """
+    """Конвертирует camel-case в CamelCase."""
     words = name.split("-")
     return words[0] + "".join(word.capitalize() for word in words[1:])
 
@@ -10,13 +10,14 @@ def configCaseToCamel(name: str) -> str:
 def configField(
     name: str,
     type: Type,
-    nestedIn: list|None = None,
+    nestedIn: list | None = None,
     defaultValue: Any = None,
     serializer: Callable = lambda x: x,
-    deserializer: Callable = lambda x: x
+    deserializer: Callable = lambda x: x,
 ):
     """ 
-    Добавляет getter и setter для поля из конфига.\n
+    Добавляет getter и setter для поля из конфига.
+    ----------------------------------------------
     @param name: Имя поля в конфиге (в .yaml файле).
     @param type: Тип поля в конфиге.
     @param nestedIn: Список полей в которые данное поле вложено. \
@@ -32,7 +33,7 @@ def configField(
     def attr(self):
         raw = self.get(name, nestedIn, defaultValue)
         return serializer(type(raw))
-    
+
     @attr.setter
     def attr(self, value):
         self.set(name, type(deserializer(value)), nestedIn)
