@@ -1,13 +1,13 @@
 from functools import cache
-from typing import override, Self
+from typing import Self, override
 
 import requests
 
 from csti.config import GlobalConfig
 from csti.contest.api import ContestSystemAPI
+from csti.contest.exceptions import AuthException
 from csti.contest_systems.ejudje.language import EjudjeLanguage
 from csti.contest_systems.ejudje.parser import ContestParser, TaskParser
-from csti.contest.exceptions import AuthException
 
 
 class EjudjeAPI(ContestSystemAPI):
@@ -46,7 +46,7 @@ class EjudjeAPI(ContestSystemAPI):
                 f"Не удалось получить доступ к контесту (id={self._contestId})."
             )
         contestGlobalId = str(contestInfo["other"]["globalId"])
-        
+
         response = requests.post(
             self.REQUEST_URL,
             headers={
@@ -56,8 +56,8 @@ class EjudjeAPI(ContestSystemAPI):
                 "contest_id": contestGlobalId,
                 "login": login,
                 "password": password,
-                "locale_id": locale
-            }
+                "locale_id": locale,
+            },
         )
 
         sessionId = ContestParser.getSessionId(response.content)
@@ -70,13 +70,12 @@ class EjudjeAPI(ContestSystemAPI):
         self._sessionId = sessionId
         self._cookieSessionId = response.cookies.get("EJSID")
 
-
     @staticmethod
     @cache
     def _getHomePage() -> bytes:
         response = requests.get(GlobalConfig().homeUrl)
         return response.content
-    
+
     @cache
     def _getContestIds(self) -> list[int]:
         homePage = self._getHomePage()
@@ -86,9 +85,8 @@ class EjudjeAPI(ContestSystemAPI):
     def getContestIds(self) -> list[int]:
         return self._getContestIds()
 
-
     @cache
-    def _getContestInfo(self) -> dict|None:
+    def _getContestInfo(self) -> dict | None:
         homePage = self._getHomePage()
         name = GlobalConfig().name
 
@@ -101,25 +99,20 @@ class EjudjeAPI(ContestSystemAPI):
             "taskIds": info["taskIds"],
             "other": {
                 "globalId": info["contestGlobalId"],
-            }
+            },
         }
-    
+
     @override
-    def getContestInfo(self, *args) -> dict|None:
+    def getContestInfo(self, *args) -> dict | None:
         return self._getContestInfo()
 
-
     @cache
-    def _getTaskInfo(self, taskId: int) -> dict|None:
+    def _getTaskInfo(self, taskId: int) -> dict | None:
         session = self.getSession()
 
         response = session.get(
             self.REQUEST_URL,
-            params = {
-                "SID": self._sessionId,
-                "action": 139,
-                "prob_id": taskId
-            }
+            params={"SID": self._sessionId, "action": 139, "prob_id": taskId},
         )
 
         html = response.content
@@ -131,15 +124,17 @@ class EjudjeAPI(ContestSystemAPI):
         inputExample = TaskParser.getTests(html)
         info = TaskParser.getInfo(html)
         lastSolution = TaskParser.getLastSolution(html)
-        
+
         solutions = []
         if lastSolution:
-            solutions.append({
-                "id": lastSolution.id,
-                "status": lastSolution.status.value,
-                "testsPassed": lastSolution.testsPassed,
-            })
-        
+            solutions.append(
+                {
+                    "id": lastSolution.id,
+                    "status": lastSolution.status.value,
+                    "testsPassed": lastSolution.testsPassed,
+                }
+            )
+
         return {
             "name": name,
             "description": description,
@@ -153,17 +148,12 @@ class EjudjeAPI(ContestSystemAPI):
         }
 
     @override
-    def getTaskInfo(self, contestId: int, taskId: int) -> dict|None:
+    def getTaskInfo(self, contestId: int, taskId: int) -> dict | None:
         return self._getTaskInfo(taskId)
-
 
     @override
     def sendTaskSolution(
-        self, 
-        contestId: int, 
-        taskId: int, 
-        code: str, 
-        languageId: int
+        self, contestId: int, taskId: int, code: str, languageId: int
     ) -> bool:
         session = self.getSession()
 
@@ -177,8 +167,8 @@ class EjudjeAPI(ContestSystemAPI):
                 "prob_id": taskId,
                 "lang_id": languageId,
                 "file": code,
-                "action_40": ""
-            }
+                "action_40": "",
+            },
         )
 
         # TODO: Сделать проверку.

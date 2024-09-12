@@ -1,8 +1,8 @@
 import abc
 from typing import Type
 
-from csti.contest.contest import Contest
 from csti.contest.api import ContestSystemAPI
+from csti.contest.contest import Contest
 
 
 class ContestManager(abc.ABC):

@@ -25,20 +25,20 @@ class Config(metaclass=Singleton):
 
     @staticmethod
     def createDefaultConfig():
-        """ Генерация конфигурационного файла из шаблона. """
+        """Генерация конфигурационного файла из шаблона."""
         shutil.copytree(configTemplateDir, appConfigDir, dirs_exist_ok=True)
 
     def load(self):
-        """ Получение данных из конфигурационного файла."""
+        """Получение данных из конфигурационного файла."""
         with open(globalConfigPath, "r") as file:
             self._data = yaml.safe_load(file)
 
     def save(self):
-        """ Сохранение данных в конфигурационный файл. """
+        """Сохранение данных в конфигурационный файл."""
         with open(globalConfigPath, "w") as file:
             yaml.dump(self._data, file, allow_unicode=True, sort_keys=False)
 
-    def _pull(self, key: str, nestedIn: list|None):
+    def _pull(self, key: str, nestedIn: list | None):
         if nestedIn is None:
             nestedIn = []
 
@@ -47,21 +47,17 @@ class Config(metaclass=Singleton):
             data = data.get(name)
             if data is None:
                 break
-        
+
         if data is None or key not in data:
             field = ".".join(nestedIn + [key])
             raise KeyError(f"Поле {field} не найдено в глобальном конфиге")
-        
+
         return data
 
-    def get(
-        self, 
-        key: str, 
-        nestedIn: list|None = None, 
-        defaultValue: Any = None
-    ):
+    def get(self, key: str, nestedIn: list | None = None, defaultValue: Any = None):
         """ 
-        Получение значения поля в конфиге.\n
+        Получение значения поля в конфиге.
+        ----------------------------------
         @param key: Имя поля в конфиге.
         @param nestedIn: Список полей в которые данное поле вложено.
         Например для user.info.login: nestedIn = [user, info].
@@ -77,8 +73,8 @@ class Config(metaclass=Singleton):
                 raise error
             return defaultValue
 
-    def set(self, key: str, value, nestedIn: list|None = None):
-        """ Выставление значения поля в конфиге. Работает по аналогии с get. """
+    def set(self, key: str, value, nestedIn: list | None = None):
+        """Выставление значения поля в конфиге. Работает по аналогии с get."""
 
         data = self._pull(key, nestedIn)
         data[key] = value
@@ -90,17 +86,14 @@ class Config(metaclass=Singleton):
 @configField("name", str, nestedIn=["user"])
 @configField("home-url", str)
 @configField(
-    "locale", str,
+    "locale",
+    str,
     serializer=lambda x: Locale[x],
     deserializer=lambda x: x.name,
-    defaultValue=Locale.russian
+    defaultValue=Locale.russian,
 )
-@configField(
-    "enable-auto-tests", bool, nestedIn=["features"], defaultValue=True
-)
-@configField(
-    "enable-auto-formatting", bool, nestedIn=["features"], defaultValue=True
-)
+@configField("enable-auto-tests", bool, nestedIn=["features"], defaultValue=True)
+@configField("enable-auto-formatting", bool, nestedIn=["features"], defaultValue=True)
 @configField("debug", bool, defaultValue=False)
 class GlobalConfig(Config):
     pass

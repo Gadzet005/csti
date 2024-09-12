@@ -7,24 +7,23 @@ from csti.etc.settings import BASE_DIR
 
 
 class ILanguage(enum.Enum):
-    """ Интерфейс перечисления языков программирования. """
+    """Интерфейс перечисления языков программирования."""
 
     @classmethod
-    def fromName(cls, name: str) -> Self|None:
-        """ Получить язык по имени. Возвращает None, если такого нет. """
+    def fromName(cls, name: str) -> Self | None:
+        """Получить язык по имени. Возвращает None, если такого нет."""
         try:
             return cls[name]
         except KeyError:
             return None
 
     @classmethod
-    def fromId(cls, id: int) -> Self|None:
-        """ Получить язык по id. Возвращает None, если такого нет. """
+    def fromId(cls, id: int) -> Self | None:
+        """Получить язык по id. Возвращает None, если такого нет."""
         for lang in cls:
             if lang.id == id:
                 return lang
         return None
-
 
     @property
     def id(self) -> int:
@@ -58,9 +57,9 @@ class ILanguage(enum.Enum):
     def availableformatStyles(self) -> list[str]:
         return self.value.get("availableformatStyles", [])
 
- 
+
 class Language(ILanguage):
-    """ 
+    """
     Перечисление языков программирования по умолчанию.
     -------------------------------------
     Атрибуты:
@@ -84,9 +83,7 @@ class Language(ILanguage):
         "availableFileExtensions": [".c"],
         "comment": "//",
         "makefile": "csti/etc/make/c/makefile",
-        "availableformatStyles": [
-            "msu-style"
-        ],
+        "availableformatStyles": ["msu-style"],
     }
 
     cpp = {
@@ -96,9 +93,7 @@ class Language(ILanguage):
         "availableFileExtensions": [".cpp", ".cxx"],
         "comment": "//",
         "makefile": "csti/etc/make/cpp/makefile",
-        "availableformatStyles": [
-            "msu-style"
-        ],
+        "availableformatStyles": ["msu-style"],
     }
 
     nasm = {

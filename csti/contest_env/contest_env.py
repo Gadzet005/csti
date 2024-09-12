@@ -8,42 +8,41 @@ from csti.contest_env.exceptions import ContestEnvException
 
 
 class ContestEnv:
-    """ Управляет папкой для работы с контестом. """
+    """Управляет папкой для работы с контестом."""
 
     def __init__(self, dir: str):
         self._dir = dir
         self._storage = EnvDataStorage(dir)
-    
+
     @staticmethod
-    def init(dir: str|None = None) -> ContestEnv:
-        """ 
+    def init(dir: str | None = None) -> ContestEnv:
+        """
         Инициализирует папку для работы с контестом.\n
         @param dir: Директория для инициализации. Если dir = None,
         то инициализирует текущую директорию.
         """
-        
+
         if dir is None:
             dir = os.getcwd()
         EnvDataStorage.init(envDir=dir)
         return ContestEnv(dir)
-    
-    
+
     def getTaskFile(self, task: Task) -> str:
         return str(task.id) + task.language.defaultfileExtension
 
     def clearTaskFiles(self):
-        """ Очистка файлов с заданиями. """
+        """Очистка файлов с заданиями."""
 
         taskFiles = self.storage.get("contest", "taskFiles")
         for file in taskFiles:
             path = os.path.join(self.dir, file)
             if os.path.isfile(path):
                 os.remove(path)
-    
+
     def createTaskFiles(self, tasks: list[Task], update: bool = False):
-        """ 
+        """
         Создает файлы для заданий в рабочей директории.
-        
+
         @param tasks: Список заданий.
         @param update: Дополнить существующие файлы (True) или перезаписать (False).
         """
@@ -63,7 +62,7 @@ class ContestEnv:
         self.storage.set("contest", "taskFiles", value=taskFiles)
 
     def selectContest(self, contest: Contest):
-        """ Смена контеста в рабочей директории. """
+        """Смена контеста в рабочей директории."""
 
         tasks = contest.getTasks()
 
@@ -72,10 +71,9 @@ class ContestEnv:
         self.storage.set("contest", "id", value=contest.id)
         self.storage.set("contest", "currentTaskId", value=tasks[0].id)
 
-
     @staticmethod
     def inCurrentDir() -> ContestEnv:
-        """ 
+        """
         Проверяет, что рабочая (текущая) директория инициализирована
         и возвращает экземплер ContestEnv.
         """
@@ -96,5 +94,5 @@ class ContestEnv:
 
     @property
     def isEnvValid(self) -> bool:
-        """ Инициализирована ли рабочая директория? """
+        """Инициализирована ли рабочая директория?"""
         return os.path.exists(self.storage.dir)

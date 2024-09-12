@@ -14,6 +14,6 @@ class SolutionStatus(Enum):
 
 @dataclass
 class Solution:
-	id: int
-	status: SolutionStatus
-	testsPassed: int
+    id: int
+    status: SolutionStatus
+    testsPassed: int

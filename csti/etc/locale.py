@@ -1,5 +1,6 @@
 import enum
 
+
 @enum.unique
 class Locale(enum.IntEnum):
     english = 0

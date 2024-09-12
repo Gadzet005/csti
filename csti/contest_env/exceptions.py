@@ -1,2 +1,6 @@
-class ContestEnvException(Exception): pass
-class EnvStorageException(ContestEnvException): pass
+class ContestEnvException(Exception):
+    pass
+
+
+class EnvStorageException(ContestEnvException):
+    pass

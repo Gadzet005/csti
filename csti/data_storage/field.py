@@ -15,23 +15,17 @@ class Field(abc.ABC, TemplateMember):
 
     @abc.abstractmethod
     def serialize(self, value) -> Any:
-        """ Объект для использования -> объект для хранения. """
+        """Объект для использования -> объект для хранения."""
         pass
 
     @abc.abstractmethod
     def deserialize(self, value) -> Any:
-        """ Объект для хранения -> объект для использования. """
+        """Объект для хранения -> объект для использования."""
         pass
 
 
 class TypeField(Field):
-    def __init__(
-            self,
-            name: str,
-            type: Type,
-            rawType: Type=str,
-            defaultValue=None
-        ):
+    def __init__(self, name: str, type: Type, rawType: Type = str, defaultValue=None):
         super().__init__(name, defaultValue)
         self._type = type
         self._rawType = rawType
@@ -62,22 +56,22 @@ class BoolField(TypeField):
 
 class ListField(Field):
     def __init__(
-            self, 
-            name: str, 
-            memberField: Type[Field]=StringField,
-            separator: str = ", ",
-            defaultValue=None
-        ):
+        self,
+        name: str,
+        memberField: Type[Field] = StringField,
+        separator: str = ", ",
+        defaultValue=None,
+    ):
         super().__init__(name, defaultValue)
         self._memberField = memberField(name="")
         self._separator = separator
 
     @override
     def serialize(self, value: list[Any]):
-        return self._separator.join([
-            self._memberField.serialize(item) for item in value
-        ])
-    
+        return self._separator.join(
+            [self._memberField.serialize(item) for item in value]
+        )
+
     @override
     def deserialize(self, value):
         return [

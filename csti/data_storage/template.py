@@ -1,6 +1,6 @@
-from csti.data_storage.template_member import TemplateMember
-from csti.data_storage.field import Field
 from csti.data_storage.exceptions import FieldNotFound
+from csti.data_storage.field import Field
+from csti.data_storage.template_member import TemplateMember
 
 
 class Group(TemplateMember):
@@ -13,7 +13,7 @@ class Group(TemplateMember):
 
 
 class StorageTemplate:
-    """ Шаблон хранилища. """
+    """Шаблон хранилища."""
 
     def __init__(self, members: list[TemplateMember]):
         self._rootGroup = Group("", members)
@@ -27,7 +27,7 @@ class StorageTemplate:
                 cur = cur.get(elem)
             except KeyError:
                 raise FieldNotFound(location)
-        
+
         if not isinstance(cur, Field):
             raise FieldNotFound(location)
 

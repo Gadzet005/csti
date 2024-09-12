@@ -2,6 +2,7 @@ from csti.cli import cli
 from csti.cli.print import cprint
 from csti.config import GlobalConfig
 
+
 def main():
     debug = GlobalConfig().debug
 

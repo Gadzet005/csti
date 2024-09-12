@@ -13,7 +13,7 @@ class Contest:
         return self._id
 
     @property
-    def _info(self) -> dict|None:
+    def _info(self) -> dict | None:
         return self._api.getContestInfo(self._id)
 
     @property

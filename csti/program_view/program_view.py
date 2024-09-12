@@ -11,8 +11,8 @@ from csti.program_view.utils import normalizeText
 
 
 class ProgramView:
-    """ 
-    Выполняет запуск, компиляцию, форматирование и 
+    """
+    Выполняет запуск, компиляцию, форматирование и
     тестирование программы на заданном языке.
     """
 
@@ -21,35 +21,38 @@ class ProgramView:
         self._filePath = filePath
         self._dir, self._file = os.path.split(filePath)
         self._fileName, self._fileExt = os.path.splitext(self._file)
-    
-    def _makeTargetCommand(
-        self, target: MakeTarget, **kwargs
-    ) -> list[str]:
-        """ Возвращает команду для запуска цели в makefile. """
+
+    def _makeTargetCommand(self, target: MakeTarget, **kwargs) -> list[str]:
+        """Возвращает команду для запуска цели в makefile."""
         return [
-            "make", target.value, "-f", self.lang.makefile, 
-            *[f"{key}={value}" for key, value in kwargs.items()]
+            "make",
+            target.value,
+            "-f",
+            self.lang.makefile,
+            *[f"{key}={value}" for key, value in kwargs.items()],
         ]
 
     def compile(self):
-        """ Компилирует программу. """
+        """Компилирует программу."""
 
         if not self.lang.isCompiledLanguage:
             return
 
         result: subprocess.CompletedProcess = subprocess.run(
             self._makeTargetCommand(
-                MakeTarget.compile, filePath=self.filePath,
-            ), capture_output=True
+                MakeTarget.compile,
+                filePath=self.filePath,
+            ),
+            capture_output=True,
         )
 
         if result.returncode != 0:
             self.clear()
             raise CompileError(result.stderr.decode())
-    
-    def run(self, input: str|None = None, timeout: str|None = None) -> str:
-        """ 
-        Запускает программу и возвращает её вывод. 
+
+    def run(self, input: str | None = None, timeout: str | None = None) -> str:
+        """
+        Запускает программу и возвращает её вывод.
         Если язык компилируемый, то требуется вызов метода compile.
         """
 
@@ -59,24 +62,26 @@ class ProgramView:
             result: subprocess.CompletedProcess = subprocess.run(
                 self._makeTargetCommand(
                     MakeTarget.run, filePath=self.filePath, outputFile=self._outputFile
-                ), 
-                capture_output=True, input=inputBuffer, timeout=timeout
+                ),
+                capture_output=True,
+                input=inputBuffer,
+                timeout=timeout,
             )
         except subprocess.TimeoutExpired:
             raise TimeoutError
 
         if result.returncode != 0:
             raise RunError(result.stderr.decode())
-        
+
         output = ""
-        with open(os.path.join(self._dir, self._outputFile), 'r') as file:
+        with open(os.path.join(self._dir, self._outputFile), "r") as file:
             output = file.read()
 
         return output
 
     def format(self, formatStyle: str) -> Self:
-        """ 
-        Выполняет форматирование программы, возвращает экземпляр 
+        """
+        Выполняет форматирование программы, возвращает экземпляр
         ProgramView для отформатированного файла.
         """
 
@@ -87,9 +92,12 @@ class ProgramView:
 
         result: subprocess.CompletedProcess = subprocess.run(
             self._makeTargetCommand(
-                MakeTarget.format, filePath=self.filePath, 
-                formattedFile=self._formattedFile, formatStyle=formatStyle
-            ), capture_output=True
+                MakeTarget.format,
+                filePath=self.filePath,
+                formattedFile=self._formattedFile,
+                formatStyle=formatStyle,
+            ),
+            capture_output=True,
         )
 
         if result.returncode != 0:
@@ -99,7 +107,7 @@ class ProgramView:
         return ProgramView(formattedPath, self.lang)
 
     def clear(self, clearSelf: bool = False):
-        """ 
+        """
         Очистка временных файлов.
 
         @param clearSelf: Требуется ли очистка самой программы?
@@ -107,9 +115,9 @@ class ProgramView:
 
         subprocess.run(
             self._makeTargetCommand(
-                MakeTarget.clear, filePath=self.filePath, 
-                outputFile=self._outputFile
-            ), capture_output=True
+                MakeTarget.clear, filePath=self.filePath, outputFile=self._outputFile
+            ),
+            capture_output=True,
         )
 
         if clearSelf:
@@ -117,14 +125,14 @@ class ProgramView:
 
     # TODO: добавить ограничение занимаемой памяти при выполнении теста.
     def test(
-            self, 
-            testCases: list[tuple[str, str]], 
-            timeLimit: int|None = None, 
-            memoryLimit: int|None = None
-        ) -> TestResultList:
+        self,
+        testCases: list[tuple[str, str]],
+        timeLimit: int | None = None,
+        memoryLimit: int | None = None,
+    ) -> TestResultList:
         """
         Запуск тестов. Если язык компилируемый, то требуется вызов метода compile.
-        
+
         @param testCases: [(вход, ожидаемый выход), ...].
         @param timeLimit: Максимальное время в секундах для выполнения теста.
         @param memoryLimit: Максимальное количество памяти в мегабайтах для выполнения теста.
@@ -140,42 +148,40 @@ class ProgramView:
                     results.append(TestStatus.ok)
                 else:
                     results.append(
-                        TestStatus.wrongAnswer, 
+                        TestStatus.wrongAnswer,
                         input=input,
                         output=output,
-                        expected=expected
+                        expected=expected,
                     )
             except RunError as error:
                 results.append(
                     TestStatus.runtimeError, input=input, message=error.__str__()
                 )
             except TimeoutError:
-                results.append(
-                    TestStatus.timeLimit, input=input
-                )
+                results.append(TestStatus.timeLimit, input=input)
 
         return results
 
     @property
     def filePath(self) -> str:
         return self._filePath
-    
+
     @property
     def lang(self) -> Language:
         return self._lang
 
     @property
     def code(self) -> str:
-        """ Код программы. """
-        with open(self.filePath, 'r') as file:
+        """Код программы."""
+        with open(self.filePath, "r") as file:
             return file.read()
 
     @property
     def _outputFile(self) -> str:
-        """ Куда будут сохранены выходные данные? """
+        """Куда будут сохранены выходные данные?"""
         return self._fileName + "-out"
 
     @property
     def _formattedFile(self) -> str:
-        """ Файл после форматирования программы."""
+        """Файл после форматирования программы."""
         return self._fileName + "-fmt" + self._fileExt

@@ -2,8 +2,8 @@ import os
 import unittest
 
 from csti.config import GlobalConfig
-from csti.contest.old_contest import Contest
 from csti.contest.contest_interface import ContestInterface
+from csti.contest.old_contest import Contest
 
 
 # NOTE: Тестировать только при рабочем config.
@@ -20,7 +20,7 @@ class TestContest(unittest.TestCase):
                 continue
 
             tasksId = list(range(1, 13))
-            contest = Contest(id, [ str(taskId) for taskId in tasksId])
+            contest = Contest(id, [str(taskId) for taskId in tasksId])
             for taskLocalId in range(1, len(tasksId) + 1):
                 contest.selectTask(taskLocalId)
                 task = contest.currentTask
@@ -33,5 +33,5 @@ class TestContest(unittest.TestCase):
                     input_ = input("Skip next ask: yes/no(default): ")
                     if input_ == "yes" or input_ == "y":
                         isSkipNext = True
-                    
+
                 os.system("clear")

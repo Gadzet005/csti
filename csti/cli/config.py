@@ -29,32 +29,30 @@ def setup():
     password = inquirer.secret(
         "Пароль: ", transformer=lambda res: "*" * len(res or config.password)
     ).execute()
-    if password: config.password = password
+    if password:
+        config.password = password
 
     name = inquirer.text("Фамилия: ", default=config.name).execute().capitalize()
     config.name = name
 
     homeUrl = inquirer.text("URL домашней страницы: ", default=config.homeUrl).execute()
     config.homeUrl = homeUrl
-    
+
     localeName = inquirer.select(
         "Выберите язык:",
         choices=list(map(lambda x: x.name, Locale)),
-        default=config.locale.name, vi_mode=True
+        default=config.locale.name,
+        vi_mode=True,
     ).execute()
     config.locale = Locale[localeName]
 
     featureChoices = [
+        Choice("enable-auto-tests", "Включить авто тесты", config.enableAutoTests),
         Choice(
-            "enable-auto-tests", 
-            "Включить авто тесты", 
-            config.enableAutoTests
+            "enable-auto-formatting",
+            "Включить авто форматирование",
+            config.enableAutoFormatting,
         ),
-        Choice(
-            "enable-auto-formatting", 
-            "Включить авто форматирование", 
-            config.enableAutoFormatting
-        )
     ]
     enabledFeatures = inquirer.checkbox(
         message="Настройка функций.", choices=featureChoices, vi_mode=True

@@ -1,19 +1,19 @@
 from csti.cli.print import cprint
-from csti.program_view.test_result import TestStatus, TestResultList
+from csti.program_view.test_result import TestResultList, TestStatus
 
 
 def printTestResults(testResults: TestResultList):
-    """ Выводит результаты тестирования программы """
+    """Выводит результаты тестирования программы"""
 
     cprint.byFlag(
-        f"Пройдено тестов: {testResults.passed} из {testResults.total}.", 
-        flag=testResults.arePassedAll
+        f"Пройдено тестов: {testResults.passed} из {testResults.total}.",
+        flag=testResults.arePassedAll,
     )
 
     for idx, testResult in enumerate(testResults, 1):
         cprint.byFlag(
             f"[{idx}/{testResults.total}] {testResult.status.value}",
-            flag=testResult.status == TestStatus.ok
+            flag=testResult.status == TestStatus.ok,
         )
 
         match testResult.status:

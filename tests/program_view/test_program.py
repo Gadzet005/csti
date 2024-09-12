@@ -10,32 +10,22 @@ class TestProgram(unittest.TestCase):
 
     def setUp(self):
         self.divide = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "divide.cpp"), 
-            Language.cpp
+            os.path.join(self.PROGRAMS_DIR, "divide.cpp"), Language.cpp
         )
-        self.add = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "add.c"), 
-            Language.c
-        )
+        self.add = ProgramView(os.path.join(self.PROGRAMS_DIR, "add.c"), Language.c)
         self.compileError = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "compile_error.c"), 
-            Language.c
+            os.path.join(self.PROGRAMS_DIR, "compile_error.c"), Language.c
         )
         self.some_code = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "some_code.cpp"), 
-            Language.cpp
+            os.path.join(self.PROGRAMS_DIR, "some_code.cpp"), Language.cpp
         )
         self.some_code_expected = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "some_code_expected.cpp"), 
-            Language.cpp
+            os.path.join(self.PROGRAMS_DIR, "some_code_expected.cpp"), Language.cpp
         )
-        self.cicle = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "cicle.c"), 
-            Language.c
-        )
+        self.cicle = ProgramView(os.path.join(self.PROGRAMS_DIR, "cicle.c"), Language.c)
 
     def testCompile(self):
-        """ Тестирование компиляции. """
+        """Тестирование компиляции."""
 
         program = ProgramView("don't exists", Language.c)
         with self.assertRaises(CompileError):
@@ -47,12 +37,12 @@ class TestProgram(unittest.TestCase):
 
         with self.assertRaises(CompileError):
             self.compileError.compile()
-        
+
         with prepareForRun(self.add):
             pass
 
     def testCAddProgram(self):
-        """ Компиляция и запуск программы, складывающей два числа. """
+        """Компиляция и запуск программы, складывающей два числа."""
 
         with self.assertRaises(RunError):
             self.add.run()
@@ -68,7 +58,7 @@ class TestProgram(unittest.TestCase):
         self.add.clear()
 
     def testCppDivideProgram(self):
-        """ Компиляция и запуск программы, делящей два числа. """
+        """Компиляция и запуск программы, делящей два числа."""
 
         with self.assertRaises(RunError):
             self.divide.run()
@@ -78,7 +68,7 @@ class TestProgram(unittest.TestCase):
             self.assertEqual(output, "2\n")
             output = self.divide.run("18 -3")
             self.assertEqual(output, "-6\n")
-        
+
             with self.assertRaises(RunError):
                 self.divide.run("10 0")
 
@@ -87,7 +77,7 @@ class TestProgram(unittest.TestCase):
         self.divide.clear()
 
     def testFormat(self):
-        """ Тестирование форматирования программы. """
+        """Тестирование форматирования программы."""
 
         program = ProgramView(self.some_code.filePath, Language.nasm)
         with self.assertRaises(FormatError):
@@ -101,11 +91,11 @@ class TestProgram(unittest.TestCase):
             originalOutput = run(program)
             formattedOutput = run(formatted)
             self.assertEqual(originalOutput, formattedOutput)
-                
+
             self.assertEqual(self.some_code_expected.code, formatted.code)
 
     def testProgramTest(self):
-        """ Тестирование запуска тестов для программы """
+        """Тестирование запуска тестов для программы"""
 
         testCases = [
             ("10 5", "2"),
@@ -123,9 +113,9 @@ class TestProgram(unittest.TestCase):
             self.assertEqual(results[1].status, TestStatus.ok)
             self.assertEqual(results[2].status, TestStatus.wrongAnswer)
             self.assertEqual(results[3].status, TestStatus.runtimeError)
-    
+
     def testTimeout(self):
-        """ Тестирование превышения времени ожидания"""
+        """Тестирование превышения времени ожидания"""
 
         with prepareForRun(self.cicle):
             with self.assertRaises(TimeoutError):
