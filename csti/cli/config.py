@@ -4,7 +4,7 @@ from InquirerPy.base.control import Choice
 from csti.cli.cli import cli
 from csti.cli.print import cprint
 from csti.config import GlobalConfig
-from csti.consts import Locale
+from csti.etc.locale import Locale
 
 
 @cli.group("config", help="Настройка приложения.")
@@ -18,8 +18,8 @@ def init():
     cprint.success("Конфиг успешно инициализирован.")
 
 
-@config.command("change", help="Изменить конфиг.")
-def change():
+@config.command("setup", help="Изменить конфиг.")
+def setup():
     config = GlobalConfig()
 
     cprint.info("Чтобы пропустить изменение поля нажмите enter.")

@@ -3,72 +3,95 @@ from typing import Callable
 from termcolor import colored
 
 
-class Colored:
-	text = 		lambda x: x
-	success = 	lambda x: colored(x, "green")
-	error = 	lambda x: colored(x, "red")
-	warning = 	lambda x: colored(x, "yellow")
-	primary = 	lambda x: colored(x, "blue")
-	info = 		lambda x: colored(x, "cyan")
-	debug = 	lambda x: colored(x, "magenta", attrs=["bold"])
+class Colors:
+    text = 		lambda x, no_color=False: x
+    success = 	lambda x, no_color=False: colored(x, "green", no_color=no_color)
+    error = 	lambda x, no_color=False: colored(x, "red", no_color=no_color)
+    warning = 	lambda x, no_color=False: colored(x, "yellow", no_color=no_color)
+    primary = 	lambda x, no_color=False: colored(x, "blue", no_color=no_color)
+    info = 		lambda x, no_color=False: colored(x, "cyan", no_color=no_color)
+    debug = 	lambda x, no_color=False: colored(x, "magenta", attrs=["bold"], no_color=no_color)
+
+    @staticmethod
+    def makeColored(
+        values: list[str], 
+        colorBy = Callable[[str, bool], str], 
+        no_color: bool = False
+    ) -> list[str]:
+        """ Перекрашивает список строк """
+        return list(map(lambda x: colorBy(x, no_color), values))
 
 
 class Printer:
-	""" Класс для цветного вывода в терминал """
+    """ Класс для цветного вывода в терминал """
 
-	def __init__(self, noColors: bool = False):
-		self._noColors = noColors
+    def __init__(self, noColor: bool = False):
+        self._noColor = noColor
 
-	def __call__(self, msg: str = "", *args, **kwargs):
-		self.text(msg, *args, **kwargs)
+    def __call__(self, *args, **kwargs):
+        self.text(*args, **kwargs)
 
-	def text(self, msg: str, *args, **kwargs):
-		print(Colored.text(msg), *args, **kwargs)
+    def text(self, *args, **kwargs):
+        print(
+            *Colors.makeColored(args, Colors.text, self._noColor), 
+            **kwargs
+        )
 
-	def success(self, msg: str, *args, **kwargs):
-		coloredFunc = Colored.text if self._noColors else Colored.success
-		print(coloredFunc(msg), *args, **kwargs)
-	
-	def error(self, msg: str, *args, **kwargs):
-		coloredFunc = Colored.text if self._noColors else Colored.error
-		print(coloredFunc(msg), *args, **kwargs)
-	
-	def warning(self, msg: str, *args, **kwargs):
-		coloredFunc = Colored.text if self._noColors else Colored.warning
-		print(coloredFunc(msg), *args, **kwargs)
-	
-	def primary(self, msg: str, *args, **kwargs):
-		coloredFunc = Colored.text if self._noColors else Colored.primary
-		print(coloredFunc(msg), *args, **kwargs)
-	
-	def info(self, msg: str, *args, **kwargs):
-		coloredFunc = Colored.text if self._noColors else Colored.info
-		print(coloredFunc(msg), *args, **kwargs)
+    def success(self, *args, **kwargs):
+        print(
+            *Colors.makeColored(args, Colors.success, self._noColor), 
+            **kwargs
+        )
+    
+    def error(self, *args, **kwargs):
+        print(
+            *Colors.makeColored(args, Colors.error, self._noColor), 
+            **kwargs
+        )
+    
+    def warning(self, *args, **kwargs):
+        print(
+            *Colors.makeColored(args, Colors.warning, self._noColor), 
+            **kwargs
+        )
+    
+    def primary(self, *args, **kwargs):
+        print(
+            *Colors.makeColored(args, Colors.primary, self._noColor), 
+            **kwargs
+        )
+    
+    def info(self, *args, **kwargs):
+        print(
+            *Colors.makeColored(args, Colors.info, self._noColor), 
+            **kwargs
+        )
 
-	def debug(self, msg: str, *args, **kwargs):
-		coloredFunc = Colored.text if self._noColors else Colored.debug
-		print(coloredFunc(msg), *args, **kwargs)
+    def debug(self, *args, **kwargs):
+        print(
+            *Colors.makeColored(args, Colors.debug, self._noColor), 
+            **kwargs
+        )
 
-	def byFlag(
-		self,
-		msg: str,
-		*args,
-		flag: bool, 
-		flagOn: Callable[[str], str] = Colored.success, 
-		flagOff: Callable[[str], str] = Colored.error, 
-		**kwargs
-	):
-		""" 
-		Если flag == True, то выведется flagOn(msg).\n
-		Если flag == False, то выведется flagOff(msg).
-		"""
+    def byFlag(
+        self,
+        *args,
+        flag: bool, 
+        flagOn: Callable[[str, bool], str] = Colors.success, 
+        flagOff: Callable[[str, bool], str] = Colors.error, 
+        **kwargs
+    ):
+        """ 
+        Если flag=True, то выведется flagOn.\n
+        Если flag=False, то выведется flagOff.
+        """
 
-		if self._noColors:
-			print(Colored.text(msg), *args, **kwargs)
-		else:
-			msg = flagOn(msg) if flag else flagOff(msg)
-			print(msg, *args, **kwargs)
+        colorBy = flagOn if flag else flagOff
+        print(
+            *Colors.makeColored(args, colorBy, self._noColor), 
+            **kwargs
+        )
 
 
 cprint = Printer()
-ncprint = Printer(noColors=True)
+ncprint = Printer(noColor=True)
