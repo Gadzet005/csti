@@ -6,19 +6,14 @@ from csti.cli.commands.root import root
 from csti.cli.state import CLIState
 from csti.config.config import Config
 from csti.config.global_config import GlobalConfig
-from csti.contest_systems.manager import getManager
+from csti.contest.systems.manager import getManager
 from csti.etc.app import RunableApp
 
 
 class CLIApp(RunableApp):
-    def __init__(
-        self, 
-        name: str,
-        version: str, 
-        config: t.Optional[Config]=None
-    ):
+    def __init__(self, name: str, config: t.Optional[Config] = None):
         config = config or GlobalConfig.forApp(name)
-        super().__init__(name, version, config)
+        super().__init__(name, config)
 
     @t.override
     def _run(self):

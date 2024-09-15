@@ -4,8 +4,8 @@ import os
 import typing as t
 
 from csti.contest import Contest, Task
-from csti.contest_env.data_storage import EnvDataStorage
-from csti.contest_env.exceptions import ContestEnvException
+from csti.contest.env.data_storage import EnvDataStorage
+from csti.contest.env.exceptions import ContestEnvException
 
 
 class ContestEnv:

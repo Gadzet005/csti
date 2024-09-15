@@ -30,7 +30,7 @@ def selectTask(state: CLIState, id: t.Optional[int] = None):
         tasks = contest.getTasks()
         taskNames = list(map(lambda task: task.name, tasks))
 
-        taskIdx = inquirer.rawlist( # type: ignore
+        taskIdx = inquirer.rawlist(  # type: ignore
             message="Задача: ",
             choices=taskNames,
             vi_mode=True,
@@ -75,9 +75,7 @@ def selectTask(state: CLIState, id: t.Optional[int] = None):
 )
 @click.pass_obj
 def showInfo(
-    state: CLIState,
-    name: bool, info: bool, cond: bool, 
-    tests: bool, solution: bool
+    state: CLIState, name: bool, info: bool, cond: bool, tests: bool, solution: bool
 ):
     task = state.env.storage.loadCurrentTask(state.manager)
 
@@ -147,9 +145,11 @@ def showInfo(
 @click.pass_obj
 def sendTask(
     state: CLIState,
-    file: t.Optional[str], 
-    lang: str, no_tests: bool, 
-    no_format: bool, no_confirm: bool
+    file: t.Optional[str],
+    lang: str,
+    no_tests: bool,
+    no_format: bool,
+    no_confirm: bool,
 ):
     task = state.env.storage.loadCurrentTask(state.manager)
 
@@ -203,7 +203,7 @@ def sendTask(
     # Подтверждение отправки решения
     shouldSendSolution = True
     if not no_confirm:
-        shouldSendSolution = inquirer.confirm( # type: ignore
+        shouldSendSolution = inquirer.confirm(  # type: ignore
             "Вы уверены что хотите отправить решение на проверку? "
             f"Оставшееся количество попыток: {task.remainingAttempts}.\n",
             default=False,

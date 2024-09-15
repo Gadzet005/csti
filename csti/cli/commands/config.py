@@ -1,5 +1,4 @@
 import click
-
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 
@@ -18,29 +17,31 @@ def setup(state: CLIState):
     config = state.app.config
 
     state.print.info("Чтобы пропустить изменение поля нажмите enter.")
-    login = inquirer.text( # type: ignore
+    login = inquirer.text(  # type: ignore
         "Логин: ", default=config.get("user", "login")
     ).execute()
     config.set("user", "login", value=login)
 
     currentPassword = config.get("user", "password")
-    password = inquirer.secret( # type: ignore
+    password = inquirer.secret(  # type: ignore
         "Пароль: ", transformer=lambda res: "*" * len(res or currentPassword)
     ).execute()
     if password:
         config.set("user", "password", value=password)
 
-    name = inquirer.text( # type: ignore
-        "Фамилия: ", default=config.get("user", "name")
-    ).execute().capitalize()
+    name = (
+        inquirer.text("Фамилия: ", default=config.get("user", "name"))  # type: ignore
+        .execute()
+        .capitalize()
+    )
     config.set("user", "name", value=name)
 
-    homeUrl = inquirer.text( # type: ignore
+    homeUrl = inquirer.text(  # type: ignore
         "URL домашней страницы: ", default=config.get("home-url")
     ).execute()
     config.set("home-url", value=homeUrl)
 
-    locale = inquirer.select( # type: ignore
+    locale = inquirer.select(  # type: ignore
         "Выберите язык:",
         choices=[locale.name for locale in Locale],
         default=config.get("locale").name,
@@ -51,9 +52,9 @@ def setup(state: CLIState):
 
     featureChoices = [
         Choice(
-            "enable-auto-tests", 
-            "Включить авто тесты", 
-            config.get("features", "enable-auto-tests")
+            "enable-auto-tests",
+            "Включить авто тесты",
+            config.get("features", "enable-auto-tests"),
         ),
         Choice(
             "enable-auto-formatting",
@@ -61,7 +62,7 @@ def setup(state: CLIState):
             config.get("features", "enable-auto-formatting"),
         ),
     ]
-    enabledFeatures = inquirer.checkbox( # type: ignore
+    enabledFeatures = inquirer.checkbox(  # type: ignore
         message="Настройка функций.", choices=featureChoices, vi_mode=True
     ).execute()
 

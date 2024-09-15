@@ -1,13 +1,16 @@
 import typing as t
+
 import click
 
-from csti.cli.commands.contest import contest
 from csti.cli.commands.config import config
+from csti.cli.commands.contest import contest
 from csti.cli.commands.task import task
 from csti.cli.state import CLIState
+from csti.etc.consts import APP_NAME, APP_VERSION
 
 
-@click.group()
+@click.group(help="CSTI - Contest System Terminal Interface.")
+@click.version_option(APP_VERSION, "-v", "--version", package_name=APP_NAME)
 def root():
     pass
 

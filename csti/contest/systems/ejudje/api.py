@@ -6,8 +6,8 @@ import requests
 from csti.config.config import Config
 from csti.contest.api import ContestSystemAPI
 from csti.contest.exceptions import AuthException
-from csti.contest_systems.ejudje.language import EjudjeLanguage
-from csti.contest_systems.ejudje.parser import ContestParser, TaskParser
+from csti.contest.systems.ejudje.language import EjudjeLanguage
+from csti.contest.systems.ejudje.parser import ContestParser, TaskParser
 
 
 class EjudjeAPI(ContestSystemAPI):
@@ -21,10 +21,12 @@ class EjudjeAPI(ContestSystemAPI):
         self._sessionId: str = ""
         self._cookieSessionId: str = ""
 
+    @t.override
     @classmethod
     @cache
-    @t.override
-    def getInstance(cls, config: Config, contestId: t.Optional[int] = None) -> t.Self:
+    def getInstance( # type: ignore
+        cls, config: Config, contestId: t.Optional[int] = None
+    ) -> t.Self:
         return cls(config, contestId)
 
     def getSession(self) -> requests.Session:
@@ -106,7 +108,7 @@ class EjudjeAPI(ContestSystemAPI):
         }
 
     @t.override
-    def getContestInfo(self, *args) -> t.Optional[dict]:
+    def getContestInfo(self, contestId: int=0) -> t.Optional[dict]:
         return self._getContestInfo()
 
     @cache

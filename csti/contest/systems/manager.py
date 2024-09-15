@@ -1,5 +1,5 @@
 from csti.contest.manager import ContestManager
-from csti.contest_systems.ejudje import EjudjeAPI
+from csti.contest.systems.ejudje import EjudjeAPI
 from csti.etc.app import App
 
 

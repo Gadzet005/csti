@@ -1,9 +1,10 @@
 import typing as t
+
 import click
 from InquirerPy import inquirer
 
 from csti.cli.state import CLIState
-from csti.contest_env import ContestEnv
+from csti.contest.env import ContestEnv
 
 
 @click.group("contest", help="Работа с контестом.")
@@ -35,7 +36,7 @@ def select(state: CLIState, id: t.Optional[int], force: bool):
         contests = state.manager.getContests()
         contestNames = [contest.name for contest in contests]
 
-        contestIdx = inquirer.rawlist( # type: ignore
+        contestIdx = inquirer.rawlist(  # type: ignore
             message="Контест:",
             choices=[contest.name for contest in contests],
             vi_mode=True,

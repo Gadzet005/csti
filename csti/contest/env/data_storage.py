@@ -3,7 +3,7 @@ import typing as t
 
 from csti.contest import Contest, Task
 from csti.contest.manager import ContestManager
-from csti.contest_env.exceptions import EnvStorageException
+from csti.contest.env.exceptions import EnvStorageException
 from csti.data_storage import DataStorage, Group, StorageTemplate
 from csti.data_storage.exceptions import FieldNotInitialized
 from csti.data_storage.field import IntField, ListField
@@ -33,11 +33,11 @@ class EnvDataStorage(DataStorage):
     def create(self):
         os.makedirs(self.dir, exist_ok=True)
 
-    def getPathByLocation(self, location: list[str]):
+    def getPathByLocation(self, location: tuple[str, ...]):
         return os.path.join(self._dir, *location)
 
     @t.override
-    def _get(self, location: list[str]) -> t.Any:
+    def _get(self, location: tuple[str, ...]) -> t.Any:
         try:
             with open(self.getPathByLocation(location), "r") as f:
                 return f.read()
@@ -45,7 +45,7 @@ class EnvDataStorage(DataStorage):
             raise FieldNotInitialized(location)
 
     @t.override
-    def _set(self, location: list[str], value):
+    def _set(self, location: tuple[str, ...], value):
         path = self.getPathByLocation(location)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:

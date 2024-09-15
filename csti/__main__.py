@@ -1,9 +1,9 @@
 from csti.cli.app import CLIApp
-from csti.etc.consts import APP_NAME, APP_VERSION
+from csti.etc.consts import APP_NAME
 
 
 def main():
-    app = CLIApp(APP_NAME, APP_VERSION)
+    app = CLIApp(APP_NAME)
     app.run()
 
 

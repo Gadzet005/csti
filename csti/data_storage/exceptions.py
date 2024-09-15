@@ -3,7 +3,7 @@ class StorageError(Exception):
 
 
 class FieldError(StorageError):
-    def __init__(self, location: tuple):
+    def __init__(self, location: tuple[str, ...]):
         self.location = location
 
     @property

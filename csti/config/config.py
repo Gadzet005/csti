@@ -17,7 +17,7 @@ class Config(SaveLoadStorage):
         return self._path
 
     @t.override
-    def _get(self, location: list[str]) -> t.Any:
+    def _get(self, location: tuple[str, ...]) -> t.Any:
         cur = self._data
 
         for name in location:
@@ -28,11 +28,11 @@ class Config(SaveLoadStorage):
         return cur
 
     @t.override
-    def _set(self, location: list[str], value: t.Any):
-        fieldName = location.pop()
+    def _set(self, location: tuple[str, ...], value: t.Any):
+        *other, fieldName = location
         cur: dict = self._data
 
-        for name in location:
+        for name in other:
             if name not in cur:
                 cur[name] = {}
             cur = cur.get(name)  # type: ignore
