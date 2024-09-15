@@ -1,1 +1,2 @@
-from .config import GlobalConfig
+from .config import Config
+from .global_config import GlobalConfig

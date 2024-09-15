@@ -1,3 +1,5 @@
+import typing as t
+
 from csti.contest.api import ContestSystemAPI
 from csti.contest.exceptions import ContestException
 from csti.contest.task import Task
@@ -13,7 +15,7 @@ class Contest:
         return self._id
 
     @property
-    def _info(self) -> dict | None:
+    def _info(self) -> t.Optional[dict]:
         return self._api.getContestInfo(self._id)
 
     @property
@@ -26,7 +28,7 @@ class Contest:
             raise ContestException(
                 f"Попытка обращения к полям невалидного контеста (id={self._id})."
             )
-        return self._info
+        return self._info  # type: ignore
 
     @property
     def name(self) -> str:

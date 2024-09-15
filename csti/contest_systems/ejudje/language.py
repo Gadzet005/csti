@@ -1,8 +1,8 @@
-from csti.etc.language import ILanguage, Language
+from csti.etc.language import GeneralLanguage, Language
 
 
-class EjudjeLanguage(ILanguage):
+class EjudjeLanguage(Language):
     nasm = {
-        **Language.nasm.value,
+        **GeneralLanguage.nasm.value,
         "id": 50,
     }

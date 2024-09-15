@@ -1,4 +1,5 @@
 import re
+import typing as t
 
 from bs4 import BeautifulSoup
 
@@ -22,7 +23,7 @@ class ContestParser(object):
         return sessionIdMatches[0]
 
     @staticmethod
-    def getContestInfo(html: bytes, name: str, contestLocalId: int) -> dict | None:
+    def getContestInfo(html: bytes, name: str, contestLocalId: int) -> t.Optional[dict]:
         """
         Возвращает информацию о контесте:
         - "contestGlobalId": int,
@@ -35,7 +36,7 @@ class ContestParser(object):
         if tabcontent is None:
             return
 
-        contestButton = tabcontent.find("a", class_="button")
+        contestButton = tabcontent.find("a", class_="button")  # type: ignore
         if contestButton is None:
             return
 
@@ -45,7 +46,7 @@ class ContestParser(object):
         else:
             return
 
-        homeworksMathes = tabcontent.find_all("td", string=re.compile(name))
+        homeworksMathes = tabcontent.find_all("td", string=re.compile(name))  # type: ignore
         if homeworksMathes is None or len(homeworksMathes) != 1:
             return
 

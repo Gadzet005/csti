@@ -1,9 +1,9 @@
+import typing as t
 from functools import cache
-from typing import Self, override
 
 import requests
 
-from csti.config import GlobalConfig
+from csti.config.config import Config
 from csti.contest.api import ContestSystemAPI
 from csti.contest.exceptions import AuthException
 from csti.contest_systems.ejudje.language import EjudjeLanguage
@@ -16,16 +16,16 @@ class EjudjeAPI(ContestSystemAPI):
     BAD_SESSION_ID = "0000000000000000"
     Lang = EjudjeLanguage
 
-    def __init__(self, contestId: int = 0):
-        self._contestId = contestId
+    def __init__(self, config: Config, contestId: t.Optional[int] = None):
+        super().__init__(config, contestId)
         self._sessionId: str = ""
         self._cookieSessionId: str = ""
 
     @classmethod
     @cache
-    @override
-    def getInstance(cls, *args, **kwargs) -> Self:
-        return cls(*args, **kwargs)
+    @t.override
+    def getInstance(cls, config: Config, contestId: t.Optional[int] = None) -> t.Self:
+        return cls(config, contestId)
 
     def getSession(self) -> requests.Session:
         if not self._sessionId or not self._cookieSessionId:
@@ -36,9 +36,9 @@ class EjudjeAPI(ContestSystemAPI):
         return session
 
     def _createSession(self):
-        login = GlobalConfig().login
-        password = GlobalConfig().password
-        locale = GlobalConfig().locale.value
+        login = self._config.get("user", "login")
+        password = self._config.get("user", "password")
+        locale = self._config.get("locale")
 
         contestInfo = self.getContestInfo()
         if contestInfo is None:
@@ -67,13 +67,16 @@ class EjudjeAPI(ContestSystemAPI):
                 "Проверьте номер контеста, логин и пароль."
             )
 
-        self._sessionId = sessionId
-        self._cookieSessionId = response.cookies.get("EJSID")
+        ejsid = response.cookies.get("EJSID")
+        if ejsid is None:
+            raise AuthException("Не удалось получить EJSID.")
 
-    @staticmethod
+        self._cookieSessionId = ejsid
+        self._sessionId = sessionId
+
     @cache
-    def _getHomePage() -> bytes:
-        response = requests.get(GlobalConfig().homeUrl)
+    def _getHomePage(self) -> bytes:
+        response = requests.get(self._config.get("home-url"))
         return response.content
 
     @cache
@@ -81,16 +84,16 @@ class EjudjeAPI(ContestSystemAPI):
         homePage = self._getHomePage()
         return ContestParser.getContestLocalIds(homePage)
 
-    @override
+    @t.override
     def getContestIds(self) -> list[int]:
         return self._getContestIds()
 
     @cache
-    def _getContestInfo(self) -> dict | None:
+    def _getContestInfo(self) -> t.Optional[dict]:
         homePage = self._getHomePage()
-        name = GlobalConfig().name
+        name = self._config.get("user", "name")
 
-        info = ContestParser.getContestInfo(homePage, name, self._contestId)
+        info = ContestParser.getContestInfo(homePage, name, self.contestId)
         if info is None:
             return
 
@@ -102,12 +105,12 @@ class EjudjeAPI(ContestSystemAPI):
             },
         }
 
-    @override
-    def getContestInfo(self, *args) -> dict | None:
+    @t.override
+    def getContestInfo(self, *args) -> t.Optional[dict]:
         return self._getContestInfo()
 
     @cache
-    def _getTaskInfo(self, taskId: int) -> dict | None:
+    def _getTaskInfo(self, taskId: int) -> t.Optional[dict]:
         session = self.getSession()
 
         response = session.get(
@@ -124,6 +127,9 @@ class EjudjeAPI(ContestSystemAPI):
         inputExample = TaskParser.getTests(html)
         info = TaskParser.getInfo(html)
         lastSolution = TaskParser.getLastSolution(html)
+
+        if info is None:
+            return None
 
         solutions = []
         if lastSolution:
@@ -144,14 +150,14 @@ class EjudjeAPI(ContestSystemAPI):
             "remainingAttempts": int(info["Оставшиеся посылки"]),
             "isSolved": False,
             "solutions": solutions,
-            "languageIds": [self.Lang.nasm.id],
+            "languageIds": [EjudjeLanguage.nasm.id],
         }
 
-    @override
-    def getTaskInfo(self, contestId: int, taskId: int) -> dict | None:
+    @t.override
+    def getTaskInfo(self, contestId: int, taskId: int) -> t.Optional[dict]:
         return self._getTaskInfo(taskId)
 
-    @override
+    @t.override
     def sendTaskSolution(
         self, contestId: int, taskId: int, code: str, languageId: int
     ) -> bool:

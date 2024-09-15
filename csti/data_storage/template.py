@@ -9,7 +9,7 @@ class Group(TemplateMember):
         self._members = {member.name: member for member in members}
 
     def get(self, name: str) -> TemplateMember:
-        return self._members.get(name)
+        return self._members.get(name)  # type: ignore
 
 
 class StorageTemplate:
@@ -18,7 +18,7 @@ class StorageTemplate:
     def __init__(self, members: list[TemplateMember]):
         self._rootGroup = Group("", members)
 
-    def getField(self, *location: list[str]) -> Field:
+    def getField(self, *location: str) -> Field:
         cur = self._rootGroup
         for elem in location:
             if not isinstance(cur, Group):

@@ -1,6 +1,8 @@
+import typing as t
+
 from csti.contest.api import ContestSystemAPI
 from csti.contest.exceptions import APIException, TaskException
-from csti.etc.language import ILanguage
+from csti.etc.language import Language
 from csti.program_view import ProgramView
 
 
@@ -15,7 +17,7 @@ class Task:
         return self._id
 
     @property
-    def _info(self) -> dict:
+    def _info(self) -> t.Optional[dict]:
         return self._api.getTaskInfo(self._contestId, self._id)
 
     @property
@@ -28,7 +30,7 @@ class Task:
             raise TaskException(
                 f"Попытка обращения к полям невалидной задачи (id={self._id})."
             )
-        return self._info
+        return self._info  # type: ignore
 
     @property
     def name(self) -> str:
@@ -63,7 +65,7 @@ class Task:
         return self.info["remainingAttempts"]
 
     @property
-    def solutions(self) -> list:
+    def solutions(self) -> list[dict]:
         return self.info["solutions"]
 
     @property
@@ -79,7 +81,7 @@ class Task:
         return self.info["languageIds"]
 
     @property
-    def language(self) -> ILanguage:
+    def language(self) -> Language:
         langId = self.languageIds[0]
         lang = self._api.Lang.fromId(langId)
         if lang is None:

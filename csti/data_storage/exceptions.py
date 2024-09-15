@@ -1,5 +1,9 @@
-class FieldError(Exception):
-    def __init__(self, location: list[str]):
+class StorageError(Exception):
+    pass
+
+
+class FieldError(StorageError):
+    def __init__(self, location: tuple):
         self.location = location
 
     @property

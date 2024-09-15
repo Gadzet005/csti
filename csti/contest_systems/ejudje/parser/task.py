@@ -1,3 +1,4 @@
+import typing as t
 from inspect import cleandoc
 
 from bs4 import BeautifulSoup
@@ -7,9 +8,11 @@ from csti.contest.solution import Solution, SolutionStatus
 
 class TaskParser(object):
     PARSER_TYPE = "html.parser"
+    TestCase: t.TypeAlias = t.Tuple[str, str]
+    TestCases: t.TypeAlias = t.List[TestCase]
 
     @staticmethod
-    def getName(html: bytes) -> str | None:
+    def getName(html: bytes) -> t.Optional[str]:
         soup = BeautifulSoup(html, TaskParser.PARSER_TYPE)
         nameElement = soup.find("h3")
         if nameElement is None:
@@ -18,27 +21,28 @@ class TaskParser(object):
         return nameElement.text
 
     @staticmethod
-    def getInfo(html: bytes) -> dict[str, str] | None:
+    def getInfo(html: bytes) -> t.Optional[dict[str, str]]:
         soup = BeautifulSoup(html, TaskParser.PARSER_TYPE)
         infoContainer = soup.find("table", class_="line-table-wb")
         if infoContainer is None:
             return
 
         infoStrings = cleandoc(infoContainer.text).split("\n")
-        info = dict(
-            map(lambda infoString: tuple(infoString.split(":", 1)), infoStrings)
-        )
+        info = {}
+        for infoString in infoStrings:
+            key, value = infoString.split(":", 1)
+            info[key.strip()] = value.strip()
 
         return info
 
     @staticmethod
-    def getCondition(html: bytes) -> str | None:
+    def getCondition(html: bytes) -> t.Optional[str]:
         soup = BeautifulSoup(html, TaskParser.PARSER_TYPE)
         taskContainer = soup.find("div", id="probNavTaskArea-ins")
         if taskContainer is None:
             return
 
-        conditionElements = taskContainer.find_all("p", recursive=False)
+        conditionElements = taskContainer.find_all("p", recursive=False)  # type: ignore
         if conditionElements is None:
             return
 
@@ -53,7 +57,7 @@ class TaskParser(object):
         return cleandoc(condition)
 
     @staticmethod
-    def getTests(html: bytes) -> list[tuple[str, str]] | None:
+    def getTests(html: bytes) -> t.Optional[TestCases]:
         soup = BeautifulSoup(html, TaskParser.PARSER_TYPE)
         testsElements = soup.find_all("pre")
         if testsElements is None:
@@ -65,13 +69,13 @@ class TaskParser(object):
         return list(zip(testsIterator, testsIterator))
 
     @staticmethod
-    def getLastSolution(html: bytes) -> Solution | None:
+    def getLastSolution(html: bytes) -> t.Optional[Solution]:
         soup = BeautifulSoup(html, TaskParser.PARSER_TYPE)
         statusTable = soup.find("table", class_="table")
         if statusTable is None:
             return
 
-        statusHistoryLine = statusTable.find_all("tr")
+        statusHistoryLine = statusTable.find_all("tr")  # type: ignore
         if statusHistoryLine is None:
             return
 

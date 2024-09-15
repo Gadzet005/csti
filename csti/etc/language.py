@@ -1,16 +1,28 @@
-from __future__ import annotations
-
 import enum
-from typing import Self
+import typing as t
 
-from csti.etc.settings import BASE_DIR
+from csti.etc.consts import BASE_DIR
 
 
-class ILanguage(enum.Enum):
-    """Интерфейс перечисления языков программирования."""
+class Language(enum.Enum):
+    """
+    Интерфейс перечисления языков программирования.
+    -----------------------------------------------
+    Атрибуты члена перечисления:
+    - id (int):									Идентификатор.
+    - fullName (str):							Название.
+    - isCompiledLanguage (bool):				Яввляется ли компилируемым языком?
+    - availableFileExtensions (list[str]):		Доступные расширения файла.
+        - Первое расширение в списке используется по умолчанию.
+        - Расширения используется вместе с точкой: .py, .cpp.
+    - comment (str):							Символ комментария.
+    - makefile (str):							Пусть к makefile для работы с программой.
+    - availableformatStyles (list[str]):		Доступные стили форматирования.
+        - Если атрибута нет, то форматирование для программ с этим языком не доступно.
+    """
 
     @classmethod
-    def fromName(cls, name: str) -> Self | None:
+    def fromName(cls, name: str) -> t.Optional[t.Self]:
         """Получить язык по имени. Возвращает None, если такого нет."""
         try:
             return cls[name]
@@ -18,7 +30,7 @@ class ILanguage(enum.Enum):
             return None
 
     @classmethod
-    def fromId(cls, id: int) -> Self | None:
+    def fromId(cls, id: int) -> t.Optional[t.Self]:
         """Получить язык по id. Возвращает None, если такого нет."""
         for lang in cls:
             if lang.id == id:
@@ -58,23 +70,8 @@ class ILanguage(enum.Enum):
         return self.value.get("availableformatStyles", [])
 
 
-class Language(ILanguage):
-    """
-    Перечисление языков программирования по умолчанию.
-    -------------------------------------
-    Атрибуты:
-    - id (int):									Идентификатор.
-    - fullName (str):							Название.
-    - isCompiledLanguage (bool):				Яввляется ли компилируемым языком?
-    - availableFileExtensions (list[str]):		Доступные расширения файла.
-        - Первое расширение в списке используется по умолчанию.
-        - Расширения используется вместе с точкой: .py, .cpp.
-    - comment (str):							Символ комментария.
-    - makefile (str):							Пусть к makefile для работы с программой.
-    - availableformatStyles (list[str]):		Доступные стили форматирования.
-        - Если атрибута нет, то форматирование для программ с этим языком не доступно.
-
-    """
+class GeneralLanguage(Language):
+    """Перечисление языков программирования, содержащее общую информацию о них."""
 
     c = {
         "id": 1,

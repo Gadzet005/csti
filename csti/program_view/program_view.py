@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import subprocess
-from typing import Self
+import typing as t
 
 from csti.etc.language import Language
 from csti.program_view.exceptions import (CompileError, FormatError, RunError,
@@ -50,7 +52,9 @@ class ProgramView:
             self.clear()
             raise CompileError(result.stderr.decode())
 
-    def run(self, input: str | None = None, timeout: str | None = None) -> str:
+    def run(
+        self, input: t.Optional[str] = None, timeLimit: t.Optional[float] = None
+    ) -> str:
         """
         Запускает программу и возвращает её вывод.
         Если язык компилируемый, то требуется вызов метода compile.
@@ -59,13 +63,13 @@ class ProgramView:
         inputBuffer = input.encode() if input else None
 
         try:
-            result: subprocess.CompletedProcess = subprocess.run(
+            result: subprocess.CompletedProcess = subprocess.run(  # type: ignore
                 self._makeTargetCommand(
                     MakeTarget.run, filePath=self.filePath, outputFile=self._outputFile
                 ),
                 capture_output=True,
                 input=inputBuffer,
-                timeout=timeout,
+                timeout=timeLimit,
             )
         except subprocess.TimeoutExpired:
             raise TimeoutError
@@ -79,7 +83,7 @@ class ProgramView:
 
         return output
 
-    def format(self, formatStyle: str) -> Self:
+    def format(self, formatStyle: str) -> ProgramView:
         """
         Выполняет форматирование программы, возвращает экземпляр
         ProgramView для отформатированного файла.
@@ -110,7 +114,7 @@ class ProgramView:
         """
         Очистка временных файлов.
 
-        @param clearSelf: Требуется ли очистка самой программы?
+        :param clearSelf: Требуется ли очистка самой программы?
         """
 
         subprocess.run(
@@ -126,16 +130,16 @@ class ProgramView:
     # TODO: добавить ограничение занимаемой памяти при выполнении теста.
     def test(
         self,
-        testCases: list[tuple[str, str]],
-        timeLimit: int | None = None,
-        memoryLimit: int | None = None,
+        testCases: t.List[t.Tuple[str, str]],
+        timeLimit: t.Optional[float] = None,
+        memoryLimit: t.Optional[float] = None,
     ) -> TestResultList:
         """
         Запуск тестов. Если язык компилируемый, то требуется вызов метода compile.
 
-        @param testCases: [(вход, ожидаемый выход), ...].
-        @param timeLimit: Максимальное время в секундах для выполнения теста.
-        @param memoryLimit: Максимальное количество памяти в мегабайтах для выполнения теста.
+        :param testCases: [(вход, ожидаемый выход), ...].
+        :param timeLimit: Максимальное время в секундах для выполнения теста.
+        :param memoryLimit: Максимальное количество памяти в мегабайтах для выполнения теста.
         """
 
         results = TestResultList()

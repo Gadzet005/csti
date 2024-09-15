@@ -1,24 +1,25 @@
-from __future__ import annotations
-
 import abc
-from typing import Any, overload
+import typing as t
 
 from csti.data_storage.exceptions import FieldNotInitialized
 from csti.data_storage.template import StorageTemplate
 
 
 class DataStorage(abc.ABC):
-    """Интерфейс хранилища данных."""
+    """Интерфейс для работы с хранилищем данных."""
 
     template: StorageTemplate = StorageTemplate([])
 
-    @staticmethod
-    def init(*args, **kwargs) -> DataStorage:
-        """Инициализация хранилища (создание файлов, папок и т.д.)."""
-        return DataStorage()
+    @abc.abstractmethod
+    def create(self):
+        """
+        Создание хранилища. Например, создание файлов для хранения.
+        Если хранилище уже создано, то ничего не происходит.
+        """
+        pass
 
     @abc.abstractmethod
-    def _get(self, location: list[str]) -> Any:
+    def _get(self, location: tuple[str, ...]) -> t.Any:
         """
         Получение значения без какой-либо обработки.
         Ошибка FieldNotInitialized, если значение не найдено.
@@ -26,34 +27,36 @@ class DataStorage(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _set(self, location: list[str], value: Any):
+    def _set(self, location: tuple[str, ...], value: t.Any):
         """Выставление значения без какой-либо обработки."""
         pass
 
-    @overload
-    def get(self, *location: list[str]) -> Any:
+    @t.overload
+    def get(self, *location: str) -> t.Any:
         """
-        Получить значение из хранилища.\n
-        @param location: \
-             Список названий полей, в которые данное поле вложено и название самого поля. \
+        Получить значение из хранилища.
+
+        :param location:
+            Список названий полей, в которые данное поле вложено и название самого поля.
             Например, для user.info.name location=[user, info, name].
         """
         pass
 
-    @overload
-    def get(self, *location: list[str], default=None) -> Any:
-        """ 
-        Получить значение из хранилища.\n
-        @param location: \
-             Список названий полей, в которые данное поле вложено и название самого поля. \
+    @t.overload
+    def get(self, *location: str, default=None) -> t.Any:
+        """
+        Получить значение из хранилища.
+
+        :param location:
+            Список названий полей, в которые данное поле вложено и название самого поля.
             Например, для user.info.name location=[user, info, name].
-        @param default: \
-            Значение, которое будет возвращено, если поле не найдено и \
+        :param default:
+            Значение, которое будет возвращено, если поле не найдено и
             не установлено базовое значение по умолчанию.
         """
         pass
 
-    def get(self, *location: list[str], **kwargs) -> Any:
+    def get(self, *location: str, **kwargs) -> t.Any:
         field = self.template.getField(*location)
 
         try:
@@ -68,20 +71,16 @@ class DataStorage(abc.ABC):
             else:
                 raise error
 
-    def contains(self, *location: list[str]) -> bool:
-        """Наличие значения в поле."""
+    def contains(self, *location: str) -> bool:
+        """Проверить наличие данного поля."""
         try:
-            self._get(*location)
+            self._get(location)
             return True
         except FieldNotInitialized:
             return False
 
-    def set(self, *location: list[str], value: Any):
-        """ 
-        @param location: \
-             Список названий полей, в которые данное поле вложено и название самого поля. \
-            Например, для user.info.name location=[user, info, name].
-        """
+    def set(self, *location: str, value: t.Any):
+        """По аналогии с :func:`get`"""
 
         field = self.template.getField(*location)
         self._set(location, field.serialize(value))
@@ -89,18 +88,16 @@ class DataStorage(abc.ABC):
 
 class SaveLoadStorage(DataStorage):
     """
-    Интерфейс хранилища, которое не предполагает
-    автоматического сохранения при вызове метода set.
+    Интерфейс для работы с хранилищем,
+    которое предполагает загрузку и сохранение данных.
     """
-
-    def __init__(self):
-        super().__init__()
-        self.data = None
 
     @abc.abstractmethod
     def save(self):
+        """Сохранить данные из экземпляра."""
         pass
 
     @abc.abstractmethod
     def load(self):
+        """Загрузить данные в экземпляр."""
         pass
