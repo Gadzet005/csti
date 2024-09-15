@@ -1,9 +1,8 @@
 import typing as t
 
-import click
-
 from csti.cli.commands.root import root
 from csti.cli.state import CLIState
+from csti.cli.utils.print import Printer
 from csti.config.config import Config
 from csti.config.global_config import GlobalConfig
 from csti.contest.systems.manager import getManager
@@ -11,15 +10,22 @@ from csti.etc.app import RunableApp
 
 
 class CLIApp(RunableApp):
-    def __init__(self, name: str, config: t.Optional[Config] = None):
+    def __init__(
+        self, 
+        name: str, 
+        config: t.Optional[Config] = None,
+        printer: t.Optional[Printer] = None
+    ):
         config = config or GlobalConfig.forApp(name)
         super().__init__(name, config)
+        self._printer = printer or Printer()
 
     @t.override
     def _run(self):
-        debug = self.config.get("debug")
-        manager = getManager(self)
-        state = CLIState(self, manager)
+        debug = self.config["debug"]
+        manager = getManager(self.config)
+
+        state = CLIState(self.config, manager, self._printer)
 
         try:
             root(obj=state)

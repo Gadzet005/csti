@@ -11,15 +11,17 @@ from csti.etc.language import GeneralLanguage, Language
 from csti.program_view import CompileError, ProgramView, format, prepareForRun
 
 
-@click.group("task", help="Взаимодействие с задачами.")
+@click.group("task")
 def task():
+    """ Работа с задачами. """
     pass
 
 
-@task.command("select", help="Выбрать задачу.")
+@task.command("select")
 @click.argument("id", type=int, required=False)
 @click.pass_obj
 def selectTask(state: CLIState, id: t.Optional[int] = None):
+    """Выбрать задачу."""
     contest = state.env.storage.loadContest(state.manager)
     task = contest.getTask(id) if id is not None else None
 
@@ -49,7 +51,7 @@ def selectTask(state: CLIState, id: t.Optional[int] = None):
     state.print.success(f"Задача успешно выбрана: {task.name}.")
 
 
-@task.command("info", help="Показать информацию о выбранной задаче.")
+@task.command("info")
 @click.option(
     "-n", "--name", is_flag=True, default=False, help="Показать название задачи."
 )
@@ -75,13 +77,17 @@ def selectTask(state: CLIState, id: t.Optional[int] = None):
 )
 @click.pass_obj
 def showInfo(
-    state: CLIState, name: bool, info: bool, cond: bool, tests: bool, solution: bool
+    state: CLIState, name: bool, info: bool,
+    cond: bool, tests: bool, solution: bool
 ):
+    """Показать информацию о выбранной задаче."""
+
     task = state.env.storage.loadCurrentTask(state.manager)
 
     flags = [name, info, cond, tests, solution]
     shouldPrintAll = not any(flags) or all(flags)
-    taskPrint = state.print if shouldPrintAll else Printer(False)
+
+    taskPrint = state.print if shouldPrintAll else Printer(state.print.file, True)
 
     if name or shouldPrintAll:
         taskPrint.primary(task.name, end="\n\n")
@@ -103,7 +109,7 @@ def showInfo(
             taskPrint(output)
             taskPrint()
 
-    if len(task.solutions) != 0:
+    if len(task.solutions) != 0 and (solution or shouldPrintAll):
         taskPrint.primary("Отправленные решения:")
         for taskSolution in task.solutions:
             taskPrint.info(f"ID: {taskSolution["id"]}")
@@ -112,7 +118,7 @@ def showInfo(
             taskPrint()
 
 
-@task.command("send", help="Отправить задачу на проверку.")
+@task.command("send")
 @click.argument("file", type=click.Path(exists=True), required=False)
 @click.option(
     "-l",
@@ -151,6 +157,8 @@ def sendTask(
     no_format: bool,
     no_confirm: bool,
 ):
+    """Отправить задачу на проверку."""
+
     task = state.env.storage.loadCurrentTask(state.manager)
 
     if file is None:

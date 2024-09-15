@@ -5,27 +5,22 @@ from csti.cli.utils.print import Printer
 from csti.config import Config
 from csti.contest.env import ContestEnv
 from csti.contest.manager import ContestManager
-from csti.etc.app import App
 
 
 class CLIState:
     def __init__(
         self,
-        app: App,
+        config: Config,
         manager: ContestManager,
         printer: t.Optional[Printer] = None,
     ):
-        self._app = app
+        self._config = config
         self._manager = manager
         self._printer: Printer = printer or Printer()  # type: ignore
 
     @property
-    def app(self) -> App:
-        return self._app
-
-    @property
     def config(self) -> Config:
-        return self.app.config
+        return self._config
 
     @property
     @cache

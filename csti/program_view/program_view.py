@@ -130,7 +130,7 @@ class ProgramView:
     # TODO: добавить ограничение занимаемой памяти при выполнении теста.
     def test(
         self,
-        testCases: t.List[t.Tuple[str, str]],
+        testCases: list[tuple[str, str]],
         timeLimit: t.Optional[float] = None,
         memoryLimit: t.Optional[float] = None,
     ) -> TestResultList:

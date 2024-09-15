@@ -3,67 +3,90 @@ import typing as t
 from termcolor import colored
 
 
-class Colors:
-    text = lambda x, no_color=False: x
-    success = lambda x, no_color=False: colored(x, "green", no_color=no_color)
-    error = lambda x, no_color=False: colored(x, "red", no_color=no_color)
-    warning = lambda x, no_color=False: colored(x, "yellow", no_color=no_color)
-    primary = lambda x, no_color=False: colored(x, "blue", no_color=no_color)
-    info = lambda x, no_color=False: colored(x, "cyan", no_color=no_color)
-    debug = lambda x, no_color=False: colored(
-        x, "magenta", attrs=["bold"], no_color=no_color
-    )
+class Color:
+    """ 
+    Класс для добавления к тексту escape-последовательностей 
+    (для придания цвета и форматирования). 
+    """
+
+    Transformer: t.TypeAlias = t.Callable[[str], str]
+
+    success = lambda x: colored(x, "green")
+    error = lambda x: colored(x, "red")
+    warning = lambda x: colored(x, "yellow")
+    primary = lambda x: colored(x, "blue")
+    info = lambda x: colored(x, "cyan")
+    debug = lambda x: colored(x, "magenta", attrs=["bold"])
 
     @staticmethod
     def makeColored(
-        values: tuple[str], colorBy=t.Callable[[str, bool], str], no_color: bool = False
-    ) -> list[str]:
-        """Перекрашивает список строк"""
-        return list(map(lambda x: colorBy(x, no_color), values))
+        values: tuple[str, ...], 
+        colorBy: Transformer,
+    ) -> tuple[str, ...]:
+        """Перекрашивает список строк."""
+        return tuple(map(lambda x: colorBy(x), values))
 
 
 class Printer:
-    """Класс для цветного вывода в терминал"""
+    """Класс для цветного вывода в терминал."""
 
-    def __init__(self, noColor: bool = False):
+    def __init__(
+        self, 
+        file: t.Optional[t.TextIO] = None, 
+        noColor: bool = False
+    ):
+        self._file = file
         self._noColor = noColor
+
+    @property
+    def file(self) -> t.Optional[t.TextIO]:
+        return self._file
 
     def __call__(self, *args, **kwargs):
         self.text(*args, **kwargs)
 
+    def colored(
+        self, messages: tuple[str, ...], colorBy: Color.Transformer
+    ) -> tuple[str, ...]:
+        if self._noColor or self._file is not None:
+            return messages
+        else:
+            return Color.makeColored(messages, colorBy)
+
     def text(self, *args, **kwargs):
-        print(*Colors.makeColored(args, Colors.text, self._noColor), **kwargs)
+        print(*args, file=self._file, **kwargs)
 
     def success(self, *args, **kwargs):
-        print(*Colors.makeColored(args, Colors.success, self._noColor), **kwargs)
+        print(*self.colored(args, Color.success), file=self._file, **kwargs)
 
     def error(self, *args, **kwargs):
-        print(*Colors.makeColored(args, Colors.error, self._noColor), **kwargs)
+        print(*self.colored(args, Color.error), file=self._file, **kwargs)
 
     def warning(self, *args, **kwargs):
-        print(*Colors.makeColored(args, Colors.warning, self._noColor), **kwargs)
+        print(*self.colored(args, Color.warning), file=self._file, **kwargs)
 
     def primary(self, *args, **kwargs):
-        print(*Colors.makeColored(args, Colors.primary, self._noColor), **kwargs)
+        print(*self.colored(args, Color.primary), file=self._file, **kwargs)
 
     def info(self, *args, **kwargs):
-        print(*Colors.makeColored(args, Colors.info, self._noColor), **kwargs)
+        print(*self.colored(args, Color.info), file=self._file, **kwargs)
 
     def debug(self, *args, **kwargs):
-        print(*Colors.makeColored(args, Colors.debug, self._noColor), **kwargs)
+        print(*self.colored(args, Color.debug), file=self._file, **kwargs)
 
     def byFlag(
         self,
         *args,
         flag: bool,
-        flagOn: t.Callable[[str, bool], str] = Colors.success,
-        flagOff: t.Callable[[str, bool], str] = Colors.error,
+        flagOn: Color.Transformer = Color.success,
+        flagOff: Color.Transformer = Color.error,
         **kwargs
     ):
         """
-        Если flag=True, то выведется flagOn.\n
-        Если flag=False, то выведется flagOff.
+        Если flag=`True`, то выведется `flagOn`.
+
+        Если flag=`False`, то выведется `flagOff`.
         """
 
         colorBy = flagOn if flag else flagOff
-        print(*Colors.makeColored(args, colorBy, self._noColor), **kwargs)
+        print(*self.colored(args, colorBy), **kwargs)
