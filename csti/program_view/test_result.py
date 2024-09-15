@@ -1,3 +1,4 @@
+import typing as t
 from enum import Enum
 
 
@@ -13,10 +14,10 @@ class TestResult:
     def __init__(
         self,
         status: TestStatus,
-        input: str | None = None,
-        output: str | None = None,
-        expected: str | None = None,
-        message: str | None = None,
+        input: t.Optional[str] = None,
+        output: t.Optional[str] = None,
+        expected: t.Optional[str] = None,
+        message: t.Optional[str] = None,
     ):
         self._status = status
         self._input = input
@@ -29,31 +30,28 @@ class TestResult:
         return self._status
 
     @property
-    def input(self) -> str | None:
+    def input(self) -> t.Optional[str]:
         return self._input
 
     @property
-    def output(self) -> str | None:
+    def output(self) -> t.Optional[str]:
         return self._output
 
     @property
-    def expected(self) -> str | None:
+    def expected(self) -> t.Optional[str]:
         return self._expected
 
     @property
-    def message(self) -> str | None:
+    def message(self) -> t.Optional[str]:
         return self._message
 
 
 class TestResultList:
-    def __init__(self, results: list[TestResult] | None = None):
+    def __init__(self, results: t.Optional[t.List[TestResult]] = None):
         self._results = results if results is not None else []
 
     def __iter__(self):
         return iter(self._results)
-
-    def __next__(self):
-        return next(self._results)
 
     def __getitem__(self, key: int):
         return self._results[key]

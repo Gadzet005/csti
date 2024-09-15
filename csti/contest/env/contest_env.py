@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import os
+import typing as t
 
 from csti.contest import Contest, Task
-from csti.contest_env.data_storage import EnvDataStorage
-from csti.contest_env.exceptions import ContestEnvException
+from csti.contest.env.data_storage import EnvDataStorage
+from csti.contest.env.exceptions import ContestEnvException
 
 
 class ContestEnv:
@@ -15,16 +16,19 @@ class ContestEnv:
         self._storage = EnvDataStorage(dir)
 
     @staticmethod
-    def init(dir: str | None = None) -> ContestEnv:
+    def create(dir: t.Optional[str] = None) -> ContestEnv:
         """
-        Инициализирует папку для работы с контестом.\n
-        @param dir: Директория для инициализации. Если dir = None,
-        то инициализирует текущую директорию.
-        """
+        Инициализирует папку для работы с контестом.
 
-        if dir is None:
-            dir = os.getcwd()
-        EnvDataStorage.init(envDir=dir)
+        :param dir:
+            Директория для инициализации.
+            Если dir = `None`, то инициализирует текущую директорию.
+        """
+        dir = dir or os.getcwd()
+
+        storage = EnvDataStorage(dir)
+        storage.create()
+
         return ContestEnv(dir)
 
     def getTaskFile(self, task: Task) -> str:
@@ -43,8 +47,8 @@ class ContestEnv:
         """
         Создает файлы для заданий в рабочей директории.
 
-        @param tasks: Список заданий.
-        @param update: Дополнить существующие файлы (True) или перезаписать (False).
+        :param tasks: Список заданий.
+        :param update: Дополнить существующие файлы - `True`, перезаписать - `False`.
         """
 
         taskFiles = []
@@ -75,7 +79,7 @@ class ContestEnv:
     def inCurrentDir() -> ContestEnv:
         """
         Проверяет, что рабочая (текущая) директория инициализирована
-        и возвращает экземплер ContestEnv.
+        и возвращает экземплер `ContestEnv`.
         """
         env = ContestEnv(os.getcwd())
         if not env.isEnvValid:

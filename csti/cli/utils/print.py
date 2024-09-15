@@ -1,4 +1,4 @@
-from typing import Callable
+import typing as t
 
 from termcolor import colored
 
@@ -16,7 +16,7 @@ class Colors:
 
     @staticmethod
     def makeColored(
-        values: list[str], colorBy=Callable[[str, bool], str], no_color: bool = False
+        values: tuple[str], colorBy=t.Callable[[str, bool], str], no_color: bool = False
     ) -> list[str]:
         """Перекрашивает список строк"""
         return list(map(lambda x: colorBy(x, no_color), values))
@@ -56,8 +56,8 @@ class Printer:
         self,
         *args,
         flag: bool,
-        flagOn: Callable[[str, bool], str] = Colors.success,
-        flagOff: Callable[[str, bool], str] = Colors.error,
+        flagOn: t.Callable[[str, bool], str] = Colors.success,
+        flagOff: t.Callable[[str, bool], str] = Colors.error,
         **kwargs
     ):
         """
@@ -67,7 +67,3 @@ class Printer:
 
         colorBy = flagOn if flag else flagOff
         print(*Colors.makeColored(args, colorBy, self._noColor), **kwargs)
-
-
-cprint = Printer()
-ncprint = Printer(noColor=True)

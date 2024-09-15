@@ -1,14 +1,13 @@
+import typing as t
+
 import click
 from InquirerPy import inquirer
 
-from csti.cli.cli import cli
-from csti.cli.print import cprint
-from csti.contest import Contest
-from csti.contest_env import ContestEnv
-from csti.contest_systems import getManager
+from csti.cli.state import CLIState
+from csti.contest.env import ContestEnv
 
 
-@cli.group("contest", help="Работа с контестом.")
+@click.group("contest", help="Работа с контестом.")
 def contest():
     pass
 
@@ -22,19 +21,22 @@ def contest():
     is_flag=True,
     help="Выбирает контест, даже если он уже выбран (обновляет данные).",
 )
-def select(id: int | None, force: bool):
-    env = ContestEnv.inCurrentDir()
-    manager = getManager()
-    contest = manager.getContest(id) if id is not None else None
+@click.pass_obj
+def select(state: CLIState, id: t.Optional[int], force: bool):
+    env = state.env
+
+    contest = None
+    if id:
+        contest = state.manager.getContest(id)
 
     if contest is None or not contest.isValid:
         if contest is not None:
-            cprint.warning("Контест с таким id отсутствует. Выберите из списка.")
+            state.print.warning("Контест с таким id отсутствует. Выберите из списка.")
 
-        contests = manager.getContests()
+        contests = state.manager.getContests()
         contestNames = [contest.name for contest in contests]
 
-        contestIdx = inquirer.rawlist(
+        contestIdx = inquirer.rawlist(  # type: ignore
             message="Контест:",
             choices=[contest.name for contest in contests],
             vi_mode=True,
@@ -46,18 +48,18 @@ def select(id: int | None, force: bool):
     if not force:
         currentContestId = env.storage.get("contest", "id", default=None)
         if currentContestId is not None and currentContestId == contest.id:
-            cprint.warning("Этот контест уже выбран.")
+            state.print.warning("Этот контест уже выбран.")
             return
 
     env.selectContest(contest)
-    cprint.success(f"Контест успешно выбран.")
+    state.print.success(f"Контест успешно выбран.")
 
 
 @contest.command("info", help="Информация о текущем контесте.")
-def showInfo():
-    env = ContestEnv.inCurrentDir()
-    contest = env.storage.loadContest()
+@click.pass_obj
+def showInfo(state: CLIState):
+    contest = state.env.storage.loadContest(state.manager)
 
-    cprint.primary(contest.name)
+    state.print.primary(contest.name)
     for task in contest.getTasks():
-        cprint.text("-", task.name)
+        state.print.text("-", task.name)

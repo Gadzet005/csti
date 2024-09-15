@@ -2,8 +2,8 @@ import unittest
 
 import requests
 
-from csti.contest_systems.ejudje.api import EjudjeAPI
-from csti.contest_systems.ejudje.parser import ContestParser
+from csti.contest.systems.ejudje.api import EjudjeAPI
+from csti.contest.systems.ejudje.parser import ContestParser
 
 
 class TestContestParser(unittest.TestCase):

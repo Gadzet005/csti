@@ -1,18 +1,10 @@
-from csti.cli import cli
-from csti.cli.print import cprint
-from csti.config import GlobalConfig
+from csti.cli.app import CLIApp
+from csti.etc.consts import APP_NAME
 
 
 def main():
-    debug = GlobalConfig().debug
-
-    try:
-        cli()
-    except Exception as error:
-        if debug:
-            raise error
-        else:
-            cprint.error(f"Ошибка выполнения: {error}")
+    app = CLIApp(APP_NAME)
+    app.run()
 
 
 if __name__ == "__main__":

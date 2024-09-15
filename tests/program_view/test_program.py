@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from csti.etc.language import Language
+from csti.etc.language import GeneralLanguage
 from csti.program_view import *
 
 
@@ -10,28 +10,33 @@ class TestProgram(unittest.TestCase):
 
     def setUp(self):
         self.divide = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "divide.cpp"), Language.cpp
+            os.path.join(self.PROGRAMS_DIR, "divide.cpp"), GeneralLanguage.cpp
         )
-        self.add = ProgramView(os.path.join(self.PROGRAMS_DIR, "add.c"), Language.c)
+        self.add = ProgramView(
+            os.path.join(self.PROGRAMS_DIR, "add.c"), GeneralLanguage.c
+        )
         self.compileError = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "compile_error.c"), Language.c
+            os.path.join(self.PROGRAMS_DIR, "compile_error.c"), GeneralLanguage.c
         )
         self.some_code = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "some_code.cpp"), Language.cpp
+            os.path.join(self.PROGRAMS_DIR, "some_code.cpp"), GeneralLanguage.cpp
         )
         self.some_code_expected = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "some_code_expected.cpp"), Language.cpp
+            os.path.join(self.PROGRAMS_DIR, "some_code_expected.cpp"),
+            GeneralLanguage.cpp,
         )
-        self.cicle = ProgramView(os.path.join(self.PROGRAMS_DIR, "cicle.c"), Language.c)
+        self.cicle = ProgramView(
+            os.path.join(self.PROGRAMS_DIR, "cicle.c"), GeneralLanguage.c
+        )
 
     def testCompile(self):
         """Тестирование компиляции."""
 
-        program = ProgramView("don't exists", Language.c)
+        program = ProgramView("don't exists", GeneralLanguage.c)
         with self.assertRaises(CompileError):
             program.compile()
 
-        program = ProgramView(self.add.filePath, Language.nasm)
+        program = ProgramView(self.add.filePath, GeneralLanguage.nasm)
         with self.assertRaises(CompileError):
             program.compile()
 
@@ -79,11 +84,11 @@ class TestProgram(unittest.TestCase):
     def testFormat(self):
         """Тестирование форматирования программы."""
 
-        program = ProgramView(self.some_code.filePath, Language.nasm)
+        program = ProgramView(self.some_code.filePath, GeneralLanguage.nasm)
         with self.assertRaises(FormatError):
             program.format("msu-style")
 
-        program = ProgramView(program.filePath, Language.cpp)
+        program = ProgramView(program.filePath, GeneralLanguage.cpp)
         with self.assertRaises(FormatError):
             program.format("don't exists")
 
@@ -119,4 +124,4 @@ class TestProgram(unittest.TestCase):
 
         with prepareForRun(self.cicle):
             with self.assertRaises(TimeoutError):
-                self.cicle.run(timeout=0.1)
+                self.cicle.run(timeLimit=0.1)

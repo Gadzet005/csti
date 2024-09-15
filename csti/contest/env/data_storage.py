@@ -1,15 +1,13 @@
-from __future__ import annotations
-
 import os
-from typing import Any, override
+import typing as t
 
 from csti.contest import Contest, Task
-from csti.contest_env.exceptions import EnvStorageException
-from csti.contest_systems import getManager
+from csti.contest.manager import ContestManager
+from csti.contest.env.exceptions import EnvStorageException
 from csti.data_storage import DataStorage, Group, StorageTemplate
 from csti.data_storage.exceptions import FieldNotInitialized
 from csti.data_storage.field import IntField, ListField
-from csti.etc.settings import APP_NAME
+from csti.etc.consts import APP_NAME
 
 
 class EnvDataStorage(DataStorage):
@@ -31,25 +29,23 @@ class EnvDataStorage(DataStorage):
         super().__init__()
         self._dir = os.path.join(envDir, self.FOLDER)
 
-    @override
-    @staticmethod
-    def init(envDir: str, *args, **kwargs) -> EnvDataStorage:
-        os.makedirs(os.path.join(envDir, EnvDataStorage.FOLDER), exist_ok=True)
-        return EnvDataStorage(envDir)
+    @t.override
+    def create(self):
+        os.makedirs(self.dir, exist_ok=True)
 
-    def getPathByLocation(self, location: list[str]):
+    def getPathByLocation(self, location: tuple[str, ...]):
         return os.path.join(self._dir, *location)
 
-    @override
-    def _get(self, location: list[str]) -> Any:
+    @t.override
+    def _get(self, location: tuple[str, ...]) -> t.Any:
         try:
             with open(self.getPathByLocation(location), "r") as f:
                 return f.read()
         except FileNotFoundError:
             raise FieldNotInitialized(location)
 
-    @override
-    def _set(self, location: list[str], value):
+    @t.override
+    def _set(self, location: tuple[str, ...], value):
         path = self.getPathByLocation(location)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
@@ -59,17 +55,16 @@ class EnvDataStorage(DataStorage):
     def dir(self) -> str:
         return self._dir
 
-    def loadContest(self) -> Contest:
-        manager = getManager()
+    def loadContest(self, manager: ContestManager) -> Contest:
         try:
             id = self.get("contest", "id")
             return manager.getContest(id)
         except FieldNotInitialized:
             raise EnvStorageException("Контест не выбран.")
 
-    def loadCurrentTask(self) -> Task:
+    def loadCurrentTask(self, manager: ContestManager) -> Task:
         try:
-            contest = self.loadContest()
+            contest = self.loadContest(manager)
             taskId = self.get("contest", "currentTaskId")
             return contest.getTask(taskId)
         except:

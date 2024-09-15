@@ -1,19 +1,31 @@
-import abc
-from typing import Self
+from __future__ import annotations
 
-from csti.etc.language import ILanguage, Language
+import abc
+import typing as t
+
+from csti.config.config import Config
+from csti.etc.language import GeneralLanguage, Language
 
 
 class ContestSystemAPI(abc.ABC):
     """Делает запросы на сервер и обрабатывает результаты."""
 
     """ Перечисление языков программирования. """
-    Lang: ILanguage = Language
+    Lang: t.Type[Language] = GeneralLanguage
+
+    def __init__(self, config: Config, contestId: t.Optional[int] = None):
+        self._config = config
+        self._contestId = contestId
 
     @classmethod
-    def getInstance(cls, *args, **kwargs) -> Self:
-        """Создает экземпляр ContestSystemAPI. Предпочтительнее, чем конструктор."""
-        return cls(*args, **kwargs)
+    def getInstance(cls, config: Config, contestId: t.Optional[int] = None) -> t.Self:
+        return cls(config, contestId)
+
+    @property
+    def contestId(self) -> int:
+        if self._contestId is None:
+            raise ValueError("ContestId равен None")
+        return self._contestId
 
     @abc.abstractmethod
     def getContestIds(cls) -> list[int]:
@@ -21,7 +33,7 @@ class ContestSystemAPI(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def getContestInfo(self, contestId: int) -> dict | None:
+    def getContestInfo(self, contestId: int) -> t.Optional[dict]:
         """
         Информация о контесте.
         ------------------------------------------------------------
@@ -34,7 +46,7 @@ class ContestSystemAPI(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def getTaskInfo(self, contestId: int, taskId: int) -> dict | None:
+    def getTaskInfo(self, contestId: int, taskId: int) -> t.Optional[dict]:
         """
         Информация о задаче.
         -------------------------------------------------------------------------------
