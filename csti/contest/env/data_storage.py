@@ -5,8 +5,8 @@ from csti.contest import Contest, Task
 from csti.contest.env.exceptions import EnvStorageException
 from csti.contest.manager import ContestManager
 from csti.data_storage import DataStorage, Group, StorageTemplate
-from csti.data_storage.exceptions import FieldNotInitialized
-from csti.data_storage.field import IntField, ListField
+from csti.data_storage.exceptions import FieldIsEmpty
+from csti.contest.env.field import IntField, ListField
 from csti.etc.consts import APP_NAME
 
 
@@ -42,7 +42,7 @@ class EnvDataStorage(DataStorage):
             with open(self.getPathByLocation(location), "r") as f:
                 return f.read()
         except FileNotFoundError:
-            raise FieldNotInitialized(location)
+            raise FieldIsEmpty(location)
 
     @t.override
     def _set(self, location: tuple[str, ...], value):
@@ -59,7 +59,7 @@ class EnvDataStorage(DataStorage):
         try:
             id = self.get("contest", "id")
             return manager.getContest(id)
-        except FieldNotInitialized:
+        except FieldIsEmpty:
             raise EnvStorageException("Контест не выбран.")
 
     def loadCurrentTask(self, manager: ContestManager) -> Task:

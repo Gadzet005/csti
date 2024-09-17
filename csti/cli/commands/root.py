@@ -31,5 +31,5 @@ root.add_command(task)
 def init(state: CLIState, dir: t.Optional[str]):
     """Инициализировать папку для работы с контестом."""
 
-    state.env.create(dir)
+    state.createEnv(dir)
     state.print.success("Инициализация завершена.")

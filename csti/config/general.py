@@ -5,8 +5,8 @@ import typing as t
 from platformdirs import user_config_dir
 
 from csti.config.config import YAMLConfig
-from csti.data_storage import Group, StorageTemplate
-from csti.data_storage.field import BoolField, EnumField, StringField
+from csti.data_storage import StorageTemplate, Group
+from csti.config.field import StringField, EnumField, BoolField
 from csti.etc.locale import Locale
 
 

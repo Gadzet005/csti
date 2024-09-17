@@ -16,7 +16,7 @@ class CLIState:
     ):
         self._config = config
         self._manager = manager
-        self._printer: Printer = printer or Printer()  # type: ignore
+        self._printer: Printer = printer or Printer()
 
     @property
     def config(self) -> Config:
@@ -26,6 +26,9 @@ class CLIState:
     @cache
     def env(self) -> ContestEnv:
         return ContestEnv.inCurrentDir()
+    
+    def createEnv(self, dir: t.Optional[str] = None):
+        return ContestEnv.create(dir)
 
     @property
     def print(self) -> Printer:
