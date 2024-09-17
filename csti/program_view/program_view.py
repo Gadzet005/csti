@@ -27,10 +27,8 @@ class ProgramView:
     def _makeTargetCommand(self, target: MakeTarget, **kwargs) -> list[str]:
         """Возвращает команду для запуска цели в makefile."""
         return [
-            "make",
-            target.value,
-            "-f",
-            self.lang.makefile,
+            "make", target.value,
+            "-f", self.lang.makefile,
             *[f"{key}={value}" for key, value in kwargs.items()],
         ]
 
@@ -53,7 +51,9 @@ class ProgramView:
             raise CompileError(result.stderr.decode())
 
     def run(
-        self, input: t.Optional[str] = None, timeLimit: t.Optional[float] = None
+        self, 
+        input: t.Optional[str] = None, 
+        timeLimit: t.Optional[float] = None
     ) -> str:
         """
         Запускает программу и возвращает её вывод.
@@ -83,22 +83,36 @@ class ProgramView:
 
         return output
 
-    def format(self, formatStyle: str) -> ProgramView:
+    def format(
+        self, 
+        formatStyle: str, 
+        formattedPath: t.Optional[str] = None
+    ) -> ProgramView:
         """
         Выполняет форматирование программы, возвращает экземпляр
         ProgramView для отформатированного файла.
+
+        :param formatStyle: 
+            Стиль форматирования, который будет применен к файлу. 
+            Должен быть в атрибуте `availableformatStyles` в языке программы.
+        :param formatFilePath:
+            Путь до отформатированного файла. Если `None`, 
+            то форматированный файл добавляется в 
+            ту же папку с названием по умолчанию.
         """
 
         if formatStyle not in self.lang.availableformatStyles:
             raise FormatError(
                 f"Неизвестный стиль форматирование: {formatStyle} для языка {self.lang.fullName}"
             )
+        
+        formattedPath = formattedPath or self._defaultformattedPath
 
         result: subprocess.CompletedProcess = subprocess.run(
             self._makeTargetCommand(
                 MakeTarget.format,
                 filePath=self.filePath,
-                formattedFile=self._formattedFile,
+                formattedPath=formattedPath,
                 formatStyle=formatStyle,
             ),
             capture_output=True,
@@ -107,7 +121,6 @@ class ProgramView:
         if result.returncode != 0:
             raise FormatError(result.stderr.decode())
 
-        formattedPath = os.path.join(self._dir, self._formattedFile)
         return ProgramView(formattedPath, self.lang)
 
     def clear(self, clearSelf: bool = False):
@@ -119,7 +132,9 @@ class ProgramView:
 
         subprocess.run(
             self._makeTargetCommand(
-                MakeTarget.clear, filePath=self.filePath, outputFile=self._outputFile
+                MakeTarget.clear, 
+                filePath=self.filePath, 
+                outputFile=self._outputFile
             ),
             capture_output=True,
         )
@@ -186,6 +201,6 @@ class ProgramView:
         return self._fileName + "-out"
 
     @property
-    def _formattedFile(self) -> str:
-        """Файл после форматирования программы."""
-        return self._fileName + "-fmt" + self._fileExt
+    def _defaultformattedPath(self) -> str:
+        """Путь до отформатированного файла по умолчанию."""
+        return os.path.join(self._dir, self._fileName + "-fmt" + self._fileExt)

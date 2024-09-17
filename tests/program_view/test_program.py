@@ -58,6 +58,8 @@ class TestProgram(unittest.TestCase):
             output = self.add.run("-4 -8")
             self.assertEqual(output, "-12\n")
 
+        self.assertFalse(os.path.exists(self.add._outputFile))
+
         with self.assertRaises(RunError):
             self.add.run()
         self.add.clear()
@@ -77,6 +79,8 @@ class TestProgram(unittest.TestCase):
             with self.assertRaises(RunError):
                 self.divide.run("10 0")
 
+        self.assertFalse(os.path.exists(self.divide._outputFile))
+
         with self.assertRaises(RunError):
             self.divide.run()
         self.divide.clear()
@@ -91,13 +95,28 @@ class TestProgram(unittest.TestCase):
         program = ProgramView(program.filePath, GeneralLanguage.cpp)
         with self.assertRaises(FormatError):
             program.format("don't exists")
-
+        
+        formattedPath = ""
         with format(program, "msu-style") as formatted:
+            formattedPath = formatted.filePath
+            self.assertTrue(os.path.exists(formattedPath))
+
             originalOutput = run(program)
             formattedOutput = run(formatted)
             self.assertEqual(originalOutput, formattedOutput)
 
             self.assertEqual(self.some_code_expected.code, formatted.code)
+        
+        self.assertFalse(os.path.exists(formattedPath))
+        self.assertTrue(os.path.exists(program.filePath))
+
+        formattedPath = os.path.join(
+            os.path.dirname(program.filePath),
+            "formatted"
+        )
+        with format(program, "msu-style", formattedPath):
+            self.assertTrue(os.path.exists(formattedPath))
+        self.assertFalse(os.path.exists(formattedPath))
 
     def testProgramTest(self):
         """Тестирование запуска тестов для программы"""

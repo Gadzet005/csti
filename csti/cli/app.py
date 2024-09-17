@@ -3,8 +3,7 @@ import typing as t
 from csti.cli.commands.root import root
 from csti.cli.state import CLIState
 from csti.cli.utils.print import Printer
-from csti.config.config import Config
-from csti.config.global_config import GlobalConfig
+from csti.config import Config, GeneralConfig
 from csti.contest.systems.manager import getManager
 from csti.etc.app import RunableApp
 
@@ -16,7 +15,7 @@ class CLIApp(RunableApp):
         config: t.Optional[Config] = None,
         printer: t.Optional[Printer] = None
     ):
-        config = config or GlobalConfig.forApp(name)
+        config = config or GeneralConfig.forApp(name)
         super().__init__(name, config)
         self._printer = printer or Printer()
 

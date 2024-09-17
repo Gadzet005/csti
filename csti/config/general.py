@@ -10,7 +10,7 @@ from csti.data_storage.field import BoolField, EnumField, StringField
 from csti.etc.locale import Locale
 
 
-class GlobalConfig(YAMLConfig):
+class GeneralConfig(YAMLConfig):
     """Глобальный конфиг приложения."""
 
     TEMPLATE_CONFIG_PATH = "csti/config/template/config.yaml"
