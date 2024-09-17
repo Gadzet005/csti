@@ -4,15 +4,15 @@ import click
 from InquirerPy import inquirer
 
 from csti.cli.state import CLIState
-from csti.contest.env import ContestEnv
 
 
-@click.group("contest", help="Работа с контестом.")
+@click.group("contest")
 def contest():
+    """Работа с контестом."""
     pass
 
 
-@contest.command("select", help="Выбрать контест.")
+@contest.command("select")
 @click.argument("id", type=int, required=False)
 @click.option(
     "-f",
@@ -23,6 +23,8 @@ def contest():
 )
 @click.pass_obj
 def select(state: CLIState, id: t.Optional[int], force: bool):
+    """Выбрать контест."""
+
     env = state.env
 
     contest = None
@@ -55,9 +57,11 @@ def select(state: CLIState, id: t.Optional[int], force: bool):
     state.print.success(f"Контест успешно выбран.")
 
 
-@contest.command("info", help="Информация о текущем контесте.")
+@contest.command("info")
 @click.pass_obj
 def showInfo(state: CLIState):
+    """Информация о текущем контесте."""
+
     contest = state.env.storage.loadContest(state.manager)
 
     state.print.primary(contest.name)

@@ -16,36 +16,33 @@ class EjudjeAPI(ContestSystemAPI):
     BAD_SESSION_ID = "0000000000000000"
     Lang = EjudjeLanguage
 
-    def __init__(self, config: Config, contestId: t.Optional[int] = None):
-        super().__init__(config, contestId)
+    _sessionCache: dict[int, tuple[str, str]] = {}
+
+    def __init__(self, config: Config):
+        super().__init__(config)
         self._sessionId: str = ""
         self._cookieSessionId: str = ""
 
-    @t.override
-    @classmethod
-    @cache
-    def getInstance( # type: ignore
-        cls, config: Config, contestId: t.Optional[int] = None
-    ) -> t.Self:
-        return cls(config, contestId)
-
-    def getSession(self) -> requests.Session:
+    def getSession(self, contestId: int) -> requests.Session:
         if not self._sessionId or not self._cookieSessionId:
-            self._createSession()
+            if contestId in self._sessionCache:
+                self._sessionId, self._cookieSessionId = self._sessionCache[contestId]
+            else:
+                self._createSession(contestId)
 
         session = requests.Session()
         session.cookies.set("EJSID", self._cookieSessionId)
         return session
 
-    def _createSession(self):
+    def _createSession(self, contestId: int):
         login = self._config.get("user", "login")
         password = self._config.get("user", "password")
         locale = self._config.get("locale")
 
-        contestInfo = self.getContestInfo()
+        contestInfo = self.getContestInfo(contestId)
         if contestInfo is None:
             raise AuthException(
-                f"Не удалось получить доступ к контесту (id={self._contestId})."
+                f"Не удалось получить доступ к контесту (id={contestId})."
             )
         contestGlobalId = str(contestInfo["other"]["globalId"])
 
@@ -75,6 +72,7 @@ class EjudjeAPI(ContestSystemAPI):
 
         self._cookieSessionId = ejsid
         self._sessionId = sessionId
+        self._sessionCache[contestId] = (sessionId, ejsid)
 
     @cache
     def _getHomePage(self) -> bytes:
@@ -91,16 +89,16 @@ class EjudjeAPI(ContestSystemAPI):
         return self._getContestIds()
 
     @cache
-    def _getContestInfo(self) -> t.Optional[dict]:
+    def _getContestInfo(self, contestId: int) -> t.Optional[dict]:
         homePage = self._getHomePage()
         name = self._config.get("user", "name")
 
-        info = ContestParser.getContestInfo(homePage, name, self.contestId)
+        info = ContestParser.getContestInfo(homePage, name, contestId)
         if info is None:
             return
 
         return {
-            "name": f"Контест №{self._contestId}",
+            "name": f"Контест №{contestId}",
             "taskIds": info["taskIds"],
             "other": {
                 "globalId": info["contestGlobalId"],
@@ -108,12 +106,12 @@ class EjudjeAPI(ContestSystemAPI):
         }
 
     @t.override
-    def getContestInfo(self, contestId: int=0) -> t.Optional[dict]:
-        return self._getContestInfo()
+    def getContestInfo(self, contestId: int) -> t.Optional[dict]:
+        return self._getContestInfo(contestId)
 
     @cache
-    def _getTaskInfo(self, taskId: int) -> t.Optional[dict]:
-        session = self.getSession()
+    def _getTaskInfo(self, contestId: int, taskId: int) -> t.Optional[dict]:
+        session = self.getSession(contestId)
 
         response = session.get(
             self.REQUEST_URL,
@@ -157,13 +155,13 @@ class EjudjeAPI(ContestSystemAPI):
 
     @t.override
     def getTaskInfo(self, contestId: int, taskId: int) -> t.Optional[dict]:
-        return self._getTaskInfo(taskId)
+        return self._getTaskInfo(contestId, taskId)
 
     @t.override
     def sendTaskSolution(
         self, contestId: int, taskId: int, code: str, languageId: int
     ) -> bool:
-        session = self.getSession()
+        session = self.getSession(contestId)
 
         session.post(
             self.REQUEST_URL,
@@ -179,5 +177,5 @@ class EjudjeAPI(ContestSystemAPI):
             },
         )
 
-        # TODO: Сделать проверку.
+        # TODO: Информация о результате отправки.
         return True

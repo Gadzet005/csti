@@ -7,12 +7,11 @@ fileName := $(basename $(notdir $(filePath)))
 
 compiledPath := $(dir)$(fileName)-cmp
 outputPath := $(dir)$(outputFile)
-formattedPath := $(dir)$(formattedFile)
 
 ifeq ($(formatStyle), msu-style)
 formatCommand := clang-format --style=file:$(makeDir)msu_style_config.yaml $(filePath) > $(formattedPath)
 else
-formatCommand := cat $(filePath) > $(dir)/$(formattedFile)
+formatCommand := cat $(filePath) > $(formattedPath)
 endif
 
 compile:

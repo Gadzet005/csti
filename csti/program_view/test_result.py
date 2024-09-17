@@ -47,7 +47,7 @@ class TestResult:
 
 
 class TestResultList:
-    def __init__(self, results: t.Optional[t.List[TestResult]] = None):
+    def __init__(self, results: t.Optional[list[TestResult]] = None):
         self._results = results if results is not None else []
 
     def __iter__(self):

@@ -13,19 +13,8 @@ class ContestSystemAPI(abc.ABC):
     """ Перечисление языков программирования. """
     Lang: t.Type[Language] = GeneralLanguage
 
-    def __init__(self, config: Config, contestId: t.Optional[int] = None):
+    def __init__(self, config: Config):
         self._config = config
-        self._contestId = contestId
-
-    @classmethod
-    def getInstance(cls, config: Config, contestId: t.Optional[int] = None) -> t.Self:
-        return cls(config, contestId)
-
-    @property
-    def contestId(self) -> int:
-        if self._contestId is None:
-            raise ValueError("ContestId равен None")
-        return self._contestId
 
     @abc.abstractmethod
     def getContestIds(cls) -> list[int]:

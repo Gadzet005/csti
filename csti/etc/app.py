@@ -22,8 +22,12 @@ class RunableApp(abc.ABC, App):
     def _run(self):
         pass
 
-    def run(self):
-        "Запуск приложения."
+    def prepare(self):
+        "Подготовка приложения к работе."
         self._config.create()
         self._config.load()
+
+    def run(self):
+        "Запуск приложения."
+        self.prepare()
         self._run()

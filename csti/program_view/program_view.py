@@ -83,10 +83,20 @@ class ProgramView:
 
         return output
 
-    def format(self, formatStyle: str) -> ProgramView:
+    def format(
+        self, formatStyle: str, formattedPath: t.Optional[str] = None
+    ) -> ProgramView:
         """
         Выполняет форматирование программы, возвращает экземпляр
         ProgramView для отформатированного файла.
+
+        :param formatStyle:
+            Стиль форматирования, который будет применен к файлу.
+            Должен быть в атрибуте `availableformatStyles` в языке программы.
+        :param formatFilePath:
+            Путь до отформатированного файла. Если `None`,
+            то форматированный файл добавляется в
+            ту же папку с названием по умолчанию.
         """
 
         if formatStyle not in self.lang.availableformatStyles:
@@ -94,11 +104,13 @@ class ProgramView:
                 f"Неизвестный стиль форматирование: {formatStyle} для языка {self.lang.fullName}"
             )
 
+        formattedPath = formattedPath or self._defaultformattedPath
+
         result: subprocess.CompletedProcess = subprocess.run(
             self._makeTargetCommand(
                 MakeTarget.format,
                 filePath=self.filePath,
-                formattedFile=self._formattedFile,
+                formattedPath=formattedPath,
                 formatStyle=formatStyle,
             ),
             capture_output=True,
@@ -107,7 +119,6 @@ class ProgramView:
         if result.returncode != 0:
             raise FormatError(result.stderr.decode())
 
-        formattedPath = os.path.join(self._dir, self._formattedFile)
         return ProgramView(formattedPath, self.lang)
 
     def clear(self, clearSelf: bool = False):
@@ -130,7 +141,7 @@ class ProgramView:
     # TODO: добавить ограничение занимаемой памяти при выполнении теста.
     def test(
         self,
-        testCases: t.List[t.Tuple[str, str]],
+        testCases: list[tuple[str, str]],
         timeLimit: t.Optional[float] = None,
         memoryLimit: t.Optional[float] = None,
     ) -> TestResultList:
@@ -186,6 +197,6 @@ class ProgramView:
         return self._fileName + "-out"
 
     @property
-    def _formattedFile(self) -> str:
-        """Файл после форматирования программы."""
-        return self._fileName + "-fmt" + self._fileExt
+    def _defaultformattedPath(self) -> str:
+        """Путь до отформатированного файла по умолчанию."""
+        return os.path.join(self._dir, self._fileName + "-fmt" + self._fileExt)

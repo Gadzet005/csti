@@ -38,13 +38,20 @@ class format:
             print(formatted.filePath)
     """
 
-    def __init__(self, program: ProgramView, formatStyle: str):
+    def __init__(
+        self,
+        program: ProgramView,
+        formatStyle: str,
+        formattedPath: t.Optional[str] = None,
+    ):
         self._origin: ProgramView = program
         self._formatted: t.Optional[ProgramView] = None
+
         self._formatStyle = formatStyle
+        self._formattedPath = formattedPath
 
     def __enter__(self) -> ProgramView:
-        self._formatted = self._origin.format(self._formatStyle)
+        self._formatted = self._origin.format(self._formatStyle, self._formattedPath)
         return self._formatted
 
     def __exit__(self, *args):
