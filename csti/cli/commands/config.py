@@ -6,60 +6,63 @@ from csti.cli.state import CLIState
 from csti.etc.locale import Locale
 
 
-@click.group("config", help="Настройка приложения.")
+@click.group("config")
 def config():
+    """Настройка приложения."""
     pass
 
 
-@config.command("setup", help="Изменить конфиг.")
+@config.command("setup")
 @click.pass_obj
 def setup(state: CLIState):
-    config = state.app.config
+    """Настроить конфиг."""
+
+    config = state.config
 
     state.print.info("Чтобы пропустить изменение поля нажмите enter.")
     login = inquirer.text(  # type: ignore
-        "Логин: ", default=config.get("user", "login")
+        "Логин: ", default=config["user", "login"]
     ).execute()
-    config.set("user", "login", value=login)
+    config["user", "login"] = login
 
-    currentPassword = config.get("user", "password")
+    currentPassword = config["user", "password"]
     password = inquirer.secret(  # type: ignore
         "Пароль: ", transformer=lambda res: "*" * len(res or currentPassword)
     ).execute()
     if password:
-        config.set("user", "password", value=password)
+        config["user", "password"] = password
 
     name = (
-        inquirer.text("Фамилия: ", default=config.get("user", "name"))  # type: ignore
+        inquirer.text("Фамилия: ", default=config["user", "name"])  # type: ignore
         .execute()
         .capitalize()
     )
-    config.set("user", "name", value=name)
+    config["user", "name"] = name
 
     homeUrl = inquirer.text(  # type: ignore
-        "URL домашней страницы: ", default=config.get("home-url")
+        "URL домашней страницы: ", default=config["home-url"]
     ).execute()
-    config.set("home-url", value=homeUrl)
+    config["home-url"] = homeUrl
 
     locale = inquirer.select(  # type: ignore
         "Выберите язык:",
         choices=[locale.name for locale in Locale],
-        default=config.get("locale").name,
+        default=config["locale"].name,
         filter=lambda loc: Locale[loc],
         vi_mode=True,
     ).execute()
-    config.set("locale", value=locale)
+    config["locale"] = locale
 
     featureChoices = [
         Choice(
             "enable-auto-tests",
             "Включить авто тесты",
-            config.get("features", "enable-auto-tests"),
+            config["features", "enable-auto-tests"],
         ),
         Choice(
             "enable-auto-formatting",
             "Включить авто форматирование",
-            config.get("features", "enable-auto-formatting"),
+            config["features", "enable-auto-formatting"],
         ),
     ]
     enabledFeatures = inquirer.checkbox(  # type: ignore
@@ -67,7 +70,7 @@ def setup(state: CLIState):
     ).execute()
 
     for choice in featureChoices:
-        config.set("features", choice.value, value=choice.value in enabledFeatures)
+        config["features", choice.value] = choice.value in enabledFeatures
 
     config.save()
     state.print.success("Настройка успешно завершена.")

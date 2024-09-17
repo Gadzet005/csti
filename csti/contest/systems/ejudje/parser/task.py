@@ -8,8 +8,8 @@ from csti.contest.solution import Solution, SolutionStatus
 
 class TaskParser(object):
     PARSER_TYPE = "html.parser"
-    TestCase: t.TypeAlias = t.Tuple[str, str]
-    TestCases: t.TypeAlias = t.List[TestCase]
+    TestCase: t.TypeAlias = tuple[str, str]
+    TestCases: t.TypeAlias = list[TestCase]
 
     @staticmethod
     def getName(html: bytes) -> t.Optional[str]:
