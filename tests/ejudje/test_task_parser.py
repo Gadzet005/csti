@@ -37,7 +37,7 @@ class TestTaskParser(unittest.TestCase):
         self.assertEqual(TaskParser.getInfo(self.html), info)
 
     def testGetTests(self):
-        self.assertEqual(list(TaskParser.getTests(self.html)), tests) # type: ignore
+        self.assertEqual(list(TaskParser.getTests(self.html)), tests)  # type: ignore
 
     def testGetLastSolution(self):
         for index in range(0, 2):

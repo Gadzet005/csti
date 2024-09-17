@@ -88,9 +88,9 @@ class DataStorage(abc.ABC):
     @t.overload
     def __getitem__(self, key: str):
         pass
-    
+
     @t.overload
-    def __getitem__(self, location: tuple[str,...]):
+    def __getitem__(self, location: tuple[str, ...]):
         pass
 
     def __getitem__(self, *args, **kwargs):
@@ -99,13 +99,13 @@ class DataStorage(abc.ABC):
             return self.get(location)
         else:
             return self.get(*location)
-    
+
     @t.overload
     def __setitem__(self, key: str, value: t.Any):
         pass
-    
+
     @t.overload
-    def __setitem__(self, location: tuple[str,...], value: t.Any):
+    def __setitem__(self, location: tuple[str, ...], value: t.Any):
         pass
 
     def __setitem__(self, *args, **kwargs):

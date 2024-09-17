@@ -8,9 +8,8 @@ from csti.cli.commands.task import task
 from csti.cli.state import CLIState
 from csti.etc.consts import APP_NAME, APP_VERSION
 
-
 CONTEXT_SETTINGS = {
-    "help_option_names": ['-h', '--help'],
+    "help_option_names": ["-h", "--help"],
 }
 
 

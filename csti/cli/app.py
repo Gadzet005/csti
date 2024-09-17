@@ -10,10 +10,10 @@ from csti.etc.app import RunableApp
 
 class CLIApp(RunableApp):
     def __init__(
-        self, 
-        name: str, 
+        self,
+        name: str,
         config: t.Optional[Config] = None,
-        printer: t.Optional[Printer] = None
+        printer: t.Optional[Printer] = None,
     ):
         config = config or GeneralConfig.forApp(name)
         super().__init__(name, config)

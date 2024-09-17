@@ -13,7 +13,7 @@ from csti.program_view import CompileError, ProgramView, format, prepareForRun
 
 @click.group("task")
 def task():
-    """ Работа с задачами. """
+    """Работа с задачами."""
     pass
 
 
@@ -77,8 +77,7 @@ def selectTask(state: CLIState, id: t.Optional[int] = None):
 )
 @click.pass_obj
 def showInfo(
-    state: CLIState, name: bool, info: bool,
-    cond: bool, tests: bool, solution: bool
+    state: CLIState, name: bool, info: bool, cond: bool, tests: bool, solution: bool
 ):
     """Показать информацию о выбранной задаче."""
 

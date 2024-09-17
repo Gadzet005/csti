@@ -4,9 +4,9 @@ from termcolor import colored
 
 
 class Color:
-    """ 
-    Класс для добавления к тексту escape-последовательностей 
-    (для придания цвета и форматирования). 
+    """
+    Класс для добавления к тексту escape-последовательностей
+    (для придания цвета и форматирования).
     """
 
     Transformer: t.TypeAlias = t.Callable[[str], str]
@@ -20,7 +20,7 @@ class Color:
 
     @staticmethod
     def makeColored(
-        values: tuple[str, ...], 
+        values: tuple[str, ...],
         colorBy: Transformer,
     ) -> tuple[str, ...]:
         """Перекрашивает список строк."""
@@ -30,11 +30,7 @@ class Color:
 class Printer:
     """Класс для цветного вывода в терминал."""
 
-    def __init__(
-        self, 
-        file: t.Optional[t.TextIO] = None, 
-        noColor: bool = False
-    ):
+    def __init__(self, file: t.Optional[t.TextIO] = None, noColor: bool = False):
         self._file = file
         self._noColor = noColor
 

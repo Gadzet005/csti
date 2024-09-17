@@ -39,10 +39,10 @@ class format:
     """
 
     def __init__(
-        self, 
-        program: ProgramView, 
+        self,
+        program: ProgramView,
         formatStyle: str,
-        formattedPath: t.Optional[str] = None
+        formattedPath: t.Optional[str] = None,
     ):
         self._origin: ProgramView = program
         self._formatted: t.Optional[ProgramView] = None
@@ -51,9 +51,7 @@ class format:
         self._formattedPath = formattedPath
 
     def __enter__(self) -> ProgramView:
-        self._formatted = self._origin.format(
-            self._formatStyle, self._formattedPath
-        )
+        self._formatted = self._origin.format(self._formatStyle, self._formattedPath)
         return self._formatted
 
     def __exit__(self, *args):

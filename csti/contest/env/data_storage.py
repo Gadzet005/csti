@@ -2,8 +2,8 @@ import os
 import typing as t
 
 from csti.contest import Contest, Task
-from csti.contest.manager import ContestManager
 from csti.contest.env.exceptions import EnvStorageException
+from csti.contest.manager import ContestManager
 from csti.data_storage import DataStorage, Group, StorageTemplate
 from csti.data_storage.exceptions import FieldNotInitialized
 from csti.data_storage.field import IntField, ListField

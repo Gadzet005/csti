@@ -95,7 +95,7 @@ class TestProgram(unittest.TestCase):
         program = ProgramView(program.filePath, GeneralLanguage.cpp)
         with self.assertRaises(FormatError):
             program.format("don't exists")
-        
+
         formattedPath = ""
         with format(program, "msu-style") as formatted:
             formattedPath = formatted.filePath
@@ -106,14 +106,11 @@ class TestProgram(unittest.TestCase):
             self.assertEqual(originalOutput, formattedOutput)
 
             self.assertEqual(self.some_code_expected.code, formatted.code)
-        
+
         self.assertFalse(os.path.exists(formattedPath))
         self.assertTrue(os.path.exists(program.filePath))
 
-        formattedPath = os.path.join(
-            os.path.dirname(program.filePath),
-            "formatted"
-        )
+        formattedPath = os.path.join(os.path.dirname(program.filePath), "formatted")
         with format(program, "msu-style", formattedPath):
             self.assertTrue(os.path.exists(formattedPath))
         self.assertFalse(os.path.exists(formattedPath))
