@@ -26,7 +26,7 @@ class CLIState:
     @cache
     def env(self) -> ContestEnv:
         return ContestEnv.inCurrentDir()
-    
+
     def createEnv(self, dir: t.Optional[str] = None):
         return ContestEnv.create(dir)
 

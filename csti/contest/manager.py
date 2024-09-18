@@ -1,8 +1,8 @@
 import abc
 
-from csti.config.config import Config
 from csti.contest.api import ContestSystemAPI
 from csti.contest.contest import Contest
+from csti.data_storage.config.config import Config
 
 
 class ContestManager(abc.ABC):

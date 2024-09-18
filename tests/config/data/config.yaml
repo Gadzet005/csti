@@ -5,10 +5,13 @@ num-list:
   - 3
 group:
   num: 1
-  num-list:
-    - 4
+  invalid-num-list:
+    - str
     - 5
     - 6
-  group:
+  invalid-num-list2: hello world
+  group1:
     name: hello world
     bool-list: [true, false, true]
+  
+enum: MAYBE

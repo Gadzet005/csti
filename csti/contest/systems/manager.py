@@ -1,6 +1,6 @@
-from csti.config.config import Config
 from csti.contest.manager import ContestManager
 from csti.contest.systems.ejudje import EjudjeAPI
+from csti.data_storage.config.config import Config
 
 
 def getManager(config: Config) -> ContestManager:

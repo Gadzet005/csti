@@ -4,9 +4,9 @@ import typing as t
 
 from platformdirs import user_config_dir
 
-from csti.config.config import YAMLConfig
-from csti.data_storage import StorageTemplate, Group
-from csti.config.field import StringField, EnumField, BoolField
+from csti.data_storage import Group, StorageTemplate
+from csti.data_storage.config import YAMLConfig
+from csti.data_storage.config.field import BoolField, EnumField, StringField
 from csti.etc.locale import Locale
 
 
@@ -23,15 +23,15 @@ class GeneralConfig(YAMLConfig):
                 [StringField("login"), StringField("password"), StringField("name")],
             ),
             StringField("home-url"),
-            EnumField("locale", enumType=Locale, defaultValue=Locale.russian),
+            EnumField("locale", enumType=Locale, default=Locale.russian),
             Group(
                 "features",
                 [
-                    BoolField("enable-auto-tests", defaultValue=True),
-                    BoolField("enable-auto-formatting", defaultValue=True),
+                    BoolField("enable-auto-tests", default=True),
+                    BoolField("enable-auto-formatting", default=True),
                 ],
             ),
-            BoolField("debug", defaultValue=False),
+            BoolField("debug", default=False),
         ]
     )
 
