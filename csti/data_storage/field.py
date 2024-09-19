@@ -14,11 +14,11 @@ class Field(abc.ABC, TemplateElement):
     Common: t.TypeAlias = t.Any
 
     @t.overload
-    def __init__(self, name: str=""): ...
+    def __init__(self, name: str = ""): ...
     @t.overload
-    def __init__(self, name: str="", *, default: Common): ...
+    def __init__(self, name: str = "", *, default: Common): ...
 
-    def __init__(self, name: str="", **kwargs):
+    def __init__(self, name: str = "", **kwargs):
         super().__init__(name)
 
         self._hasDefault = "default" in kwargs
@@ -56,7 +56,7 @@ class StringField(Field):
         if isinstance(value, str):
             return True, value
         return False, None
-    
+
     def deserialize(self, value: str) -> tuple[bool, t.Optional[str]]:
         if isinstance(value, str):
             return True, value
@@ -65,11 +65,11 @@ class StringField(Field):
 
 class EnumField(Field):
     @t.overload
-    def __init__(self, name: str="", *, enumType: t.Type[Enum]): ...
+    def __init__(self, name: str = "", *, enumType: t.Type[Enum]): ...
     @t.overload
-    def __init__(self, name: str="", *, enumType: t.Type[Enum], default: Enum): ...
+    def __init__(self, name: str = "", *, enumType: t.Type[Enum], default: Enum): ...
 
-    def __init__(self, name: str="", *, enumType: t.Type[Enum], **kwargs):
+    def __init__(self, name: str = "", *, enumType: t.Type[Enum], **kwargs):
         super().__init__(name, **kwargs)
         self._enumType = enumType
 
@@ -89,12 +89,12 @@ class EnumField(Field):
 
 class BaseListField(Field):
     @t.overload
-    def __init__(self, name: str="", item: Field = StringField()): ...
+    def __init__(self, name: str = "", item: Field = StringField()): ...
     @t.overload
     def __init__(
-        self, name: str="", item: Field = StringField(), *, default: list
+        self, name: str = "", item: Field = StringField(), *, default: list
     ): ...
 
-    def __init__(self, name: str="", item: Field = StringField(), **kwargs):
+    def __init__(self, name: str = "", item: Field = StringField(), **kwargs):
         super().__init__(name, **kwargs)
         self._item = item

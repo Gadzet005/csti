@@ -31,7 +31,7 @@ class TestYAMLConfig(FileTestCase):
         self.assertEqual(config["number"], 200)
         self.assertEqual(config["default_number"], 1000)
         self.assertEqual(config["invalid_number"], 0)
-    
+
     def testStringField(self):
         config = StringConfig(self.useData("string_config.yaml"))
         config.load()
@@ -40,7 +40,7 @@ class TestYAMLConfig(FileTestCase):
         self.assertEqual(config["default_name"], "Bob")
         with self.assertRaises(FieldValueError):
             config["invalid_name"]
-        
+
         with self.assertRaises(FieldValueError):
             config["name"] = 123
 
@@ -97,7 +97,7 @@ class TestYAMLConfig(FileTestCase):
         self.assertEqual(config["color"], Color.green)
         self.assertEqual(config["default_color"], Color.red)
         self.assertEqual(config["invalid_color"], Color.blue)
-    
+
     def testListField(self):
         config = ListConfig(self.useData("list_config.yaml"))
         config.load()
@@ -134,7 +134,7 @@ class TestYAMLConfig(FileTestCase):
         self.assertEqual(config["numbers"], [4, 5, 6])
         self.assertEqual(config["invalid_numbers"], [])
         self.assertEqual(config["matrix"], [[1, 2], [3, 4, 5], [6, 7, 8, 9]])
-    
+
     def testGroup(self):
         config = GroupConfig(self.useData("group_config.yaml"))
         config.load()
@@ -152,7 +152,7 @@ class TestYAMLConfig(FileTestCase):
             config["group1", "invalid_num"]
         with self.assertRaises(FieldValueError):
             config["group2", "group1", "flag"] = None
-        
+
         config["group2", "group2", "num"] = 10
         config["group2", "group2", "name"] = "buy"
         config.save()
@@ -161,25 +161,23 @@ class TestYAMLConfig(FileTestCase):
         config.load()
         self.assertEqual(config["group2", "group2", "num"], 10)
         self.assertEqual(config["group2", "group2", "name"], "buy")
-        
+
     def testLoad(self):
         invalid = GroupConfig(self.useData("invalid.yaml"))
         with self.assertRaises(LoadError):
             invalid.load()
 
-        noFound = GroupConfig(
-            os.path.join(self.getTestDir(), "no_fount_config.yaml")
-        )
+        noFound = GroupConfig(os.path.join(self.getTestDir(), "no_fount_config.yaml"))
         with self.assertRaises(LoadError):
             noFound.load()
-        
+
         valid = GroupConfig(self.useData("group_config.yaml"))
 
         with self.assertRaises(FieldIsEmpty):
             valid["group1", "num"]
         valid.load()
         self.assertEqual(valid["group1", "num"], 2)
-    
+
     def testSave(self):
         config = GroupConfig(self.useData("group_config.yaml"))
         config.load()
@@ -245,7 +243,7 @@ class TestYAMLConfig(FileTestCase):
 
         with self.assertRaises(FieldIsEmpty):
             config["number"]
-        
+
         config["number"] = 100
         config["default_number"] = 200
         config.save()

@@ -1,8 +1,9 @@
 import typing as t
+
 import yaml
 
 from csti.data_storage.config.config import Config
-from csti.data_storage.exceptions import SaveError, LoadError
+from csti.data_storage.exceptions import LoadError, SaveError
 
 
 class YAMLConfig(Config):
@@ -23,7 +24,7 @@ class YAMLConfig(Config):
             raise LoadError(f"Не удалось загрузить данные из файла '{self.path}'.")
         except yaml.YAMLError as e:
             raise LoadError(f"Ошибка при загрузке файла '{self.path}': {e}")
-    
+
     def create(self):
         with open(self.path, "w"):
             pass

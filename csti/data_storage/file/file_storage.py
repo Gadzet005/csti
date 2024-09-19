@@ -16,7 +16,7 @@ class FileStorage(DataStorage):
 
     def getPathByLocation(self, location: tuple[str, ...]) -> str:
         return os.path.join(self._dir, *location)
-    
+
     @t.override
     def create(self):
         os.makedirs(self._dir, exist_ok=True)
@@ -28,7 +28,7 @@ class FileStorage(DataStorage):
                 return f.read().strip()
         except FileNotFoundError:
             raise FieldIsEmpty(location)
-        
+
     @t.override
     def _set(self, location: tuple[str, ...], value):
         path = self.getPathByLocation(location)

@@ -1,7 +1,7 @@
-import typing as t
 import os
-import unittest
 import shutil
+import typing as t
+import unittest
 
 
 class TestCase(unittest.TestCase):
@@ -50,10 +50,7 @@ class FileTestCase(TestCase):
 
     @classmethod
     def useData(
-        cls,
-        srcRelPath: str,
-        destRelPath: t.Optional[str] = None,
-        isDir: bool = False
+        cls, srcRelPath: str, destRelPath: t.Optional[str] = None, isDir: bool = False
     ) -> str:
         """
         Копирование файла/директории из `DATA_DIR` в `TEST_DIR`.

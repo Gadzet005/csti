@@ -20,7 +20,7 @@ class BoolField(Field):
         if isinstance(value, bool):
             return True, value
         return False, None
-    
+
     def deserialize(self, value: bool) -> tuple[bool, t.Optional[bool]]:
         if isinstance(value, int):
             return True, value
@@ -53,5 +53,5 @@ class ListField(BaseListField):
             if not success:
                 return False, None
             result.append(deserialized)
-        
+
         return True, result

@@ -8,7 +8,7 @@ class IntField(Field):
         if isinstance(value, int):
             return True, str(value)
         return False, None
-    
+
     def deserialize(self, value: str) -> tuple[bool, t.Optional[int]]:
         if isinstance(value, str):
             try:
@@ -37,23 +37,21 @@ class BoolField(Field):
 class ListField(BaseListField):
     @t.overload
     def __init__(
-        self, 
-        name: str = "", 
-        item: Field = StringField(),
-        separator: str = ", "
+        self, name: str = "", item: Field = StringField(), separator: str = ", "
     ): ...
     @t.overload
     def __init__(
-        self, 
-        name: str = "", 
+        self,
+        name: str = "",
         item: Field = StringField(),
         separator: str = ", ",
-        *, default: list
+        *,
+        default: list
     ): ...
 
     def __init__(
         self,
-        name: str="",
+        name: str = "",
         item: Field = StringField(),
         separator: str = ", ",
         **kwargs
@@ -86,5 +84,5 @@ class ListField(BaseListField):
             if not success:
                 return False, None
             result.append(deserialized)
-        
+
         return True, result

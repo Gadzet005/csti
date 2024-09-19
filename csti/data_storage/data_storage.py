@@ -3,7 +3,7 @@ import typing as t
 
 from csti.data_storage.exceptions import FieldIsEmpty, FieldValueError
 from csti.data_storage.field import Field
-from csti.data_storage.template import StorageTemplate, Group
+from csti.data_storage.template import Group, StorageTemplate
 
 
 class DataStorage(abc.ABC):
@@ -82,7 +82,7 @@ class DataStorage(abc.ABC):
 
     def contains(self, *location: str) -> bool:
         """Проверить наличие данного поля в шаблоне и наличия у него значения."""
-        
+
         # Проверка наличия в шаблоне.
         success, result = self.template.get(*location)
         if not success:

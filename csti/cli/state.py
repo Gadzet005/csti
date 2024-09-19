@@ -2,9 +2,9 @@ import typing as t
 from functools import cache
 
 from csti.cli.utils.print import Printer
-from csti.config import Config
 from csti.contest.env import ContestEnv
 from csti.contest.manager import ContestManager
+from csti.data_storage.config import Config
 
 
 class CLIState:

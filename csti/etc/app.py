@@ -1,6 +1,6 @@
 import abc
 
-from csti.config import Config
+from csti.data_storage.config import Config
 
 
 class App:

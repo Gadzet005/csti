@@ -6,7 +6,7 @@ from csti.data_storage.template_element import TemplateElement
 
 
 class Group(TemplateElement):
-    def __init__(self, name: str="", members: list[TemplateElement] = list()):
+    def __init__(self, name: str = "", members: list[TemplateElement] = list()):
         super().__init__(name)
         self._members = {member.name: member for member in members}
 
@@ -31,7 +31,7 @@ class StorageTemplate:
                 return False, None
 
         return True, cur
-    
+
     def getField(self, *location: str) -> Field:
         success, result = self.get(*location)
         if not success or not isinstance(result, Field):

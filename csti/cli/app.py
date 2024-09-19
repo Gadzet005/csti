@@ -3,8 +3,9 @@ import typing as t
 from csti.cli.commands.root import root
 from csti.cli.state import CLIState
 from csti.cli.utils.print import Printer
-from csti.config import Config, GeneralConfig
+from csti.config import GeneralConfig
 from csti.contest.systems.manager import getManager
+from csti.data_storage.config import Config
 from csti.etc.app import RunableApp
 
 

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import typing as t
 
@@ -15,8 +13,8 @@ class ContestEnv:
         self._dir = dir
         self._storage = EnvDataStorage.fromEnv(dir)
 
-    @staticmethod
-    def create(dir: t.Optional[str] = None) -> ContestEnv:
+    @classmethod
+    def create(cls, dir: t.Optional[str] = None) -> t.Self:
         """
         Инициализирует папку для работы с контестом.
 
@@ -29,7 +27,20 @@ class ContestEnv:
         storage = EnvDataStorage.fromEnv(dir)
         storage.create()
 
-        return ContestEnv(dir)
+        return cls(dir)
+
+    @classmethod
+    def inCurrentDir(cls) -> t.Self:
+        """
+        Проверяет, что рабочая (текущая) директория инициализирована
+        и возвращает экземплер `ContestEnv`.
+        """
+        env = cls(os.getcwd())
+        if not env.isEnvValid:
+            raise ContestEnvException(
+                "Рабочая папка не проинциализирована. Используйте csti init."
+            )
+        return env
 
     def getTaskFile(self, task: Task) -> str:
         return str(task.id) + task.language.defaultfileExtension
@@ -74,19 +85,6 @@ class ContestEnv:
         self.createTaskFiles(tasks)
         self.storage.set("contest", "id", value=contest.id)
         self.storage.set("contest", "currentTaskId", value=tasks[0].id)
-
-    @staticmethod
-    def inCurrentDir() -> ContestEnv:
-        """
-        Проверяет, что рабочая (текущая) директория инициализирована
-        и возвращает экземплер `ContestEnv`.
-        """
-        env = ContestEnv(os.getcwd())
-        if not env.isEnvValid:
-            raise ContestEnvException(
-                "Рабочая папка не проинциализирована. Используйте csti init."
-            )
-        return env
 
     @property
     def dir(self) -> str:

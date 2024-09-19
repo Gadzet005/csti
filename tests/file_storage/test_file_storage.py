@@ -1,4 +1,5 @@
 import os
+
 from csti.data_storage.exceptions import (FieldIsEmpty, FieldNotFound,
                                           FieldValueError)
 from tests.file_storage.storages import *
@@ -102,7 +103,7 @@ class TestFileStorage(FileTestCase):
             storage["enums"] = [1, 2, 3]
         with self.assertRaises(FieldValueError):
             storage["matrix"] = [1, 2, 3]
-        
+
         storage["numbers"] = [4, 5, 6]
         storage["strings"] = ["new", "string"]
         storage["enums"] = [Color.green, Color.blue]
@@ -164,7 +165,7 @@ class TestFileStorage(FileTestCase):
         self.assertFalse(("group1", "name") in storage)
         self.assertFalse(("group1", "invalid_key") in storage)
         self.assertFalse("invalid_key" in storage)
-        self.assertFalse(("group1", "group2")in storage)
+        self.assertFalse(("group1", "group2") in storage)
 
     def testCreate(self):
         storage = GroupStorage(os.path.join(self.getTestDir(), "new"))
