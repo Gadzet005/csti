@@ -18,7 +18,7 @@ class YAMLConfig(Config):
     def load(self):
         try:
             with open(self._path, "r") as file:
-                self._data = yaml.safe_load(file)
+                self._data = yaml.safe_load(file) or {}
         except OSError:
             raise LoadError(f"Не удалось загрузить данные из файла '{self.path}'.")
         except yaml.YAMLError as e:

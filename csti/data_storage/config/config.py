@@ -17,13 +17,16 @@ class Config(SaveLoadStorage):
     @t.override
     def _get(self, location: tuple[str, ...]) -> t.Any:
         cur = self._data
+        *loc, fieldName = location
 
-        for name in location:
+        for name in loc:
             cur = cur.get(name, None)
-            if cur is None:
+            if not isinstance(cur, dict):
                 raise FieldIsEmpty(location)
 
-        return cur
+        if fieldName not in cur:
+            raise FieldIsEmpty(location)
+        return cur.get(fieldName)
 
     @t.override
     def _set(self, location: tuple[str, ...], value: t.Any):

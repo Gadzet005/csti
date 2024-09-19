@@ -1,9 +1,9 @@
 import abc
 import typing as t
 
-from csti.data_storage.exceptions import (FieldIsEmpty, FieldNotFound,
-                                          FieldValueError)
-from csti.data_storage.template import StorageTemplate
+from csti.data_storage.exceptions import FieldIsEmpty, FieldValueError
+from csti.data_storage.field import Field
+from csti.data_storage.template import StorageTemplate, Group
 
 
 class DataStorage(abc.ABC):
@@ -81,16 +81,23 @@ class DataStorage(abc.ABC):
                 raise error
 
     def contains(self, *location: str) -> bool:
-        """Проверить наличие данного поля."""
-        try:
-            try:
-                self.template.getField(*location)
-            except FieldNotFound:
-                return False
+        """Проверить наличие данного поля в шаблоне и наличия у него значения."""
+        
+        # Проверка наличия в шаблоне.
+        success, result = self.template.get(*location)
+        if not success:
+            return False
 
-            self._get(location)
+        if isinstance(result, Field):
+            # Проверка наличия значения у поля
+            try:
+                self._get(location)
+                return True
+            except FieldIsEmpty:
+                return False
+        elif isinstance(result, Group):
             return True
-        except FieldIsEmpty:
+        else:
             return False
 
     def set(self, *location: str, value: t.Any):

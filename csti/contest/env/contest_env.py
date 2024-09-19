@@ -13,7 +13,7 @@ class ContestEnv:
 
     def __init__(self, dir: str):
         self._dir = dir
-        self._storage = EnvDataStorage(dir)
+        self._storage = EnvDataStorage.fromEnv(dir)
 
     @staticmethod
     def create(dir: t.Optional[str] = None) -> ContestEnv:
@@ -26,7 +26,7 @@ class ContestEnv:
         """
         dir = dir or os.getcwd()
 
-        storage = EnvDataStorage(dir)
+        storage = EnvDataStorage.fromEnv(dir)
         storage.create()
 
         return ContestEnv(dir)

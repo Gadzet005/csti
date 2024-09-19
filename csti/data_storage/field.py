@@ -8,25 +8,24 @@ from csti.data_storage.template_element import TemplateElement
 class Field(abc.ABC, TemplateElement):
     """Базовый класс поля в хранилище."""
 
-    # Может быть переопределено в наследниках.
     # Тип для хранения.
-    RAW = t.Any
+    Raw: t.TypeAlias = t.Any
     # Тип для использования.
-    COMMON = t.Any
+    Common: t.TypeAlias = t.Any
 
     @t.overload
-    def __init__(self, name: str): ...
+    def __init__(self, name: str=""): ...
     @t.overload
-    def __init__(self, name: str, *, default: COMMON): ...
+    def __init__(self, name: str="", *, default: Common): ...
 
-    def __init__(self, name: str, **kwargs):
+    def __init__(self, name: str="", **kwargs):
         super().__init__(name)
 
         self._hasDefault = "default" in kwargs
         self._default = kwargs.pop("default", None)
 
     @property
-    def default(self) -> tuple[bool, COMMON]:
+    def default(self) -> tuple[bool, Common]:
         """
         Кортеж из двух элементов: имеется ли значение
         по умолчанию и значение по умолчанию или `None`
@@ -34,7 +33,7 @@ class Field(abc.ABC, TemplateElement):
         return self._hasDefault, self._default
 
     @abc.abstractmethod
-    def serialize(self, value: COMMON) -> tuple[bool, t.Optional[RAW]]:
+    def serialize(self, value: Common) -> tuple[bool, t.Optional[Raw]]:
         """
         Объект для использования -> объект для хранения.
         Возвращает кортеж из двух элементов:
@@ -43,7 +42,7 @@ class Field(abc.ABC, TemplateElement):
         pass
 
     @abc.abstractmethod
-    def deserialize(self, value: RAW) -> tuple[bool, t.Optional[COMMON]]:
+    def deserialize(self, value: Raw) -> tuple[bool, t.Optional[Common]]:
         """
         Объект для хранения -> объект для использования.
         Возвращает кортеж из двух элементов:
@@ -52,55 +51,36 @@ class Field(abc.ABC, TemplateElement):
         pass
 
 
-class TypeField(Field):
-    RAW = type
-    COMMON = type
-
-    @t.override
-    def serialize(self, value: COMMON) -> tuple[bool, t.Optional[RAW]]:
-        if not isinstance(value, self.COMMON):
-            return False, None
-        try:
-            return True, self.RAW(value)
-        except ValueError:
-            return False, None
-
-    @t.override
-    def deserialize(self, value: RAW) -> tuple[bool, t.Optional[COMMON]]:
-        if not isinstance(value, self.RAW):
-            return False, None
-        try:
-            return True, self.COMMON(value)
-        except ValueError:
-            return False, None
-
-
-class StringField(TypeField):
-    RAW = str
-    COMMON = str
+class StringField(Field):
+    def serialize(self, value: str) -> tuple[bool, t.Optional[str]]:
+        if isinstance(value, str):
+            return True, value
+        return False, None
+    
+    def deserialize(self, value: str) -> tuple[bool, t.Optional[str]]:
+        if isinstance(value, str):
+            return True, value
+        return False, None
 
 
 class EnumField(Field):
-    RAW = str
-    COMMON = Enum
-
     @t.overload
-    def __init__(self, name: str, enumType: t.Type[Enum]): ...
+    def __init__(self, name: str="", *, enumType: t.Type[Enum]): ...
     @t.overload
-    def __init__(self, name: str, enumType: t.Type[Enum], *, default: COMMON): ...
+    def __init__(self, name: str="", *, enumType: t.Type[Enum], default: Enum): ...
 
-    def __init__(self, name: str, enumType: t.Type[Enum], **kwargs):
+    def __init__(self, name: str="", *, enumType: t.Type[Enum], **kwargs):
         super().__init__(name, **kwargs)
         self._enumType = enumType
 
     @t.override
-    def serialize(self, value: COMMON) -> tuple[bool, t.Optional[RAW]]:
-        if isinstance(value, self.COMMON):
+    def serialize(self, value: Enum) -> tuple[bool, t.Optional[str]]:
+        if isinstance(value, Enum):
             return True, value.name
         return False, None
 
     @t.override
-    def deserialize(self, value: RAW) -> tuple[bool, t.Optional[COMMON]]:
+    def deserialize(self, value: str) -> tuple[bool, t.Optional[Enum]]:
         try:
             return True, self._enumType[value]
         except KeyError:
@@ -108,15 +88,13 @@ class EnumField(Field):
 
 
 class BaseListField(Field):
-    COMMON = list
-
     @t.overload
-    def __init__(self, name: str, memberField: t.Type[Field] = StringField): ...
+    def __init__(self, name: str="", item: Field = StringField()): ...
     @t.overload
     def __init__(
-        self, name: str, memberField: t.Type[Field] = StringField, *, default: COMMON
+        self, name: str="", item: Field = StringField(), *, default: list
     ): ...
 
-    def __init__(self, name: str, memberField: t.Type[Field] = StringField, **kwargs):
+    def __init__(self, name: str="", item: Field = StringField(), **kwargs):
         super().__init__(name, **kwargs)
-        self._memberField = memberField("")
+        self._item = item

@@ -26,21 +26,9 @@ class EnvDataStorage(FileStorage):
         ]
     )
 
-    def __init__(self, envDir: str):
-        super().__init__()
-        self._dir = os.path.join(envDir, self.FOLDER)
-
-    @property
-    def dir(self) -> str:
-        return self._dir
-
-    @t.override
-    def create(self):
-        os.makedirs(self.dir, exist_ok=True)
-
-    @t.override
-    def getPathByLocation(self, location: tuple[str, ...]):
-        return os.path.join(self._dir, *location)
+    @classmethod
+    def fromEnv(cls, envDir: str) -> t.Self:
+        return cls(os.path.join(envDir, cls.FOLDER))
 
     def loadContest(self, manager: ContestManager) -> Contest:
         try:

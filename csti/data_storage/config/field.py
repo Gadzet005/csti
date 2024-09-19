@@ -3,28 +3,39 @@ import typing as t
 from csti.data_storage.field import *
 
 
-class IntField(TypeField):
-    RAW = int
-    COMMON = int
+class IntField(Field):
+    def serialize(self, value: int) -> tuple[bool, t.Optional[int]]:
+        if isinstance(value, int):
+            return True, value
+        return False, None
+
+    def deserialize(self, value: int) -> tuple[bool, t.Optional[int]]:
+        if isinstance(value, int):
+            return True, value
+        return False, None
 
 
-class BoolField(TypeField):
-    RAW = bool
-    COMMON = bool
+class BoolField(Field):
+    def serialize(self, value: bool) -> tuple[bool, t.Optional[bool]]:
+        if isinstance(value, bool):
+            return True, value
+        return False, None
+    
+    def deserialize(self, value: bool) -> tuple[bool, t.Optional[bool]]:
+        if isinstance(value, int):
+            return True, value
+        return False, None
 
 
 class ListField(BaseListField):
-    RAW = list
-    COMMON = list
-
     @t.override
-    def serialize(self, value: COMMON) -> tuple[bool, t.Optional[RAW]]:
-        if not isinstance(value, self.COMMON):
+    def serialize(self, value: list) -> tuple[bool, t.Optional[list]]:
+        if not isinstance(value, list):
             return False, None
-        result = []
 
+        result = []
         for item in value:
-            success, serialized = self._memberField.serialize(item)
+            success, serialized = self._item.serialize(item)
             if not success:
                 return False, None
             result.append(serialized)
@@ -32,13 +43,13 @@ class ListField(BaseListField):
         return True, result
 
     @t.override
-    def deserialize(self, value: RAW) -> tuple[bool, t.Optional[COMMON]]:
-        if not isinstance(value, self.RAW):
+    def deserialize(self, value: list) -> tuple[bool, t.Optional[list]]:
+        if not isinstance(value, list):
             return False, None
-        result = []
 
+        result = []
         for item in value:
-            success, deserialized = self._memberField.deserialize(item)
+            success, deserialized = self._item.deserialize(item)
             if not success:
                 return False, None
             result.append(deserialized)
