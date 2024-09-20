@@ -2,7 +2,7 @@ import os
 import typing as t
 
 from csti.contest import Contest, Task
-from csti.contest.env.exceptions import EnvStorageException
+from csti.contest.env.exceptions import EnvStorageError
 from csti.contest.manager import ContestManager
 from csti.data_storage import Group, StorageTemplate
 from csti.data_storage.exceptions import FieldIsEmpty
@@ -27,7 +27,7 @@ class EnvDataStorage(FileStorage):
     )
 
     @classmethod
-    def fromEnv(cls, envDir: str) -> t.Self:
+    def forEnv(cls, envDir: str) -> t.Self:
         return cls(os.path.join(envDir, cls.FOLDER))
 
     def loadContest(self, manager: ContestManager) -> Contest:
@@ -35,7 +35,7 @@ class EnvDataStorage(FileStorage):
             id = self.get("contest", "id")
             return manager.getContest(id)
         except FieldIsEmpty:
-            raise EnvStorageException("Контест не выбран.")
+            raise EnvStorageError("Контест не выбран.")
 
     def loadCurrentTask(self, manager: ContestManager) -> Task:
         try:
@@ -43,4 +43,4 @@ class EnvDataStorage(FileStorage):
             taskId = self.get("contest", "currentTaskId")
             return contest.getTask(taskId)
         except:
-            raise EnvStorageException("Задача не выбрана.")
+            raise EnvStorageError("Задача не выбрана.")

@@ -15,13 +15,16 @@ class TestCase(unittest.TestCase):
         return os.path.join(cls.dir(), relativePath)
 
 
-class FileTestCase(TestCase):
-    """Класс для безопасного тестирования работы с файлами."""
+class IsolatedDirCase(TestCase):
+    """
+    Класс для безопасного тестирования работы с файлами.
+    Создает временную директорию, в которой будет происходить тестирование.
+    """
 
     # Может быть переопределено в наследниках.
-    # Директория с файлами.
+    # Директория с файлами, которые мы хотели бы использовать.
     DATA_DIR = "data"
-    # Директория, в которую будут копироваться файлы из DATA_DIR.
+    # Директория, которая будет использоваться для тестирования.
     # После завершения тестов эта директория будет удалена вместе с создержимым.
     TEST_DIR = "test"
 
@@ -36,6 +39,7 @@ class FileTestCase(TestCase):
 
     @classmethod
     def getDataDir(cls, relPath: t.Optional[str] = None) -> str:
+        """Получить абсолютный путь по относительному в директории `DATA`."""
         path = cls.DATA_DIR
         if relPath:
             path = os.path.join(path, relPath)
@@ -43,6 +47,7 @@ class FileTestCase(TestCase):
 
     @classmethod
     def getTestDir(cls, relPath: t.Optional[str] = None) -> str:
+        """Получить абсолютный путь по относительному в директории `TEST`."""
         path = cls.TEST_DIR
         if relPath:
             path = os.path.join(path, relPath)
@@ -50,7 +55,10 @@ class FileTestCase(TestCase):
 
     @classmethod
     def useData(
-        cls, srcRelPath: str, destRelPath: t.Optional[str] = None, isDir: bool = False
+        cls,
+        srcRelPath: str, 
+        destRelPath: t.Optional[str] = None, 
+        isDir: bool = False
     ) -> str:
         """
         Копирование файла/директории из `DATA_DIR` в `TEST_DIR`.

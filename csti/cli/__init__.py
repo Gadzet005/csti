@@ -1,1 +1,2 @@
-from .app import CLIApp
+from .cli import ContestCLI
+from .commands.root import root

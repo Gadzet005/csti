@@ -3,10 +3,10 @@ import os
 from csti.data_storage.exceptions import (FieldIsEmpty, FieldNotFound,
                                           FieldValueError)
 from tests.file_storage.storages import *
-from tests.testcase import FileTestCase
+from tests.testcase import IsolatedDirCase
 
 
-class TestFileStorage(FileTestCase):
+class TestFileStorage(IsolatedDirCase):
     DATA_DIR = "file_storage/data"
     TEST_DIR = "file_storage/test"
 
@@ -145,7 +145,7 @@ class TestFileStorage(FileTestCase):
         with self.assertRaises(FieldNotFound):
             storage["group1", "non_existent_subfield"]
 
-        noFound = GroupStorage(os.path.join(self.getTestDir(), "no_found"))
+        noFound = GroupStorage(self.getTestDir("no_found"))
         with self.assertRaises(FieldIsEmpty):
             noFound["num"]
         with self.assertRaises(FieldIsEmpty):
@@ -168,6 +168,6 @@ class TestFileStorage(FileTestCase):
         self.assertFalse(("group1", "group2") in storage)
 
     def testCreate(self):
-        storage = GroupStorage(os.path.join(self.getTestDir(), "new"))
+        storage = GroupStorage(self.getTestDir("new"))
         storage.create()
         self.assertTrue(os.path.exists(storage.dir))

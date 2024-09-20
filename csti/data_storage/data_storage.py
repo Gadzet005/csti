@@ -11,7 +11,6 @@ class DataStorage(abc.ABC):
 
     template: StorageTemplate = StorageTemplate([])
 
-    @abc.abstractmethod
     def create(self):
         """
         Создание хранилища. Например, создание файлов для хранения.

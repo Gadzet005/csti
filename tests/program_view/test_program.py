@@ -2,10 +2,10 @@ import os
 
 from csti.etc.language import GeneralLanguage
 from csti.program_view import *
-from tests.testcase import FileTestCase
+from tests.testcase import IsolatedDirCase
 
 
-class TestProgram(FileTestCase):
+class TestProgram(IsolatedDirCase):
     DATA_DIR = "program_view/programs"
     TEST_DIR = "program_view/test"
 

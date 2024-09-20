@@ -8,6 +8,7 @@ from csti.data_storage import Group, StorageTemplate
 from csti.data_storage.config import YAMLConfig
 from csti.data_storage.config.field import BoolField, EnumField, StringField
 from csti.etc.locale import Locale
+from csti.contest.systems import ContestSystem
 
 
 class GeneralConfig(YAMLConfig):
@@ -17,7 +18,7 @@ class GeneralConfig(YAMLConfig):
 
     template = StorageTemplate(
         [
-            StringField("contest-system"),
+            EnumField("contest-system", enumType=ContestSystem),
             Group(
                 "user",
                 [StringField("login"), StringField("password"), StringField("name")],
@@ -37,7 +38,8 @@ class GeneralConfig(YAMLConfig):
 
     @classmethod
     def forApp(cls, appName: str) -> t.Self:
-        return cls(user_config_dir(appName) + "/config.yaml")
+        path = os.path.join(user_config_dir(appName), "config.yaml")
+        return cls(path)
 
     @t.override
     def create(self):

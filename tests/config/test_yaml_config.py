@@ -3,10 +3,10 @@ import os
 from csti.data_storage.exceptions import (FieldIsEmpty, FieldNotFound,
                                           FieldValueError, LoadError)
 from tests.config.configs import *
-from tests.testcase import FileTestCase
+from tests.testcase import IsolatedDirCase
 
 
-class TestYAMLConfig(FileTestCase):
+class TestYAMLConfig(IsolatedDirCase):
     DATA_DIR = "config/data"
     TEST_DIR = "config/test"
 
@@ -167,7 +167,7 @@ class TestYAMLConfig(FileTestCase):
         with self.assertRaises(LoadError):
             invalid.load()
 
-        noFound = GroupConfig(os.path.join(self.getTestDir(), "no_fount_config.yaml"))
+        noFound = GroupConfig(self.getTestDir("no_fount_config.yaml"))
         with self.assertRaises(LoadError):
             noFound.load()
 
@@ -189,7 +189,7 @@ class TestYAMLConfig(FileTestCase):
         config.load()
         self.assertEqual(config["group1", "name"], "buy")
 
-        new = GroupConfig(os.path.join(self.getTestDir(), "new.yaml"))
+        new = GroupConfig(self.getTestDir("new.yaml"))
         new["num"] = 1
         new["group1", "num"] = 2
         new.save()
@@ -254,6 +254,6 @@ class TestYAMLConfig(FileTestCase):
         self.assertEqual(config["default_number"], 200)
 
     def testCreate(self):
-        config = GroupConfig(os.path.join(self.getTestDir(), "new_config.yaml"))
+        config = GroupConfig(self.getTestDir("new_config.yaml"))
         config.create()
         self.assertTrue(os.path.exists(config.path))

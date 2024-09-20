@@ -6,16 +6,13 @@ from InquirerPy.base.control import Choice
 
 from csti.cli.commands.contest import contest
 from csti.cli.commands.task import task
-from csti.cli.state import CLIState
+from csti.cli.cli import ContestCLI
 from csti.etc.consts import APP_NAME, APP_VERSION
 from csti.etc.locale import Locale
-
-CONTEXT_SETTINGS = {
-    "help_option_names": ["-h", "--help"],
-}
+from csti.contest.env import ContestEnv
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group()
 @click.version_option(APP_VERSION, "-v", "--version", package_name=APP_NAME)
 def root():
     """CSTI - Contest System Terminal Interface."""
@@ -27,23 +24,30 @@ root.add_command(task)
 
 
 @root.command("init")
-@click.argument("dir", type=click.Path(exists=True), required=False)
+@click.argument("dir", type=click.Path(), required=False)
 @click.pass_obj
-def init(state: CLIState, dir: t.Optional[str]):
-    """Инициализировать папку для работы с контестом."""
+def init(cli: ContestCLI, dir: t.Optional[str]):
+    """Инициализировать директорию для работы с контестом."""
 
-    state.createEnv(dir)
-    state.print.success("Инициализация завершена.")
+    env = cli.getEnv(dir, False)
+    alreadyInitialized = env.isInitialized
+
+    env.init()
+
+    if alreadyInitialized:
+        cli.print.success("Повторная инициализация директории.")
+    else:
+        cli.print.success("Директория инициализирована.")
 
 
 @root.command("configure")
 @click.pass_obj
-def configure(state: CLIState):
+def configure(cli: ContestCLI):
     """Настроить конфиг."""
 
-    config = state.config
+    config = cli.config
 
-    state.print.info("Чтобы пропустить изменение поля нажмите enter.")
+    cli.print.info("Чтобы пропустить изменение поля нажмите enter.")
     login = inquirer.text(  # type: ignore
         "Логин: ", default=config["user", "login"]
     ).execute()
@@ -97,4 +101,4 @@ def configure(state: CLIState):
         config["features", choice.value] = choice.value in enabledFeatures
 
     config.save()
-    state.print.success("Настройка успешно завершена.")
+    cli.print.success("Настройка успешно завершена.")
