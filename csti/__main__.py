@@ -1,10 +1,17 @@
-from csti.cli.app import CLIApp
-from csti.etc.consts import APP_NAME
+from csti.cli import ContestCLI, root
 
 
 def main():
-    app = CLIApp(APP_NAME)
-    app.run()
+    cli = ContestCLI()
+    debug = cli.config.get("debug")
+
+    try:
+        root(obj=cli)
+    except Exception as error:
+        if debug:
+            raise error
+        else:
+            cli.print.error(f"Ошибка выполнения: {error}")
 
 
 if __name__ == "__main__":

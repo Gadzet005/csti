@@ -1,0 +1,11 @@
+num: 1
+group1:
+  invalid_num: null
+  num: 2
+group2:
+  group1:
+    num: 3
+    flag: true
+  group2:
+    num: 4
+    name: world

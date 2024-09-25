@@ -4,7 +4,7 @@ import typing as t
 import click
 from InquirerPy import inquirer
 
-from csti.cli.state import CLIState
+from csti.cli.cli import ContestCLI
 from csti.cli.utils.print import Printer
 from csti.cli.utils.print_test_results import printTestResults
 from csti.etc.language import GeneralLanguage, Language
@@ -20,14 +20,17 @@ def task():
 @task.command("select")
 @click.argument("id", type=int, required=False)
 @click.pass_obj
-def selectTask(state: CLIState, id: t.Optional[int] = None):
+def selectTask(cli: ContestCLI, id: t.Optional[int] = None):
     """Выбрать задачу."""
-    contest = state.env.storage.loadContest(state.manager)
+
+    env = cli.getEnv()
+    manager = env.getContestManager()
+    contest = env.storage.loadContest(manager)
     task = contest.getTask(id) if id is not None else None
 
     if task is None or not task.isValid:
         if task is not None:
-            state.print.warning("Задача отсутствует. Выберите из списка.")
+            cli.print.warning("Задача отсутствует. Выберите из списка.")
 
         tasks = contest.getTasks()
         taskNames = list(map(lambda task: task.name, tasks))
@@ -41,14 +44,14 @@ def selectTask(state: CLIState, id: t.Optional[int] = None):
 
         task = tasks[taskIdx]
 
-    currentTaskId = state.env.storage.get("contest", "currentTaskId", default=None)
+    currentTaskId = env.storage.get("contest", "currentTaskId", default=None)
     if currentTaskId is not None and currentTaskId == task.id:
-        state.print.warning("Эта задача уже выбрана.")
+        cli.print.warning("Эта задача уже выбрана.")
         return
 
-    state.env.createTaskFiles([task], update=True)
-    state.env.storage.set("contest", "currentTaskId", value=task.id)
-    state.print.success(f"Задача успешно выбрана: {task.name}.")
+    env.createTaskFiles([task], update=True)
+    env.storage.set("contest", "currentTaskId", value=task.id)
+    cli.print.success(f"Задача успешно выбрана: {task.name}.")
 
 
 @task.command("info")
@@ -77,16 +80,18 @@ def selectTask(state: CLIState, id: t.Optional[int] = None):
 )
 @click.pass_obj
 def showInfo(
-    state: CLIState, name: bool, info: bool, cond: bool, tests: bool, solution: bool
+    cli: ContestCLI, name: bool, info: bool, cond: bool, tests: bool, solution: bool
 ):
     """Показать информацию о выбранной задаче."""
 
-    task = state.env.storage.loadCurrentTask(state.manager)
+    env = cli.getEnv()
+    manager = env.getContestManager()
+    task = env.storage.loadCurrentTask(manager)
 
     flags = [name, info, cond, tests, solution]
     shouldPrintAll = not any(flags) or all(flags)
 
-    taskPrint = state.print if shouldPrintAll else Printer(state.print.file, True)
+    taskPrint = cli.print if shouldPrintAll else Printer(cli.print.file, True)
 
     if name or shouldPrintAll:
         taskPrint.primary(task.name, end="\n\n")
@@ -149,7 +154,7 @@ def showInfo(
 )
 @click.pass_obj
 def sendTask(
-    state: CLIState,
+    cli: ContestCLI,
     file: t.Optional[str],
     lang: str,
     no_tests: bool,
@@ -158,26 +163,28 @@ def sendTask(
 ):
     """Отправить задачу на проверку."""
 
-    task = state.env.storage.loadCurrentTask(state.manager)
+    env = cli.getEnv()
+    manager = env.getContestManager()
+    task = env.storage.loadCurrentTask(manager)
 
     if file is None:
-        file = state.env.getTaskFile(task)
-        path = os.path.join(state.env.dir, file)
+        file = env.getTaskFile(task)
+        path = os.path.join(env.dir, file)
         if os.path.exists(path):
-            state.print.info(f"Файл для отправки: '{file}'.")
+            cli.print.info(f"Файл для отправки: '{file}'.")
         else:
-            state.print.warning(f"Файл по пути '{path}' не найден.")
+            cli.print.warning(f"Файл по пути '{path}' не найден.")
             return
 
     if not no_tests:
-        no_tests = not state.config.get("features", "enable-auto-tests")
+        no_tests = not cli.config.get("features", "enable-auto-tests")
     if not no_format:
-        no_format = not state.config.get("features", "enable-auto-formatting")
+        no_format = not cli.config.get("features", "enable-auto-formatting")
 
     if lang != "auto":
         selected = GeneralLanguage.fromName(lang)
         if selected is None:
-            state.print.warning(f"Неизвестный язык программирования: {lang}.")
+            cli.print.warning(f"Неизвестный язык программирования: {lang}.")
             return
         taskLang: Language = selected
     else:
@@ -189,7 +196,7 @@ def sendTask(
     if not no_tests:
         allTestsPassed = True
         try:
-            state.print.primary("Запуск тестов...")
+            cli.print.primary("Запуск тестов...")
             with prepareForRun(program):
                 testResults = program.test(
                     task.inputExample,
@@ -197,14 +204,14 @@ def sendTask(
                     task.memoryLimit,
                 )
                 allTestsPassed = testResults.arePassedAll
-                printTestResults(testResults, state.print)
+                printTestResults(testResults, cli.print)
         except CompileError as error:
-            state.print.error(f"Ошибка компиляции файла '{file}':")
-            state.print(error)
+            cli.print.error(f"Ошибка компиляции файла '{file}':")
+            cli.print(error)
             allTestsPassed = False
 
         if not allTestsPassed:
-            state.print.primary("Решение не было отправлено.")
+            cli.print.primary("Решение не было отправлено.")
             return
 
     # Подтверждение отправки решения
@@ -221,9 +228,9 @@ def sendTask(
         if no_format or len(program.lang.availableformatStyles) == 0:
             task.sendSolution(program)
         else:
-            state.print.primary("Форматирование кода...")
+            cli.print.primary("Форматирование кода...")
             with format(program, program.lang.availableformatStyles[0]) as formatted:
                 task.sendSolution(formatted)
-        state.print.success("Решение успешно отправлено.")
+        cli.print.success("Решение успешно отправлено.")
     else:
-        state.print.primary("Решение не было отправлено.")
+        cli.print.primary("Решение не было отправлено.")

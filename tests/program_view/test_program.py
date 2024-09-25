@@ -1,33 +1,32 @@
 import os
-import unittest
 
 from csti.etc.language import GeneralLanguage
 from csti.program_view import *
+from tests.testcase import IsolatedDirCase
 
 
-class TestProgram(unittest.TestCase):
-    PROGRAMS_DIR = "tests/program_view/programs"
+class TestProgram(IsolatedDirCase):
+    DATA_DIR = "program_view/programs"
+    TEST_DIR = "program_view/test"
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.copyAll()
 
     def setUp(self):
-        self.divide = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "divide.cpp"), GeneralLanguage.cpp
-        )
-        self.add = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "add.c"), GeneralLanguage.c
-        )
+        self.divide = ProgramView(self.getTestDir("divide.cpp"), GeneralLanguage.cpp)
+        self.add = ProgramView(self.getTestDir("add.c"), GeneralLanguage.c)
         self.compileError = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "compile_error.c"), GeneralLanguage.c
+            self.getTestDir("compile_error.c"), GeneralLanguage.c
         )
-        self.some_code = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "some_code.cpp"), GeneralLanguage.cpp
+        self.someCode = ProgramView(
+            self.getTestDir("some_code.cpp"), GeneralLanguage.cpp
         )
-        self.some_code_expected = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "some_code_expected.cpp"),
-            GeneralLanguage.cpp,
+        self.someCodeExpected = ProgramView(
+            self.getTestDir("some_code_expected.cpp"), GeneralLanguage.cpp
         )
-        self.cicle = ProgramView(
-            os.path.join(self.PROGRAMS_DIR, "cicle.c"), GeneralLanguage.c
-        )
+        self.cicle = ProgramView(self.getTestDir("cicle.c"), GeneralLanguage.c)
 
     def testCompile(self):
         """Тестирование компиляции."""
@@ -43,14 +42,15 @@ class TestProgram(unittest.TestCase):
         with self.assertRaises(CompileError):
             self.compileError.compile()
 
-        with prepareForRun(self.add):
-            pass
+        self.add.compile()
+        self.add.compile()
 
     def testCAddProgram(self):
         """Компиляция и запуск программы, складывающей два числа."""
 
+        self.add.clear()
         with self.assertRaises(RunError):
-            self.add.run()
+            self.add.run(timeLimit=0.1)
 
         with prepareForRun(self.add):
             output = self.add.run("1 2")
@@ -61,14 +61,14 @@ class TestProgram(unittest.TestCase):
         self.assertFalse(os.path.exists(self.add._outputFile))
 
         with self.assertRaises(RunError):
-            self.add.run()
-        self.add.clear()
+            self.add.run(timeLimit=0.1)
 
     def testCppDivideProgram(self):
         """Компиляция и запуск программы, делящей два числа."""
 
+        self.divide.clear()
         with self.assertRaises(RunError):
-            self.divide.run()
+            self.divide.run(timeLimit=0.1)
 
         with prepareForRun(self.divide):
             output = self.divide.run("10 5")
@@ -88,7 +88,7 @@ class TestProgram(unittest.TestCase):
     def testFormat(self):
         """Тестирование форматирования программы."""
 
-        program = ProgramView(self.some_code.filePath, GeneralLanguage.nasm)
+        program = ProgramView(self.someCode.filePath, GeneralLanguage.nasm)
         with self.assertRaises(FormatError):
             program.format("msu-style")
 
@@ -105,7 +105,7 @@ class TestProgram(unittest.TestCase):
             formattedOutput = run(formatted)
             self.assertEqual(originalOutput, formattedOutput)
 
-            self.assertEqual(self.some_code_expected.code, formatted.code)
+            self.assertEqual(self.someCodeExpected.code, formatted.code)
 
         self.assertFalse(os.path.exists(formattedPath))
         self.assertTrue(os.path.exists(program.filePath))
@@ -116,7 +116,7 @@ class TestProgram(unittest.TestCase):
         self.assertFalse(os.path.exists(formattedPath))
 
     def testProgramTest(self):
-        """Тестирование запуска тестов для программы"""
+        """Тестирование запуска тестов для программы."""
 
         testCases = [
             ("10 5", "2"),
@@ -136,8 +136,33 @@ class TestProgram(unittest.TestCase):
             self.assertEqual(results[3].status, TestStatus.runtimeError)
 
     def testTimeout(self):
-        """Тестирование превышения времени ожидания"""
+        """Тестирование превышения времени ожидания."""
 
         with prepareForRun(self.cicle):
             with self.assertRaises(TimeoutError):
                 self.cicle.run(timeLimit=0.1)
+
+    def testClear(self):
+        """Тестирование очистки временных файлов."""
+
+        path = self.useData("add.c", "add/add.c")
+        add = ProgramView(path, GeneralLanguage.c)
+        add.compile()
+        add.run("1 2")
+        add.clear()
+
+        files = os.listdir(os.path.dirname(add.filePath))
+        self.assertEqual(len(files), 1)
+        self.assertEqual(files[0], os.path.basename(add.filePath))
+
+    def testNameConflict(self):
+        """Тестирование конфликта имен временных файлов."""
+        program1 = self.add
+
+        path = os.path.join(os.path.dirname(self.add.filePath), "add.cpp")
+        program2 = self.divide.format("msu-style", path)
+
+        program1.compile()
+        self.assertEqual(program1.run("4 2"), "6\n")
+        program2.compile()
+        self.assertEqual(program2.run("4 2"), "2\n")

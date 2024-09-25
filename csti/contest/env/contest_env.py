@@ -1,35 +1,72 @@
-from __future__ import annotations
-
 import os
 import typing as t
 
 from csti.contest import Contest, Task
 from csti.contest.env.data_storage import EnvDataStorage
-from csti.contest.env.exceptions import ContestEnvException
+from csti.contest.env.exceptions import EnvNotInitialized
+from csti.contest.manager import ContestManager
+from csti.contest.systems import ContestSystem
+from csti.etc.consts import APP_NAME
+from csti.storage.config import Config
+from csti.storage.config.tuner import ConfigTuner
 
 
 class ContestEnv:
-    """Управляет папкой для работы с контестом."""
+    """Управляет директорией для работы с контестом."""
 
-    def __init__(self, dir: str):
-        self._dir = dir
-        self._storage = EnvDataStorage(dir)
+    DATA_DIR = "." + APP_NAME
+    CONFIG_FILE = "config.yaml"
 
-    @staticmethod
-    def create(dir: t.Optional[str] = None) -> ContestEnv:
+    def __init__(self, dir: t.Optional[str] = None):
+        self._dir = dir or os.getcwd()
+        self._storage = EnvDataStorage(self.dataDir)
+
+    def create(self, system: ContestSystem):
+        """Инициализирует директорию для работы с контестом."""
+
+        os.makedirs(self.dataDir, exist_ok=True)
+        self.storage.create()
+        self.storage["contest-system"] = system
+        self.getConfig().create()
+
+    @property
+    def dir(self) -> str:
+        return self._dir
+
+    @property
+    def dataDir(self) -> str:
+        return os.path.join(self.dir, self.DATA_DIR)
+
+    @property
+    def storage(self) -> EnvDataStorage:
+        return self._storage
+
+    @property
+    def isInitialized(self) -> bool:
+        return os.path.exists(self.dataDir)
+
+    def assertInitialized(self):
         """
-        Инициализирует папку для работы с контестом.
-
-        :param dir:
-            Директория для инициализации.
-            Если dir = `None`, то инициализирует текущую директорию.
+        Если директория не инициализирована,
+        выбрасывает исключение `EnvNotInitialized`.
         """
-        dir = dir or os.getcwd()
+        if not self.isInitialized:
+            raise EnvNotInitialized
 
-        storage = EnvDataStorage(dir)
-        storage.create()
+    @property
+    def system(self) -> ContestSystem:
+        return self.storage.get("contest-system")
 
-        return ContestEnv(dir)
+    def getConfig(self) -> Config:
+        path = os.path.join(self.dataDir, self.CONFIG_FILE)
+        config = self.system.config(path)
+        return config
+
+    def getConfigTuner(self) -> ConfigTuner:
+        return self.system.configTuner(self.getConfig())
+
+    def getContestManager(self) -> ContestManager:
+        return ContestManager(self.system.api(self.getConfig()))
 
     def getTaskFile(self, task: Task) -> str:
         return str(task.id) + task.language.defaultfileExtension
@@ -63,7 +100,7 @@ class ContestEnv:
 
         if update:
             taskFiles += self.storage.get("contest", "taskFiles")
-        self.storage.set("contest", "taskFiles", value=taskFiles)
+        self.storage["contest", "taskFiles"] = taskFiles
 
     def selectContest(self, contest: Contest):
         """Смена контеста в рабочей директории."""
@@ -72,31 +109,5 @@ class ContestEnv:
 
         self.clearTaskFiles()
         self.createTaskFiles(tasks)
-        self.storage.set("contest", "id", value=contest.id)
-        self.storage.set("contest", "currentTaskId", value=tasks[0].id)
-
-    @staticmethod
-    def inCurrentDir() -> ContestEnv:
-        """
-        Проверяет, что рабочая (текущая) директория инициализирована
-        и возвращает экземплер `ContestEnv`.
-        """
-        env = ContestEnv(os.getcwd())
-        if not env.isEnvValid:
-            raise ContestEnvException(
-                "Рабочая папка не проинциализирована. Используйте csti init."
-            )
-        return env
-
-    @property
-    def dir(self) -> str:
-        return self._dir
-
-    @property
-    def storage(self) -> EnvDataStorage:
-        return self._storage
-
-    @property
-    def isEnvValid(self) -> bool:
-        """Инициализирована ли рабочая директория?"""
-        return os.path.exists(self.storage.dir)
+        self.storage["contest", "id"] = contest.id
+        self.storage["contest", "currentTaskId"] = tasks[0].id
