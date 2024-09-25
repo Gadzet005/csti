@@ -1,6 +1,6 @@
 import typing as t
 
-from csti.data_storage.field import *
+from csti.storage.field import *
 
 
 class IntField(Field):

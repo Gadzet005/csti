@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import abc
 import typing as t
 
-from csti.data_storage.config.config import Config
+from csti.storage.config import Config
 from csti.etc.language import GeneralLanguage, Language
 
 
@@ -15,6 +13,7 @@ class ContestSystemAPI(abc.ABC):
 
     def __init__(self, config: Config):
         self._config = config
+        self._config.load()
 
     @abc.abstractmethod
     def getContestIds(cls) -> list[int]:

@@ -1,8 +1,9 @@
 import typing as t
+from copy import deepcopy
 
-from csti.data_storage.exceptions import FieldNotFound
-from csti.data_storage.field import Field
-from csti.data_storage.template_element import TemplateElement
+from csti.storage.exceptions import FieldNotFound
+from csti.storage.field import Field
+from csti.storage.template_element import TemplateElement
 
 
 class Group(TemplateElement):
@@ -12,6 +13,10 @@ class Group(TemplateElement):
 
     def get(self, name: str) -> TemplateElement:
         return self._members.get(name)  # type: ignore
+
+    def extend(self, newMembers: list[TemplateElement]):
+        for member in newMembers:
+            self._members[member.name] = member
 
 
 class StorageTemplate:
@@ -37,3 +42,9 @@ class StorageTemplate:
         if not success or not isinstance(result, Field):
             raise FieldNotFound(location)
         return result
+    
+    def extend(self, newMembers: list[TemplateElement]) -> t.Self:
+        """ Расширяет шаблон новыми полями. """
+        new = deepcopy(self)
+        new._rootGroup.extend(newMembers)
+        return new

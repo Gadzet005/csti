@@ -2,9 +2,9 @@ import os
 import typing as t
 from enum import Enum
 
-from csti.data_storage import Group, StorageTemplate
-from csti.data_storage.file import FileStorage
-from csti.data_storage.file.field import *
+from csti.storage import Group, StorageTemplate
+from csti.storage.file import FileStorage
+from csti.storage.file.field import *
 
 
 class IntStorage(FileStorage):

@@ -1,8 +1,8 @@
 import os
 import typing as t
 
-from csti.data_storage import DataStorage
-from csti.data_storage.exceptions import FieldIsEmpty
+from csti.storage import DataStorage
+from csti.storage.exceptions import FieldIsEmpty
 
 
 class FileStorage(DataStorage):
@@ -15,11 +15,7 @@ class FileStorage(DataStorage):
         return self._dir
 
     def getPathByLocation(self, location: tuple[str, ...]) -> str:
-        return os.path.join(self._dir, *location)
-
-    @t.override
-    def create(self):
-        os.makedirs(self._dir, exist_ok=True)
+        return os.path.join(self.dir, *location)
 
     @t.override
     def _get(self, location: tuple[str, ...]) -> t.Any:
@@ -35,3 +31,6 @@ class FileStorage(DataStorage):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             f.write(value)
+
+    def create(self):
+        os.makedirs(self.dir, exist_ok=True)

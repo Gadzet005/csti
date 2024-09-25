@@ -7,7 +7,7 @@ from csti.contest.api import ContestSystemAPI
 from csti.contest.exceptions import AuthException
 from csti.contest.systems.ejudje.language import EjudjeLanguage
 from csti.contest.systems.ejudje.parser import ContestParser, TaskParser
-from csti.data_storage.config.config import Config
+from csti.storage.config import Config
 
 
 class EjudjeAPI(ContestSystemAPI):

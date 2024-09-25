@@ -1,33 +1,42 @@
 import os
 import typing as t
 
+from csti.storage.config.tuner import ConfigTuner
 from csti.contest import Contest, Task
 from csti.contest.env.data_storage import EnvDataStorage
-from csti.contest.env.exceptions import EnvNotInitialized, EnvError
+from csti.contest.env.exceptions import EnvNotInitialized
+from csti.contest.manager import ContestManager
+from csti.etc.consts import APP_NAME
+from csti.storage.config import Config
+from csti.contest.systems import ContestSystem
 
 
 class ContestEnv:
     """Управляет директорией для работы с контестом."""
 
-    def __init__(
-        self, 
-        dir: t.Optional[str] = None, 
-        assertInitialized: bool = True
-    ):
+    DATA_DIR = "." + APP_NAME
+    CONFIG_FILE = "config.yaml"
+
+    def __init__(self, dir: t.Optional[str] = None):
         self._dir = dir or os.getcwd()
-        self._storage = EnvDataStorage.forEnv(self._dir)
+        self._storage = EnvDataStorage(self.dataDir)
 
-        if assertInitialized:
-            self.assertInitialized()
-
-    def init(self):
+    def create(self, system: ContestSystem):
         """Инициализирует директорию для работы с контестом."""
-        os.makedirs(self.dir, exist_ok=True)
+
+        os.makedirs(self.dataDir, exist_ok=True)
         self.storage.create()
+        self.storage["contest-system"] = system
+        self.getConfig().create()
+
 
     @property
     def dir(self) -> str:
         return self._dir
+
+    @property
+    def dataDir(self) -> str:
+        return os.path.join(self.dir, self.DATA_DIR)
 
     @property
     def storage(self) -> EnvDataStorage:
@@ -35,7 +44,7 @@ class ContestEnv:
 
     @property
     def isInitialized(self) -> bool:
-        return os.path.exists(self.storage.dir)
+        return os.path.exists(self.dataDir)
 
     def assertInitialized(self):
         """
@@ -44,6 +53,22 @@ class ContestEnv:
         """
         if not self.isInitialized:
             raise EnvNotInitialized
+
+
+    @property
+    def system(self) -> ContestSystem:
+        return self.storage.get("contest-system")
+
+    def getConfig(self) -> Config:
+        path = os.path.join(self.dataDir, self.CONFIG_FILE)
+        config = self.system.config(path)
+        return config
+
+    def getConfigTuner(self) -> ConfigTuner:
+        return self.system.configTuner(self.getConfig())
+
+    def getContestManager(self) -> ContestManager:
+        return ContestManager(self.system.api(self.getConfig()))
 
 
     def getTaskFile(self, task: Task) -> str:
@@ -78,7 +103,7 @@ class ContestEnv:
 
         if update:
             taskFiles += self.storage.get("contest", "taskFiles")
-        self.storage.set("contest", "taskFiles", value=taskFiles)
+        self.storage["contest", "taskFiles"] = taskFiles
 
     def selectContest(self, contest: Contest):
         """Смена контеста в рабочей директории."""
@@ -87,5 +112,5 @@ class ContestEnv:
 
         self.clearTaskFiles()
         self.createTaskFiles(tasks)
-        self.storage.set("contest", "id", value=contest.id)
-        self.storage.set("contest", "currentTaskId", value=tasks[0].id)
+        self.storage["contest", "id"] = contest.id
+        self.storage["contest", "currentTaskId"] = tasks[0].id

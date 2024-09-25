@@ -1,6 +1,6 @@
 import os
 
-from csti.data_storage.exceptions import (FieldIsEmpty, FieldNotFound,
+from csti.storage.exceptions import (FieldIsEmpty, FieldNotFound,
                                           FieldValueError, LoadError)
 from tests.config.configs import *
 from tests.testcase import IsolatedDirCase

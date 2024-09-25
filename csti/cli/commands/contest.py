@@ -26,16 +26,17 @@ def select(cli: ContestCLI, id: t.Optional[int], force: bool):
     """Выбрать контест."""
 
     env = cli.getEnv()
+    manager = env.getContestManager()
 
     contest = None
     if id:
-        contest = cli.manager.getContest(id)
+        contest = manager.getContest(id)
 
     if contest is None or not contest.isValid:
         if contest is not None:
             cli.print.warning("Контест с таким id отсутствует. Выберите из списка.")
 
-        contests = cli.manager.getContests()
+        contests = manager.getContests()
         contestNames = [contest.name for contest in contests]
 
         contestIdx = inquirer.rawlist(  # type: ignore
@@ -63,7 +64,8 @@ def showInfo(cli: ContestCLI):
     """Информация о текущем контесте."""
 
     env = cli.getEnv()
-    contest = env.storage.loadContest(cli.manager)
+    manager = env.getContestManager()
+    contest = env.storage.loadContest(manager)
 
     cli.print.primary(contest.name)
     for task in contest.getTasks():

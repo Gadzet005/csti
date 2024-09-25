@@ -1,6 +1,6 @@
 import typing as t
 
-from csti.data_storage.config import Config
+from csti.storage.config import Config
 
 
 class TestConfig(Config):
@@ -13,8 +13,9 @@ class TestConfig(Config):
         pass
 
     @t.override
-    def load(self):
+    def load(self, force: bool = True):
         pass
+
 
 config = TestConfig({
     "contest-system": "ejudje"

@@ -1,8 +1,8 @@
 from enum import Enum
 
-from csti.data_storage import Group, StorageTemplate
-from csti.data_storage.config import YAMLConfig
-from csti.data_storage.config.field import *
+from csti.storage import Group, StorageTemplate
+from csti.storage.config import YAMLConfig
+from csti.storage.config.field import *
 
 
 class IntConfig(YAMLConfig):

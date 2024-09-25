@@ -2,8 +2,8 @@ import typing as t
 
 import yaml
 
-from csti.data_storage.config.config import Config
-from csti.data_storage.exceptions import LoadError, SaveError
+from csti.storage.config.config import Config
+from csti.storage.exceptions import LoadError, SaveError
 
 
 class YAMLConfig(Config):
@@ -16,7 +16,8 @@ class YAMLConfig(Config):
             raise SaveError(f"Не удалось сохранить данные в файл '{self.path}'.")
 
     @t.override
-    def load(self):
+    def load(self, force: bool = False):
+        super().load(force)
         try:
             with open(self._path, "r") as file:
                 self._data = yaml.safe_load(file) or {}
@@ -24,7 +25,3 @@ class YAMLConfig(Config):
             raise LoadError(f"Не удалось загрузить данные из файла '{self.path}'.")
         except yaml.YAMLError as e:
             raise LoadError(f"Ошибка при загрузке файла '{self.path}': {e}")
-
-    def create(self):
-        with open(self.path, "w"):
-            pass

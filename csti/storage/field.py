@@ -2,7 +2,7 @@ import abc
 import typing as t
 from enum import Enum
 
-from csti.data_storage.template_element import TemplateElement
+from csti.storage.template_element import TemplateElement
 
 
 class Field(abc.ABC, TemplateElement):

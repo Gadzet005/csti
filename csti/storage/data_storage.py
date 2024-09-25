@@ -1,22 +1,15 @@
 import abc
 import typing as t
 
-from csti.data_storage.exceptions import FieldIsEmpty, FieldValueError
-from csti.data_storage.field import Field
-from csti.data_storage.template import Group, StorageTemplate
+from csti.storage.exceptions import FieldIsEmpty, FieldValueError
+from csti.storage.field import Field
+from csti.storage.template import Group, StorageTemplate
 
 
-class DataStorage(abc.ABC):
-    """Интерфейс для работы с хранилищем данных."""
+class ReadOnlyStorage(abc.ABC):
+    """Интерфейс для просмотра данных в хранилище."""
 
     template: StorageTemplate = StorageTemplate([])
-
-    def create(self):
-        """
-        Создание хранилища. Например, создание файлов для хранения.
-        Если хранилище уже создано, то ничего не происходит.
-        """
-        pass
 
     @abc.abstractmethod
     def _get(self, location: tuple[str, ...]) -> t.Any:
@@ -24,11 +17,6 @@ class DataStorage(abc.ABC):
         Получение значения без какой-либо обработки.
         Ошибка `FieldIsEmpty`, если значение не найдено.
         """
-        pass
-
-    @abc.abstractmethod
-    def _set(self, location: tuple[str, ...], value: t.Any):
-        """Выставление значения без какой-либо обработки."""
         pass
 
     @t.overload
@@ -99,18 +87,6 @@ class DataStorage(abc.ABC):
         else:
             return False
 
-    def set(self, *location: str, value: t.Any):
-        """
-        По аналогии с `get`
-        Ошибка `FieldValueError`, если `value` нельзя присвоить полю.
-        """
-
-        field = self.template.getField(*location)
-        success, result = field.serialize(value)
-        if not success:
-            raise FieldValueError(location, value)
-        self._set(location, result)
-
     @t.overload
     def __getitem__(self, key: str): ...
     @t.overload
@@ -124,18 +100,6 @@ class DataStorage(abc.ABC):
             return self.get(*location)
 
     @t.overload
-    def __setitem__(self, key: str, value: t.Any): ...
-    @t.overload
-    def __setitem__(self, location: tuple[str, ...], value: t.Any): ...
-
-    def __setitem__(self, *args, **kwargs):
-        location, value = args
-        if isinstance(location, str):
-            return self.set(location, value=value)
-        else:
-            return self.set(*location, value=value)
-
-    @t.overload
     def __contains__(self, key: str): ...
     @t.overload
     def __contains__(self, location: tuple[str, ...]): ...
@@ -146,6 +110,46 @@ class DataStorage(abc.ABC):
             return self.contains(location)
         else:
             return self.contains(*location)
+
+
+class DataStorage(ReadOnlyStorage):
+    """Интерфейс для работы с хранилищем данных."""
+    
+    def create(self):
+        """
+        Создание хранилища. Например, создание файлов для хранения.
+        Если хранилище уже создано, то ничего не изменяется.
+        """
+        pass
+
+    @abc.abstractmethod
+    def _set(self, location: tuple[str, ...], value: t.Any):
+        """Выставление значения без какой-либо обработки."""
+        pass
+
+    def set(self, *location: str, value: t.Any):
+        """
+        По аналогии с `get`
+        Ошибка `FieldValueError`, если `value` нельзя присвоить полю.
+        """
+
+        field = self.template.getField(*location)
+        success, result = field.serialize(value)
+        if not success:
+            raise FieldValueError(location, value)
+        self._set(location, result)
+
+    @t.overload
+    def __setitem__(self, key: str, value: t.Any): ...
+    @t.overload
+    def __setitem__(self, location: tuple[str, ...], value: t.Any): ...
+
+    def __setitem__(self, *args, **kwargs):
+        location, value = args
+        if isinstance(location, str):
+            return self.set(location, value=value)
+        else:
+            return self.set(*location, value=value)
 
 
 class SaveLoadStorage(DataStorage):

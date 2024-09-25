@@ -1,7 +1,8 @@
+import os
 import typing as t
 
-from csti.data_storage import SaveLoadStorage
-from csti.data_storage.exceptions import FieldIsEmpty
+from csti.storage import SaveLoadStorage
+from csti.storage.exceptions import FieldIsEmpty
 
 
 class Config(SaveLoadStorage):
@@ -9,6 +10,7 @@ class Config(SaveLoadStorage):
         super().__init__()
         self._path = path
         self._data = {}
+        self._isLoaded = False
 
     @property
     def path(self) -> str:
@@ -39,3 +41,15 @@ class Config(SaveLoadStorage):
             cur = cur.get(name)  # type: ignore
 
         cur[fieldName] = value
+
+    @t.override
+    def create(self):
+        if not os.path.exists(self.path):
+            with open(self.path, "w"):
+                pass
+    
+    @t.override
+    def load(self, force: bool = False):
+        if self._isLoaded and not force:
+            return
+        self._isLoaded = True

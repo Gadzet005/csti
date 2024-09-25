@@ -24,7 +24,8 @@ def selectTask(cli: ContestCLI, id: t.Optional[int] = None):
     """Выбрать задачу."""
 
     env = cli.getEnv()
-    contest = env.storage.loadContest(cli.manager)
+    manager = env.getContestManager()
+    contest = env.storage.loadContest(manager)
     task = contest.getTask(id) if id is not None else None
 
     if task is None or not task.isValid:
@@ -84,7 +85,8 @@ def showInfo(
     """Показать информацию о выбранной задаче."""
 
     env = cli.getEnv()
-    task = env.storage.loadCurrentTask(cli.manager)
+    manager = env.getContestManager()
+    task = env.storage.loadCurrentTask(manager)
 
     flags = [name, info, cond, tests, solution]
     shouldPrintAll = not any(flags) or all(flags)
@@ -162,7 +164,8 @@ def sendTask(
     """Отправить задачу на проверку."""
 
     env = cli.getEnv()
-    task = env.storage.loadCurrentTask(cli.manager)
+    manager = env.getContestManager()
+    task = env.storage.loadCurrentTask(manager)
 
     if file is None:
         file = env.getTaskFile(task)

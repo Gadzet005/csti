@@ -1,18 +1,14 @@
-import os
-import typing as t
-
 from csti.contest import Contest, Task
 from csti.contest.env.exceptions import EnvStorageError
 from csti.contest.manager import ContestManager
-from csti.data_storage import Group, StorageTemplate
-from csti.data_storage.exceptions import FieldIsEmpty
-from csti.data_storage.file import FileStorage
-from csti.data_storage.file.field import IntField, ListField
-from csti.etc.consts import APP_NAME
+from csti.contest.systems.supported import SupportedContestSystem
+from csti.storage import Group, StorageTemplate
+from csti.storage.exceptions import FieldIsEmpty
+from csti.storage.file import FileStorage
+from csti.storage.file.field import EnumField, IntField, ListField
 
 
 class EnvDataStorage(FileStorage):
-    FOLDER = "." + APP_NAME
     template = StorageTemplate(
         [
             Group(
@@ -22,14 +18,11 @@ class EnvDataStorage(FileStorage):
                     IntField("currentTaskId"),
                     ListField("taskFiles", default=[], separator="\n"),
                 ],
-            )
+            ),
+            EnumField("contest-system", enumType=SupportedContestSystem),
         ]
     )
-
-    @classmethod
-    def forEnv(cls, envDir: str) -> t.Self:
-        return cls(os.path.join(envDir, cls.FOLDER))
-
+    
     def loadContest(self, manager: ContestManager) -> Contest:
         try:
             id = self.get("contest", "id")

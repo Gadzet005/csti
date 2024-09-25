@@ -1,49 +1,40 @@
 import typing as t
 
 from csti.cli.utils.print import Printer
-from csti.config import GeneralConfig
+from csti.storage.config.general import GeneralConfig
 from csti.contest.env import ContestEnv
-from csti.contest.manager import ContestManager
-from csti.contest.systems import ContestSystem
-from csti.data_storage.config import Config
+from csti.storage.config import Config
 from csti.etc.consts import APP_NAME
+from csti.contest.systems import ContestSystem
 
 
 class ContestCLI:
     def __init__(
         self,
-        config: Config,
-        manager: ContestManager,
+        config: t.Optional[Config] = None,
+        env: t.Optional[ContestEnv] = None,
         printer: t.Optional[Printer] = None,
-    ):
-        self._config = config
-        self._manager = manager
+    ):  
+        self._config = config or GeneralConfig.forApp(APP_NAME)
+        self._env = env or ContestEnv()
         self._printer = printer or Printer()
 
-    @classmethod
-    def init(cls):
-        config = GeneralConfig.forApp(APP_NAME)
-        config.create()
-        config.load()
-
-        contestSystem: ContestSystem = config.get("contest-system")
-        return cls(config, ContestManager(contestSystem.api))
+        self._config.create()
+        self._config.load()
 
     @property
     def config(self) -> Config:
         return self._config
-
+    
     @property
     def print(self) -> Printer:
         return self._printer
 
-    @property
-    def manager(self) -> ContestManager:
-        return self._manager
+    def getEnv(self, checkExists: bool = True) -> ContestEnv:
+        if checkExists:
+            self._env.assertInitialized()
+        return self._env
 
-    def getEnv(
-        self, 
-        dir: t.Optional[str] = None, 
-        assertInitialized: bool = True
-    ):
-        return ContestEnv(dir, assertInitialized)
+    def createEnv(self, dir: t.Optional[str], system: ContestSystem):
+        self._env = ContestEnv(dir)
+        self._env.create(system)

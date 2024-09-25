@@ -2,7 +2,7 @@ from csti.cli import ContestCLI, root
 
 
 def main():
-    cli = ContestCLI.init()
+    cli = ContestCLI()
     debug = cli.config.get("debug")
 
     try:
