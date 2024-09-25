@@ -22,7 +22,7 @@ class EnvDataStorage(FileStorage):
             EnumField("contest-system", enumType=SupportedContestSystem),
         ]
     )
-    
+
     def loadContest(self, manager: ContestManager) -> Contest:
         try:
             id = self.get("contest", "id")

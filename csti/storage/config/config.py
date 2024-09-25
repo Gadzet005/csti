@@ -47,7 +47,7 @@ class Config(SaveLoadStorage):
         if not os.path.exists(self.path):
             with open(self.path, "w"):
                 pass
-    
+
     @t.override
     def load(self, force: bool = False):
         if self._isLoaded and not force:

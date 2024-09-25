@@ -3,12 +3,13 @@ import typing as t
 import click
 from InquirerPy import inquirer
 
+from csti.cli.cli import ContestCLI
 from csti.cli.commands.contest import contest
 from csti.cli.commands.task import task
-from csti.cli.cli import ContestCLI
-from csti.etc.consts import APP_NAME, APP_VERSION
-from csti.contest.systems import SupportedContestSystem
+from csti.cli.general_config_tuner import GeneralConfigTuner
 from csti.contest.env import ContestEnv
+from csti.contest.systems import SupportedContestSystem
+from csti.etc.consts import APP_NAME, APP_VERSION
 
 
 @click.group()
@@ -34,7 +35,7 @@ def init(cli: ContestCLI, dir: t.Optional[str]):
         )
         return
 
-    system = inquirer.select( # type: ignore
+    system = inquirer.select(  # type: ignore
         "Выберите систему контестов:",
         choices=[system.name for system in SupportedContestSystem],
         filter=lambda system: SupportedContestSystem[system],
@@ -51,13 +52,25 @@ def init(cli: ContestCLI, dir: t.Optional[str]):
 
 
 @root.command("configure")
+@click.option(
+    "-g",
+    "--global",
+    "_global",
+    is_flag=True,
+    default=False,
+    help="Если включено, то настраивается глобальный конфиг, иначе - локальный.",
+)
 @click.pass_obj
-def configure(cli: ContestCLI):
+def configure(cli: ContestCLI, _global: bool):
     """Настроить конфиг."""
 
     cli.print.info("Чтобы пропустить изменение поля нажмите enter.")
 
-    tuner = cli.getEnv().getConfigTuner()
+    tuner = None
+    if _global:
+        tuner = GeneralConfigTuner(cli.config)
+    else:
+        tuner = cli.getEnv().getConfigTuner()
     tuner.tune()
-    
+
     cli.print.success("Настройка успешно завершена.")

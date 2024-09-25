@@ -55,10 +55,7 @@ class IsolatedDirCase(TestCase):
 
     @classmethod
     def useData(
-        cls,
-        srcRelPath: str, 
-        destRelPath: t.Optional[str] = None, 
-        isDir: bool = False
+        cls, srcRelPath: str, destRelPath: t.Optional[str] = None, isDir: bool = False
     ) -> str:
         """
         Копирование файла/директории из `DATA_DIR` в `TEST_DIR`.

@@ -1,11 +1,12 @@
 import typing as t
+
 from InquirerPy import inquirer
 
 from csti.contest.systems.ejudje.locale import Locale
 from csti.storage import Group, StorageTemplate
+from csti.storage.config import YAMLConfig
 from csti.storage.config.field import EnumField, StringField
 from csti.storage.config.tuner import ConfigTuner
-from csti.storage.config import YAMLConfig
 
 
 class EjudjeConfig(YAMLConfig):
@@ -32,8 +33,9 @@ class EjudjeConfigTuner(ConfigTuner):
 
         currentPassword = self.config.get("user", "password", default="")
         password = inquirer.secret(  # type: ignore
-            "Пароль: ", transformer=lambda res: "*" * len(res or currentPassword),
-            validate=lambda res: res or currentPassword
+            "Пароль: ",
+            transformer=lambda res: "*" * len(res or currentPassword),
+            validate=lambda res: res or currentPassword,
         ).execute()
         if password:
             self.config["user", "password"] = password

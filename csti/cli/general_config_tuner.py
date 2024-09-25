@@ -1,4 +1,5 @@
 import typing as t
+
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 
@@ -22,7 +23,7 @@ class GeneralConfigTuner(ConfigTuner):
                 self.config["features", "enable-auto-formatting"],
             ),
         ]
-        
+
         enabledFeatures = inquirer.checkbox(  # type: ignore
             message="Настройка функций.", choices=featureChoices, vi_mode=True
         ).execute()

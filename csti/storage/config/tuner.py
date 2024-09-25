@@ -1,10 +1,11 @@
-import typing as t
 import abc
+import typing as t
+
 from csti.storage.config import Config
 
 
 class ConfigTuner(abc.ABC):
-    """ Класс для настройки конфига через cli."""
+    """Класс для настройки конфига через cli."""
 
     FieldName: t.TypeAlias = str | tuple[str, ...]
 

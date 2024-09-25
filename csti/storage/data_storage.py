@@ -114,7 +114,7 @@ class ReadOnlyStorage(abc.ABC):
 
 class DataStorage(ReadOnlyStorage):
     """Интерфейс для работы с хранилищем данных."""
-    
+
     def create(self):
         """
         Создание хранилища. Например, создание файлов для хранения.

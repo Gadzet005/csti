@@ -1,14 +1,14 @@
 import os
 import typing as t
 
-from csti.storage.config.tuner import ConfigTuner
 from csti.contest import Contest, Task
 from csti.contest.env.data_storage import EnvDataStorage
 from csti.contest.env.exceptions import EnvNotInitialized
 from csti.contest.manager import ContestManager
+from csti.contest.systems import ContestSystem
 from csti.etc.consts import APP_NAME
 from csti.storage.config import Config
-from csti.contest.systems import ContestSystem
+from csti.storage.config.tuner import ConfigTuner
 
 
 class ContestEnv:
@@ -29,7 +29,6 @@ class ContestEnv:
         self.storage["contest-system"] = system
         self.getConfig().create()
 
-
     @property
     def dir(self) -> str:
         return self._dir
@@ -48,12 +47,11 @@ class ContestEnv:
 
     def assertInitialized(self):
         """
-        Если директория не инициализирована, 
+        Если директория не инициализирована,
         выбрасывает исключение `EnvNotInitialized`.
         """
         if not self.isInitialized:
             raise EnvNotInitialized
-
 
     @property
     def system(self) -> ContestSystem:
@@ -69,7 +67,6 @@ class ContestEnv:
 
     def getContestManager(self) -> ContestManager:
         return ContestManager(self.system.api(self.getConfig()))
-
 
     def getTaskFile(self, task: Task) -> str:
         return str(task.id) + task.language.defaultfileExtension

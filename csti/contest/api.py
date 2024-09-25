@@ -1,8 +1,8 @@
 import abc
 import typing as t
 
-from csti.storage.config import Config
 from csti.etc.language import GeneralLanguage, Language
+from csti.storage.config import Config
 
 
 class ContestSystemAPI(abc.ABC):

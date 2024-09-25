@@ -42,9 +42,9 @@ class StorageTemplate:
         if not success or not isinstance(result, Field):
             raise FieldNotFound(location)
         return result
-    
+
     def extend(self, newMembers: list[TemplateElement]) -> t.Self:
-        """ Расширяет шаблон новыми полями. """
+        """Расширяет шаблон новыми полями."""
         new = deepcopy(self)
         new._rootGroup.extend(newMembers)
         return new
