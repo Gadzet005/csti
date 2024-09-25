@@ -41,7 +41,8 @@ def select(cli: ContestCLI, id: t.Optional[int], force: bool):
 
         contestIdx = inquirer.rawlist(  # type: ignore
             message="Контест:",
-            choices=[contest.name for contest in contests],
+            choices=contestNames,
+            default=len(contestNames),
             vi_mode=True,
             filter=lambda x: contestNames.index(x),
         ).execute()

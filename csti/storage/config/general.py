@@ -4,7 +4,7 @@ import typing as t
 from platformdirs import user_config_dir
 
 from csti.storage import Group, StorageTemplate
-from csti.storage.config import YAMLConfig
+from csti.storage.config.yaml import YAMLConfig
 from csti.storage.config.field import BoolField
 
 
