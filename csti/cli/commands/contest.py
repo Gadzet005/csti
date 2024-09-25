@@ -36,11 +36,13 @@ def select(state: CLIState, id: t.Optional[int], force: bool):
             state.print.warning("Контест с таким id отсутствует. Выберите из списка.")
 
         contests = state.manager.getContests()
+        lastElementIndex = len(contests)
         contestNames = [contest.name for contest in contests]
 
         contestIdx = inquirer.rawlist(  # type: ignore
             message="Контест:",
-            choices=[contest.name for contest in contests],
+            choices=contestNames,
+            default=lastElementIndex,
             vi_mode=True,
             filter=lambda x: contestNames.index(x),
         ).execute()
