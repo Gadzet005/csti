@@ -37,8 +37,7 @@ def init(cli: ContestCLI, dir: t.Optional[str]):
 
     system = inquirer.select(  # type: ignore
         "Выберите систему контестов:",
-        choices=[system.name for system in SupportedContestSystem],
-        filter=lambda system: SupportedContestSystem[system],
+        choices=[system for system in SupportedContestSystem],
         vi_mode=True,
     ).execute()
 

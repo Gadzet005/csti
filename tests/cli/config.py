@@ -17,4 +17,4 @@ class TestConfig(Config):
         pass
 
 
-config = TestConfig({"contest-system": "ejudje"})
+config = TestConfig({"contest-system": "contest solutions"})

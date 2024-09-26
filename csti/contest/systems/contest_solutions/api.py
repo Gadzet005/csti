@@ -5,16 +5,16 @@ import requests
 
 from csti.contest.api import ContestSystemAPI
 from csti.contest.exceptions import AuthException
-from csti.contest.systems.ejudje.language import EjudjeLanguage
-from csti.contest.systems.ejudje.parser import ContestParser, TaskParser
+from csti.contest.systems.contest_solutions.language import ContestSolutionsLanguage
+from csti.contest.systems.contest_solutions.parser import ContestParser, TaskParser
 from csti.storage.config import Config
 
 
-class EjudjeAPI(ContestSystemAPI):
+class ContestSolutionsAPI(ContestSystemAPI):
     URL = "https://contest.solutions"
     REQUEST_URL = URL + "/cgi-bin/new-client"
     BAD_SESSION_ID = "0000000000000000"
-    Lang = EjudjeLanguage
+    Lang = ContestSolutionsLanguage
 
     _sessionCache: dict[int, tuple[str, str]] = {}
 
@@ -80,12 +80,12 @@ class EjudjeAPI(ContestSystemAPI):
         return response.content
 
     @cache
-    def _getContestIds(self) -> list[int]:
+    def _getContestIds(self) -> set[int]:
         homePage = self._getHomePage()
-        return ContestParser.getContestLocalIds(homePage)
+        return set(ContestParser.getContestLocalIds(homePage))
 
     @t.override
-    def getContestIds(self) -> list[int]:
+    def getContestIds(self) -> set[int]:
         return self._getContestIds()
 
     @cache
@@ -150,7 +150,7 @@ class EjudjeAPI(ContestSystemAPI):
             "remainingAttempts": int(info["Оставшиеся посылки"]),
             "isSolved": False,
             "solutions": solutions,
-            "languageIds": [EjudjeLanguage.nasm.id],
+            "languageIds": [ContestSolutionsLanguage.nasm.id],
         }
 
     @t.override

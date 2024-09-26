@@ -3,13 +3,13 @@ from enum import Enum
 
 
 class SolutionStatus(Enum):
-    accepted_for_review = "Принято на проверку"
-    wrang_answer = "Неправильный ответ"
-    compilation_error = "Ошибка компиляции"
-    execution_error = "Ошибка выполнения"
-    bad_output_format = "Неправильный формат вывода"
-    unclassified_error = "Не классифицированная ошибка"
-    time_limit = "Превышено максимальное время работы"
+    acceptedForReview = "Принято на проверку"
+    wrongAnswer = "Неправильный ответ"
+    compilationError = "Ошибка компиляции"
+    runtimeError = "Ошибка выполнения"
+    badOuputFormat = "Неправильный формат вывода"
+    unclassifiedError = "Не классифицированная ошибка"
+    timeLimit = "Превышено максимальное время работы"
 
 
 @dataclass
