@@ -16,7 +16,7 @@ class EnvDataStorage(FileStorage):
                 [
                     IntField("id"),
                     IntField("currentTaskId"),
-                    ListField("taskFiles", default=[], separator="\n"),
+                    ListField("taskIds", item=IntField(), default=[]),
                 ],
             ),
             EnumField("contest-system", enumType=SupportedContestSystem),
@@ -35,5 +35,13 @@ class EnvDataStorage(FileStorage):
             contest = self.loadContest(manager)
             taskId = self.get("contest", "currentTaskId")
             return contest.getTask(taskId)
-        except:
+        except FieldIsEmpty:
             raise EnvStorageError("Задача не выбрана.")
+
+    def loadTasks(self, manager: ContestManager) -> list[Task]:
+        try:
+            contest = self.loadContest(manager)
+            ids = self.get("contest", "taskIds")
+            return [contest.getTask(taskId) for taskId in ids]
+        except EnvStorageError:
+            return []

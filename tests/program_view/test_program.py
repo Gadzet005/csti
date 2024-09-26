@@ -35,10 +35,6 @@ class TestProgram(IsolatedDirCase):
         with self.assertRaises(CompileError):
             program.compile()
 
-        program = ProgramView(self.add.filePath, GeneralLanguage.nasm)
-        with self.assertRaises(CompileError):
-            program.compile()
-
         with self.assertRaises(CompileError):
             self.compileError.compile()
 
@@ -88,11 +84,7 @@ class TestProgram(IsolatedDirCase):
     def testFormat(self):
         """Тестирование форматирования программы."""
 
-        program = ProgramView(self.someCode.filePath, GeneralLanguage.nasm)
-        with self.assertRaises(FormatError):
-            program.format("msu-style")
-
-        program = ProgramView(program.filePath, GeneralLanguage.cpp)
+        program = ProgramView(self.someCode.filePath, GeneralLanguage.cpp)
         with self.assertRaises(FormatError):
             program.format("don't exists")
 

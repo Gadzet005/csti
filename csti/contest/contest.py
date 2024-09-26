@@ -44,3 +44,6 @@ class Contest:
 
     def getTask(self, taskId: int) -> Task:
         return Task(taskId, self._id, self._api)
+
+    def __str__(self) -> str:
+        return self.name

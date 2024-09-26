@@ -4,14 +4,17 @@ from enum import Enum
 
 from csti.storage.template_element import TemplateElement
 
+# Тип для хранения.
+Raw: t.TypeAlias = t.Any
+RawResult: t.TypeAlias = tuple[bool, t.Optional[Raw]]
+
+# Тип для использования.
+Common: t.TypeAlias = t.Any
+CommonResult: t.TypeAlias = tuple[bool, t.Optional[Common]]
+
 
 class Field(abc.ABC, TemplateElement):
     """Базовый класс поля в хранилище."""
-
-    # Тип для хранения.
-    Raw: t.TypeAlias = t.Any
-    # Тип для использования.
-    Common: t.TypeAlias = t.Any
 
     @t.overload
     def __init__(self, name: str = ""): ...
@@ -33,7 +36,7 @@ class Field(abc.ABC, TemplateElement):
         return self._hasDefault, self._default
 
     @abc.abstractmethod
-    def serialize(self, value: Common) -> tuple[bool, t.Optional[Raw]]:
+    def serialize(self, value: Common) -> RawResult:
         """
         Объект для использования -> объект для хранения.
         Возвращает кортеж из двух элементов:
@@ -42,7 +45,7 @@ class Field(abc.ABC, TemplateElement):
         pass
 
     @abc.abstractmethod
-    def deserialize(self, value: Raw) -> tuple[bool, t.Optional[Common]]:
+    def deserialize(self, value: Raw) -> CommonResult:
         """
         Объект для хранения -> объект для использования.
         Возвращает кортеж из двух элементов:
@@ -52,15 +55,19 @@ class Field(abc.ABC, TemplateElement):
 
 
 class StringField(Field):
-    def serialize(self, value: str) -> tuple[bool, t.Optional[str]]:
-        if isinstance(value, str):
-            return True, value
-        return False, None
+    @t.override
+    def serialize(self, value: Common) -> RawResult:
+        try:
+            return True, str(value)
+        except ValueError:
+            return False, None
 
-    def deserialize(self, value: str) -> tuple[bool, t.Optional[str]]:
-        if isinstance(value, str):
-            return True, value
-        return False, None
+    @t.override
+    def deserialize(self, value: Raw) -> CommonResult:
+        try:
+            return True, str(value)
+        except ValueError:
+            return False, None
 
 
 class EnumField(Field):
@@ -74,13 +81,13 @@ class EnumField(Field):
         self._enumType = enumType
 
     @t.override
-    def serialize(self, value: Enum) -> tuple[bool, t.Optional[str]]:
+    def serialize(self, value: Common) -> RawResult:
         if isinstance(value, Enum):
             return True, value.name
         return False, None
 
     @t.override
-    def deserialize(self, value: str) -> tuple[bool, t.Optional[Enum]]:
+    def deserialize(self, value: Raw) -> CommonResult:
         try:
             return True, self._enumType[value]
         except KeyError:

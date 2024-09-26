@@ -5,8 +5,11 @@ import requests
 
 from csti.contest.api import ContestSystemAPI
 from csti.contest.exceptions import AuthException
-from csti.contest.systems.contest_solutions.language import ContestSolutionsLanguage
-from csti.contest.systems.contest_solutions.parser import ContestParser, TaskParser
+from csti.contest.solution import SolutionStatus
+from csti.contest.systems.contest_solutions.language import \
+    ContestSolutionsLanguage
+from csti.contest.systems.contest_solutions.parser import (ContestParser,
+                                                           TaskParser)
 from csti.storage.config import Config
 
 
@@ -140,6 +143,9 @@ class ContestSolutionsAPI(ContestSystemAPI):
                     "testsPassed": lastSolution.testsPassed,
                 }
             )
+        isSolved = False
+        if len(solutions) > 0:
+            isSolved = solutions[-1]["status"] == SolutionStatus.acceptedForReview.value
 
         return {
             "name": name,
@@ -148,7 +154,7 @@ class ContestSolutionsAPI(ContestSystemAPI):
             "timeLimit": int(info["Ограничение времени"][:-2]),
             "memoryLimit": int(info["Ограничение памяти"][:-1]),
             "remainingAttempts": int(info["Оставшиеся посылки"]),
-            "isSolved": False,
+            "isSolved": isSolved,
             "solutions": solutions,
             "languageIds": [ContestSolutionsLanguage.nasm.id],
         }

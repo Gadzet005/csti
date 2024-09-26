@@ -10,5 +10,6 @@ class TestContestParser(unittest.TestCase):
     def testGetSessionId(self):
         response = requests.post(ContestSolutionsAPI.REQUEST_URL)
         self.assertEqual(
-            ContestParser.getSessionId(response.content), ContestSolutionsAPI.BAD_SESSION_ID
+            ContestParser.getSessionId(response.content),
+            ContestSolutionsAPI.BAD_SESSION_ID,
         )

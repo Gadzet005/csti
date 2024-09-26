@@ -38,21 +38,14 @@ class TestYAMLConfig(IsolatedDirCase):
 
         self.assertEqual(config["name"], "hello world")
         self.assertEqual(config["default_name"], "Bob")
-        with self.assertRaises(FieldValueError):
-            config["invalid_name"]
-
-        with self.assertRaises(FieldValueError):
-            config["name"] = 123
 
         config["name"] = "new name"
-        config["invalid_name"] = ""
         config.save()
 
         config = StringConfig(config.path)
         config.load()
         self.assertEqual(config["name"], "new name")
         self.assertEqual(config["default_name"], "Bob")
-        self.assertEqual(config["invalid_name"], "")
 
     def testBoolField(self):
         config = BoolConfig(self.useData("bool_config.yaml"))

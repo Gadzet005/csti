@@ -2,8 +2,9 @@ import os
 import typing as t
 
 from csti.contest import Contest, Task
-from csti.contest.env.data_storage import EnvDataStorage
 from csti.contest.env.exceptions import EnvNotInitialized
+from csti.contest.env.storage import EnvDataStorage
+from csti.contest.env.task_file import TaskFile
 from csti.contest.manager import ContestManager
 from csti.contest.systems import ContestSystem
 from csti.etc.consts import APP_NAME
@@ -15,11 +16,12 @@ class ContestEnv:
     """Управляет директорией для работы с контестом."""
 
     DATA_DIR = "." + APP_NAME
+    STORAGE_DIR = "storage"
     CONFIG_FILE = "config.yaml"
 
     def __init__(self, dir: t.Optional[str] = None):
         self._dir = dir or os.getcwd()
-        self._storage = EnvDataStorage(self.dataDir)
+        self._storage = EnvDataStorage(os.path.join(self.dataDir, self.STORAGE_DIR))
 
     def create(self, system: ContestSystem):
         """Инициализирует директорию для работы с контестом."""
@@ -68,46 +70,37 @@ class ContestEnv:
     def getContestManager(self) -> ContestManager:
         return ContestManager(self.system.api(self.getConfig()))
 
-    def getTaskFile(self, task: Task) -> str:
-        return str(task.id) + task.language.defaultfileExtension
+    def getTaskFile(self, task: Task) -> TaskFile:
+        return TaskFile(self.dir, task)
 
-    def clearTaskFiles(self):
-        """Очистка файлов с заданиями."""
-
-        taskFiles = self.storage.get("contest", "taskFiles")
-        for file in taskFiles:
-            path = os.path.join(self.dir, file)
-            if os.path.isfile(path):
-                os.remove(path)
-
-    def createTaskFiles(self, tasks: list[Task], update: bool = False):
+    def addTaskFile(self, task: Task):
         """
-        Создает файлы для заданий в рабочей директории.
-
-        :param tasks: Список заданий.
-        :param update: Дополнить существующие файлы - `True`, перезаписать - `False`.
+        Создает файл для задания в рабочей директории и
+        добавляет его в список заданий.
         """
 
-        taskFiles = []
-        for task in tasks:
-            file = self.getTaskFile(task)
-            if os.path.exists(file):
-                continue
+        tasks = self.storage["contest", "taskIds"]
 
-            with open(os.path.join(self.dir, file), "w") as f:
-                f.write(task.language.comment + " " + task.name + "\n")
-                taskFiles.append(file)
+        if task.id not in tasks:
+            taskFile = self.getTaskFile(task)
+            taskFile.create()
+            tasks.append(task.id)
 
-        if update:
-            taskFiles += self.storage.get("contest", "taskFiles")
-        self.storage["contest", "taskFiles"] = taskFiles
+        self.storage["contest", "taskIds"] = tasks
 
     def selectContest(self, contest: Contest):
         """Смена контеста в рабочей директории."""
 
-        tasks = contest.getTasks()
+        oldTasks = self.storage.loadTasks(self.getContestManager())
+        for task in oldTasks:
+            taskFile = self.getTaskFile(task)
+            taskFile.remove()
 
-        self.clearTaskFiles()
-        self.createTaskFiles(tasks)
+        tasks = contest.getTasks()
+        for task in tasks:
+            taskFile = self.getTaskFile(task)
+            taskFile.create()
+
+        self.storage["contest", "taskIds"] = [task.id for task in tasks]
         self.storage["contest", "id"] = contest.id
         self.storage["contest", "currentTaskId"] = tasks[0].id

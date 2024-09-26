@@ -18,15 +18,15 @@ def task():
 
 
 @task.command("select")
-@click.argument("id", type=int, required=False)
+@click.argument("_id", metavar="id", type=int, required=False)
 @click.pass_obj
-def selectTask(cli: ContestCLI, id: t.Optional[int] = None):
+def selectTask(cli: ContestCLI, _id: t.Optional[int] = None):
     """Выбрать задачу."""
 
     env = cli.getEnv()
     manager = env.getContestManager()
     contest = env.storage.loadContest(manager)
-    task = contest.getTask(id) if id is not None else None
+    task = contest.getTask(_id) if _id is not None else None
 
     if task is None or not task.isValid:
         if task is not None:
@@ -49,12 +49,13 @@ def selectTask(cli: ContestCLI, id: t.Optional[int] = None):
         cli.print.warning("Эта задача уже выбрана.")
         return
 
-    env.createTaskFiles([task], update=True)
+    env.addTaskFile(task)
     env.storage.set("contest", "currentTaskId", value=task.id)
     cli.print.success(f"Задача успешно выбрана: {task.name}.")
 
 
 @task.command("info")
+@click.argument("_id", metavar="id", type=int, required=False)
 @click.option(
     "-n", "--name", is_flag=True, default=False, help="Показать название задачи."
 )
@@ -80,13 +81,25 @@ def selectTask(cli: ContestCLI, id: t.Optional[int] = None):
 )
 @click.pass_obj
 def showInfo(
-    cli: ContestCLI, name: bool, info: bool, cond: bool, tests: bool, solution: bool
+    cli: ContestCLI,
+    _id: t.Optional[int],
+    name: bool,
+    info: bool,
+    cond: bool,
+    tests: bool,
+    solution: bool,
 ):
     """Показать информацию о выбранной задаче."""
 
     env = cli.getEnv()
     manager = env.getContestManager()
-    task = env.storage.loadCurrentTask(manager)
+
+    task = None
+    if _id:
+        contest = env.storage.loadContest(manager)
+        task = contest.getTask(_id)
+    else:
+        task = env.storage.loadCurrentTask(manager)
 
     flags = [name, info, cond, tests, solution]
     shouldPrintAll = not any(flags) or all(flags)
@@ -123,6 +136,7 @@ def showInfo(
 
 
 @task.command("send")
+@click.argument("_id", metavar="id", type=int, required=False)
 @click.argument("file", type=click.Path(exists=True), required=False)
 @click.option(
     "-l",
@@ -136,11 +150,17 @@ def showInfo(
     ),
 )
 @click.option(
-    "-t", "--no-tests", is_flag=True, default=False, help="Отключает выполнение тестов."
+    "-t",
+    "--no-tests",
+    "noTests",
+    is_flag=True,
+    default=False,
+    help="Отключает выполнение тестов.",
 )
 @click.option(
     "-f",
     "--no-format",
+    "noFormat",
     is_flag=True,
     default=False,
     help="Отключает форматирование файла.",
@@ -148,6 +168,7 @@ def showInfo(
 @click.option(
     "-c",
     "--no-confirm",
+    "noConfirm",
     is_flag=True,
     default=False,
     help="Отключает подтверждение отправки решения.",
@@ -155,31 +176,38 @@ def showInfo(
 @click.pass_obj
 def sendTask(
     cli: ContestCLI,
+    _id: t.Optional[int],
     file: t.Optional[str],
     lang: str,
-    no_tests: bool,
-    no_format: bool,
-    no_confirm: bool,
+    noTests: bool,
+    noFormat: bool,
+    noConfirm: bool,
 ):
     """Отправить задачу на проверку."""
 
     env = cli.getEnv()
     manager = env.getContestManager()
-    task = env.storage.loadCurrentTask(manager)
+
+    task = None
+    if _id:
+        contest = env.storage.loadContest(manager)
+        task = contest.getTask(_id)
+    else:
+        task = env.storage.loadCurrentTask(manager)
 
     if file is None:
-        file = env.getTaskFile(task)
-        path = os.path.join(env.dir, file)
-        if os.path.exists(path):
+        taskFile = env.getTaskFile(task)
+        file = taskFile.path
+        if os.path.exists(file):
             cli.print.info(f"Файл для отправки: '{file}'.")
         else:
-            cli.print.warning(f"Файл по пути '{path}' не найден.")
+            cli.print.warning(f"Файл '{file}' не найден.")
             return
 
-    if not no_tests:
-        no_tests = not cli.config.get("features", "enable-auto-tests")
-    if not no_format:
-        no_format = not cli.config.get("features", "enable-auto-formatting")
+    if not noTests:
+        noTests = not cli.config.get("features", "enable-auto-tests")
+    if not noFormat:
+        noFormat = not cli.config.get("features", "enable-auto-formatting")
 
     if lang != "auto":
         selected = GeneralLanguage.fromName(lang)
@@ -193,7 +221,7 @@ def sendTask(
     program = ProgramView(file, taskLang)
 
     # Тестирование
-    if not no_tests:
+    if not noTests:
         allTestsPassed = True
         try:
             cli.print.primary("Запуск тестов...")
@@ -216,7 +244,7 @@ def sendTask(
 
     # Подтверждение отправки решения
     shouldSendSolution = True
-    if not no_confirm:
+    if not noConfirm:
         shouldSendSolution = inquirer.confirm(  # type: ignore
             "Вы уверены что хотите отправить решение на проверку? "
             f"Оставшееся количество попыток: {task.remainingAttempts}.\n",
@@ -225,7 +253,7 @@ def sendTask(
 
     if shouldSendSolution:
         # Форматирование кода
-        if no_format or len(program.lang.availableformatStyles) == 0:
+        if noFormat or len(program.lang.availableformatStyles) == 0:
             task.sendSolution(program)
         else:
             cli.print.primary("Форматирование кода...")
