@@ -43,7 +43,7 @@ def init(cli: ContestCLI, dir: t.Optional[str]):
 
     cli.createEnv(dir, system)
 
-    cli.print.primary("Настройка конфига системы.")
+    cli.print.primary("Настройка конфига.")
     tuner = cli.getEnv().getConfigTuner()
     tuner.tune()
 

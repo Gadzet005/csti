@@ -16,13 +16,15 @@ class ContestCLI:
         printer: t.Optional[Printer] = None,
     ):
         self._config = config or GeneralConfig.forApp(APP_NAME)
-        self._env = env or ContestEnv()
-
         self._config.create()
         self._config.load()
 
-        useColor = self.config.get("use-color")
-        self._printer = printer or Printer(noColor=not useColor)
+        self._env = env or ContestEnv()
+
+        if printer is None:
+            useColor = self.config.get("use-color")
+            printer = Printer(noColor=not useColor)
+        self._printer = printer
 
     @property
     def config(self) -> Config:

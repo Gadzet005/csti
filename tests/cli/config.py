@@ -16,5 +16,6 @@ class TestConfig(Config):
     def load(self, force: bool = True):
         pass
 
-
-config = TestConfig({"contest-system": "contest solutions"})
+    @t.override
+    def create(self):
+        pass

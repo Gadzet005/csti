@@ -1,19 +1,22 @@
-# from click.testing import CliRunner
+from click.testing import CliRunner
 
-# from tests.testcase import IsolatedDirCase
-# from csti.cli.commands.root import root
-# from tests.cli.config import config
+from csti.cli import ContestCLI
+from csti.cli.commands.root import root
+from csti.cli.utils.print import Printer
+from csti.contest.env import ContestEnv
+from tests.cli.config import TestConfig
+from tests.testcase import IsolatedDirCase
 
 
-# class TestCLI(IsolatedDirCase):
-#     DATA_DIR = "cli"
-#     TEST_DIR = "cli/test"
+class TestCLI(IsolatedDirCase):
+    DATA_DIR = "cli"
+    TEST_DIR = "cli/test"
 
-#     def testCLI(self):
-#         app = CLIApp("csti", config)
-#         state = app.getState()
+    def testCLI(self):
+        globalConfig = TestConfig({})
+        printer = Printer(noColor=True)
+        env = ContestEnv(self.getTestDir())
 
-#         runner = CliRunner()
-#         # result = runner.invoke(root, ["init"], obj=state)
-#         # print(result.exit_code)
-#         # print("result =", result.output)
+        cli = ContestCLI(globalConfig, env, printer)
+        runner = CliRunner()
+        result = runner.invoke(root, ["init"], obj=cli, input="\n")
