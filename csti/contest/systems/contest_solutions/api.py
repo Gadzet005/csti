@@ -83,12 +83,12 @@ class ContestSolutionsAPI(ContestSystemAPI):
         return response.content
 
     @cache
-    def _getContestIds(self) -> set[int]:
+    def _getContestIds(self) -> list[int]:
         homePage = self._getHomePage()
-        return set(ContestParser.getContestLocalIds(homePage))
+        return list(ContestParser.getContestLocalIds(homePage))
 
     @t.override
-    def getContestIds(self) -> set[int]:
+    def getContestIds(self) -> list[int]:
         return self._getContestIds()
 
     @cache

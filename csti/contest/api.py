@@ -16,7 +16,7 @@ class ContestSystemAPI(abc.ABC):
         self._config.load()
 
     @abc.abstractmethod
-    def getContestIds(cls) -> set[int]:
+    def getContestIds(cls) -> list[int]:
         """Возращает id доступных контестов."""
         pass
 

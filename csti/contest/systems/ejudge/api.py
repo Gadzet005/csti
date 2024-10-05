@@ -186,8 +186,8 @@ class EjudgeAPI(ContestSystemAPI):
     
 
     @t.override
-    def getContestIds(cls) -> set[int]:
-        return set()
+    def getContestIds(cls) -> list[int]:
+        return []
 
     @t.override
     def getContestInfo(self, contestId: int) -> t.Optional[dict]:
