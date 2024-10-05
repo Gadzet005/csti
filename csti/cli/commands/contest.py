@@ -4,6 +4,7 @@ import click
 from InquirerPy import inquirer
 
 from csti.cli.cli import ContestCLI
+from csti.cli.utils.print import Color
 
 
 @click.group("contest")
@@ -13,7 +14,7 @@ def contest():
 
 
 @contest.command("select")
-@click.argument("id", type=int, required=False)
+@click.argument("_id", metavar="id", type=int, required=False)
 @click.option(
     "-f",
     "--force",
@@ -22,32 +23,26 @@ def contest():
     help="Выбирает контест, даже если он уже выбран (обновляет данные).",
 )
 @click.pass_obj
-def select(cli: ContestCLI, id: t.Optional[int], force: bool):
+def select(cli: ContestCLI, _id: t.Optional[int], force: bool):
     """Выбрать контест."""
 
     env = cli.getEnv()
     manager = env.getContestManager()
 
-    contest = None
-    if id:
-        contest = manager.getContest(id)
+    contest = manager.getContest(_id) if _id else None
 
     if contest is None or not contest.isValid:
         if contest is not None:
             cli.print.warning("Контест с таким id отсутствует. Выберите из списка.")
 
         contests = manager.getContests()
-        contestNames = [contest.name for contest in contests]
 
-        contestIdx = inquirer.rawlist(  # type: ignore
+        contest = inquirer.rawlist(  # type: ignore
             message="Контест:",
-            choices=contestNames,
-            default=len(contestNames),
+            choices=contests,
+            default=len(contests),
             vi_mode=True,
-            filter=lambda x: contestNames.index(x),
         ).execute()
-
-        contest = contests[contestIdx]
 
     if not force:
         currentContestId = env.storage.get("contest", "id", default=None)
@@ -70,4 +65,4 @@ def showInfo(cli: ContestCLI):
 
     cli.print.primary(contest.name)
     for task in contest.getTasks():
-        cli.print.text("-", task.name)
+        cli.print.byFlag("-", task.name, flag=task.isSolved, flagOff=Color.text)

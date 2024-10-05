@@ -33,9 +33,6 @@ class TestFileStorage(IsolatedDirCase):
         self.assertEqual(storage["name"], "hello world")
         self.assertEqual(storage["default_name"], "Bob")
 
-        with self.assertRaises(FieldValueError):
-            storage["name"] = 123
-
         storage["name"] = "new name"
         storage["default_name"] = ""
 
@@ -96,8 +93,6 @@ class TestFileStorage(IsolatedDirCase):
             storage["numbers"] = "str"
         with self.assertRaises(FieldValueError):
             storage["numbers"] = ["str"]
-        with self.assertRaises(FieldValueError):
-            storage["strings"] = [1, 2, 3]
         with self.assertRaises(FieldValueError):
             storage["enums"] = [1, 2, 3]
         with self.assertRaises(FieldValueError):

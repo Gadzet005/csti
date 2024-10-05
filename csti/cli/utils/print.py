@@ -11,6 +11,7 @@ class Color:
 
     Transformer: t.TypeAlias = t.Callable[[str], str]
 
+    text = lambda x: x
     success = lambda x: colored(x, "green")
     error = lambda x: colored(x, "red")
     warning = lambda x: colored(x, "yellow")

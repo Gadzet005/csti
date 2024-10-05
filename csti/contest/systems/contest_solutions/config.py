@@ -2,14 +2,14 @@ import typing as t
 
 from InquirerPy import inquirer
 
-from csti.contest.systems.ejudje.locale import Locale
+from csti.contest.systems.contest_solutions.locale import Locale
 from csti.storage import Group, StorageTemplate
 from csti.storage.config import YAMLConfig
 from csti.storage.config.field import EnumField, StringField
 from csti.storage.config.tuner import ConfigTuner
 
 
-class EjudjeConfig(YAMLConfig):
+class ContestSolutionsConfig(YAMLConfig):
     template = StorageTemplate(
         [
             Group(
@@ -22,7 +22,7 @@ class EjudjeConfig(YAMLConfig):
     )
 
 
-class EjudjeConfigTuner(ConfigTuner):
+class ContestSolutionsConfigTuner(ConfigTuner):
     @t.override
     def _tune(self):
         login = self.config.get("user", "login", default="")

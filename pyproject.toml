@@ -13,7 +13,7 @@ platformdirs = "^4.2.2"
 inquirerpy = "^0.3.4"
 click = "^8.1.7"
 termcolor = "^2.4.0"
-# Ejudje.
+# Contest Solutions.
 beautifulsoup4 = "^4.12.3"
 requests = "^2.32.3"
 

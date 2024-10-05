@@ -142,15 +142,19 @@ class ProgramView:
     def test(
         self,
         testCases: list[tuple[str, str]],
-        timeLimit: t.Optional[float] = None,
+        timeLimit: t.Optional[float] = 1.0,
         memoryLimit: t.Optional[float] = None,
     ) -> TestResultList:
         """
         Запуск тестов. Если язык компилируемый, то требуется вызов метода compile.
 
         :param testCases: [(вход, ожидаемый выход), ...].
-        :param timeLimit: Максимальное время в секундах для выполнения теста.
-        :param memoryLimit: Максимальное количество памяти в мегабайтах для выполнения теста.
+        :param timeLimit:
+            Максимальное время в секундах для выполнения теста.
+            Если `None`, то время не ограничено.
+        :param memoryLimit:
+            Максимальное количество памяти в мегабайтах для выполнения теста.
+            Если `None`, то память не ограничена.
         """
 
         results = TestResultList()

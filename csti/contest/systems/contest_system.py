@@ -24,3 +24,6 @@ class ContestSystem(Enum):
     @property
     def configTuner(self) -> t.Type[ConfigTuner]:
         return self.value["configTuner"]
+
+    def __str__(self) -> str:
+        return self.fullName

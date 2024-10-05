@@ -17,7 +17,7 @@ class ContestSystemAPI(abc.ABC):
 
     @abc.abstractmethod
     def getContestIds(cls) -> list[int]:
-        """Возращает список id контестов."""
+        """Возращает id доступных контестов."""
         pass
 
     @abc.abstractmethod
@@ -26,6 +26,7 @@ class ContestSystemAPI(abc.ABC):
         Информация о контесте.
         ------------------------------------------------------------
         - name (str):                       Название контеста.
+        - isOpen (str):                     Открыт ли контест.
         - taskIds (list[int]):              Список id задач.
         - other (dict):                     Специфичная для api информация.
 

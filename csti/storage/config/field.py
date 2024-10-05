@@ -4,32 +4,32 @@ from csti.storage.field import *
 
 
 class IntField(Field):
-    def serialize(self, value: int) -> tuple[bool, t.Optional[int]]:
+    def serialize(self, value: Common) -> RawResult:
         if isinstance(value, int):
             return True, value
         return False, None
 
-    def deserialize(self, value: int) -> tuple[bool, t.Optional[int]]:
+    def deserialize(self, value: Raw) -> CommonResult:
         if isinstance(value, int):
             return True, value
         return False, None
 
 
 class BoolField(Field):
-    def serialize(self, value: bool) -> tuple[bool, t.Optional[bool]]:
+    def serialize(self, value: Common) -> RawResult:
         if isinstance(value, bool):
             return True, value
         return False, None
 
-    def deserialize(self, value: bool) -> tuple[bool, t.Optional[bool]]:
-        if isinstance(value, int):
+    def deserialize(self, value: Raw) -> CommonResult:
+        if isinstance(value, bool):
             return True, value
         return False, None
 
 
 class ListField(BaseListField):
     @t.override
-    def serialize(self, value: list) -> tuple[bool, t.Optional[list]]:
+    def serialize(self, value: Common) -> RawResult:
         if not isinstance(value, list):
             return False, None
 
@@ -43,7 +43,7 @@ class ListField(BaseListField):
         return True, result
 
     @t.override
-    def deserialize(self, value: list) -> tuple[bool, t.Optional[list]]:
+    def deserialize(self, value: Raw) -> CommonResult:
         if not isinstance(value, list):
             return False, None
 
