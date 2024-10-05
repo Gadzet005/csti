@@ -1,12 +1,13 @@
+from csti.contest.systems.contest_solutions import (ContestSolutionsAPI,
+                                                    ContestSolutionsConfig,
+                                                    ContestSolutionsConfigTuner)
 from csti.contest.systems.contest_system import ContestSystem
-from csti.contest.systems.ejudje import (EjudjeAPI, EjudjeConfig,
-                                         EjudjeConfigTuner)
 
 
 class SupportedContestSystem(ContestSystem):
-    ejudje = {
-        "fullName": "Ejudje",
-        "api": EjudjeAPI,
-        "config": EjudjeConfig,
-        "configTuner": EjudjeConfigTuner,
+    contestSolutions = {
+        "fullName": "Contest Solutions",
+        "api": ContestSolutionsAPI,
+        "config": ContestSolutionsConfig,
+        "configTuner": ContestSolutionsConfigTuner,
     }

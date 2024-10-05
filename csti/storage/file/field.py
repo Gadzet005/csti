@@ -4,12 +4,12 @@ from csti.storage.field import *
 
 
 class IntField(Field):
-    def serialize(self, value: int) -> tuple[bool, t.Optional[str]]:
+    def serialize(self, value: Common) -> RawResult:
         if isinstance(value, int):
             return True, str(value)
         return False, None
 
-    def deserialize(self, value: str) -> tuple[bool, t.Optional[int]]:
+    def deserialize(self, value: Raw) -> CommonResult:
         if isinstance(value, str):
             try:
                 return True, int(value)
@@ -20,13 +20,13 @@ class IntField(Field):
 
 class BoolField(Field):
     @t.override
-    def serialize(self, value: bool) -> tuple[bool, t.Optional[str]]:
+    def serialize(self, value: Common) -> RawResult:
         if isinstance(value, bool):
             return True, "1" if value else "0"
         return False, None
 
     @t.override
-    def deserialize(self, value: str) -> tuple[bool, t.Optional[bool]]:
+    def deserialize(self, value: Raw) -> CommonResult:
         if value == "0":
             return True, False
         if value == "1":
@@ -60,7 +60,7 @@ class ListField(BaseListField):
         self._separator = separator
 
     @t.override
-    def serialize(self, value: list) -> tuple[bool, t.Optional[str]]:
+    def serialize(self, value: Common) -> RawResult:
         if not isinstance(value, list):
             return False, None
 
@@ -74,7 +74,7 @@ class ListField(BaseListField):
         return True, self._separator.join(result)
 
     @t.override
-    def deserialize(self, value: str) -> tuple[bool, t.Optional[list]]:
+    def deserialize(self, value: Raw) -> CommonResult:
         if not isinstance(value, str):
             return False, None
 

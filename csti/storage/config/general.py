@@ -4,8 +4,8 @@ import typing as t
 from platformdirs import user_config_dir
 
 from csti.storage import Group, StorageTemplate
-from csti.storage.config.yaml import YAMLConfig
 from csti.storage.config.field import BoolField
+from csti.storage.config.yaml import YAMLConfig
 
 
 class GeneralConfig(YAMLConfig):
@@ -20,6 +20,7 @@ class GeneralConfig(YAMLConfig):
                     BoolField("enable-auto-formatting", default=True),
                 ],
             ),
+            BoolField("use-color", default=True),
             BoolField("debug", default=False),
         ]
     )
