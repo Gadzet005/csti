@@ -118,7 +118,7 @@ def showInfo(
     if cond or shouldPrintAll:
         taskPrint(task.description, end="\n\n")
 
-    if tests or shouldPrintAll:
+    if tests or shouldPrintAll and not task.inputExample is None:
         for input, output in task.inputExample:
             taskPrint.info(f"Входные данные:")
             taskPrint(input)
