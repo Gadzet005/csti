@@ -92,14 +92,23 @@ class ContestEnv:
         """Смена контеста в рабочей директории."""
 
         oldTasks = self.storage.loadTasks(self.getContestManager())
-        for task in oldTasks:
-            taskFile = self.getTaskFile(task)
-            taskFile.remove()
+        if len(oldTasks) > 0:
+            oldTaskSavePath = f"{self.dataDir}/{self.storage["contest", "id"]}/"
+            os.makedirs(oldTaskSavePath, exist_ok=True)
+            for task in oldTasks:
+                taskFile = self.getTaskFile(task)
+                if os.path.exists(taskFile.path):
+                    os.rename(taskFile.path, f"{oldTaskSavePath}{os.path.basename(taskFile.path)}")
 
         tasks = contest.getTasks()
+        taskSavePath = f"{self.dataDir}/{contest.id}/"
         for task in tasks:
             taskFile = self.getTaskFile(task)
-            taskFile.create()
+            if os.path.exists(f"{taskSavePath}{os.path.basename(taskFile.path)}"):
+                os.rename(f"{taskSavePath}{os.path.basename(taskFile.path)}",
+                          taskFile.path)
+            else:
+                taskFile.create()
 
         self.storage["contest", "taskIds"] = [task.id for task in tasks]
         self.storage["contest", "id"] = contest.id
