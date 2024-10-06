@@ -1,4 +1,4 @@
-from csti.etc.language import Language, GeneralLanguage
+from csti.etc.language import GeneralLanguage, Language
 
 
 class EjudgeLanguage(Language):

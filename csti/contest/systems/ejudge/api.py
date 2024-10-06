@@ -25,11 +25,11 @@ class EjudgeAPI(ContestSystemAPI):
     @property
     def url(self):
         return self._config.get("url")
-    
+
     @property
     def requestUrl(self):
         return self.url + self.REQUEST_URL
-    
+
     @staticmethod
     def raiseResponseForStatus(response: requests.Response):
         if not response.ok:
@@ -51,7 +51,7 @@ class EjudgeAPI(ContestSystemAPI):
             errorCode = error.get("symbol")
             message = error.get("message", "no message")
             raise EjudgeAPIException(errorCode, message)
-    
+
         return json.get("result", {})
 
     def getSession(self, contestId: int) -> requests.Session:
@@ -62,13 +62,8 @@ class EjudgeAPI(ContestSystemAPI):
                 self._createSession(contestId)
 
         session = requests.Session()
-        session.params = {
-            "SID": self._sid,
-            "EJSID": self._ejsid,
-            "json": True
-        }
+        session.params = {"SID": self._sid, "EJSID": self._ejsid, "json": True}
         return session
-
 
     def _createSession(self, contestId: int):
         login = self._config.get("login")
@@ -90,15 +85,15 @@ class EjudgeAPI(ContestSystemAPI):
         self._ejsid = data.get("EJSID", "invalid")
         self._sid = data.get("SID", "invalid")
         self._sessionCache[contestId] = (self._sid, self._ejsid)
-    
+
     @cache
     def _getContestStatus(self, contestId: int) -> dict:
         session = self.getSession(contestId)
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "contest-status-json",
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
@@ -108,10 +103,10 @@ class EjudgeAPI(ContestSystemAPI):
         session = self.getSession(contestId)
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "problem-status-json",
                 "problem": taskId,
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
@@ -121,10 +116,10 @@ class EjudgeAPI(ContestSystemAPI):
         session = self.getSession(contestId)
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "problem-statement-json",
                 "problem": taskId,
-            }
+            },
         )
         data = self.getResponseContent(response)
         return data
@@ -134,10 +129,10 @@ class EjudgeAPI(ContestSystemAPI):
         session = self.getSession(contestId)
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "list-runs-json",
                 "prob_id": taskId,
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
@@ -147,10 +142,10 @@ class EjudgeAPI(ContestSystemAPI):
         session = self.getSession(contestId)
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "run-status-json",
                 "run_id": solutionId,
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
@@ -160,10 +155,10 @@ class EjudgeAPI(ContestSystemAPI):
         session = self.getSession(contestId)
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "download-run",
                 "run_id": solutionId,
-            }
+            },
         )
         data = self.getResponseContent(response)
         return data
@@ -174,16 +169,15 @@ class EjudgeAPI(ContestSystemAPI):
         session = self.getSession(contestId)
         response = session.post(
             self.requestUrl,
-            params = {
+            params={
                 "action": "submit-run",
                 "prob_id": taskId,
                 "lang_id": languageId,
                 "file": code,
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
-    
 
     @t.override
     def getContestIds(cls) -> list[int]:
@@ -192,7 +186,7 @@ class EjudgeAPI(ContestSystemAPI):
     @t.override
     def getContestInfo(self, contestId: int) -> t.Optional[dict]:
         pass
-    
+
     @t.override
     def getTaskInfo(self, contestId: int, taskId: int) -> t.Optional[dict]:
         pass

@@ -11,10 +11,10 @@ from csti.storage.config.tuner import ConfigTuner
 class Ejudge2KursVmkConfig(YAMLConfig):
     template = StorageTemplate(
         [
-            StringField("login"), 
+            StringField("login"),
             StringField("password"),
             StringField("url"),
-            StringField("contest-id")
+            StringField("contest-id"),
         ]
     )
 
