@@ -11,7 +11,7 @@ from csti.storage.config.tuner import ConfigTuner
 class EjudgeConfig(YAMLConfig):
     template = StorageTemplate(
         [
-            StringField("login"), 
+            StringField("login"),
             StringField("password"),
             StringField("url"),
         ]

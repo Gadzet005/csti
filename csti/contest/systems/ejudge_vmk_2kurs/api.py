@@ -1,13 +1,14 @@
+import re
 import typing as t
 from functools import cache
 
-import re
 import requests
 
 from csti.contest.api import ContestSystemAPI
 from csti.contest.systems.ejudge_vmk_2kurs.api_error import (APIException,
-                                                   EjudgeAPIException)
-from csti.contest.systems.ejudge_vmk_2kurs.language import Ejudge2KursVmkLanguage
+                                                             EjudgeAPIException)
+from csti.contest.systems.ejudge_vmk_2kurs.language import \
+    Ejudge2KursVmkLanguage
 from csti.storage.config.config import Config
 
 
@@ -16,11 +17,7 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
     RESPONSE_ENCODING = "utf-8"
     Lang = Ejudge2KursVmkLanguage
 
-
-    CONTEST_TYPES = {
-        "mz": "Маш. зал.",
-        "up": "Дореш."
-    }
+    CONTEST_TYPES = {"mz": "Маш. зал.", "up": "Дореш."}
 
     def __init__(self, config: Config):
         super().__init__(config)
@@ -30,11 +27,11 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
     @property
     def url(self):
         return self._config.get("url")
-    
+
     @property
     def requestUrl(self):
         return self.url + self.REQUEST_URL
-    
+
     @staticmethod
     def raiseResponseForStatus(response: requests.Response):
         if not response.ok:
@@ -56,7 +53,7 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             errorCode = error.get("symbol")
             message = error.get("message", "no message")
             raise EjudgeAPIException(errorCode, message)
-    
+
         return json.get("result", {})
 
     def getSession(self) -> requests.Session:
@@ -64,13 +61,8 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             self._createSession()
 
         session = requests.Session()
-        session.params = {
-            "SID": self._sid,
-            "EJSID": self._ejsid,
-            "json": True
-        }
+        session.params = {"SID": self._sid, "EJSID": self._ejsid, "json": True}
         return session
-
 
     def _createSession(self):
         login = self._config.get("login")
@@ -91,15 +83,15 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
 
         self._ejsid = data.get("EJSID", "invalid")
         self._sid = data.get("SID", "invalid")
-    
+
     @cache
     def _getContestStatus(self) -> dict:
         session = self.getSession()
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "contest-status-json",
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
@@ -109,10 +101,10 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
         session = self.getSession()
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "problem-status-json",
                 "problem": taskId,
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
@@ -122,10 +114,10 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
         session = self.getSession()
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "problem-statement-json",
                 "problem": taskId,
-            }
+            },
         )
         data = self.getResponseContent(response)
         return data
@@ -135,10 +127,10 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
         session = self.getSession()
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "list-runs-json",
                 "prob_id": taskId,
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
@@ -148,10 +140,10 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
         session = self.getSession()
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "run-status-json",
                 "run_id": solutionId,
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
@@ -161,30 +153,27 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
         session = self.getSession()
         response = session.get(
             self.requestUrl,
-            params = {
+            params={
                 "action": "download-run",
                 "run_id": solutionId,
-            }
+            },
         )
         data = self.getResponseContent(response)
         return data
 
-    def _submitSolution(
-        self, taskId: int, code: str, languageId: int
-    ) -> dict:
+    def _submitSolution(self, taskId: int, code: str, languageId: int) -> dict:
         session = self.getSession()
         response = session.post(
             self.requestUrl,
-            params = {
+            params={
                 "action": "submit-run",
                 "prob_id": taskId,
                 "lang_id": languageId,
                 "file": code,
-            }
+            },
         )
         data = self.getResponseJson(response)
         return data
-    
 
     @cache
     def _getContestInfo(self, contestId: int) -> t.Optional[dict]:
@@ -198,13 +187,14 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
 
         problems = self._getContestStatus().get("problems")
         if problems is None:
-            raise # Придумать ошибку.
-        
+            raise  # Придумать ошибку.
+
         contestType = ""
         for problem in problems:
             shortProblemName = problem.get("short_name", "")
-            problemContestId = int(re.findall(r"\w{2}(\d{2})-\d{1,}",
-                                              shortProblemName)[0])
+            problemContestId = int(
+                re.findall(r"\w{2}(\d{2})-\d{1,}", shortProblemName)[0]
+            )
             if problemContestId < contestId:
                 continue
 
@@ -214,15 +204,16 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             contestType = re.findall(r"(\w{2})\d{2}-\d{1,}", shortProblemName)[0]
             data[contestType]["taskIds"].append(int(problem["id"]))
             if data[contestType]["isOpen"] is None:
-                data[contestType]["isOpen"] = bool(self._getTaskStatus(problem["id"])["problem_status"]["is_viewable"])
+                data[contestType]["isOpen"] = bool(
+                    self._getTaskStatus(problem["id"])["problem_status"]["is_viewable"]
+                )
 
         if data[contestType]["isOpen"] is None:
-            raise # Придумать ошибку.
-        
+            raise  # Придумать ошибку.
+
         data[contestType]["name"] = f"{self.CONTEST_TYPES[contestType]} {contestId}"
 
         return data[contestType]
-
 
     @cache
     def _getTaskInfo(self, contestId: int, taskId: int) -> t.Optional[dict]:
@@ -240,8 +231,8 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             solutions_out.append(solution_out)
 
         if problem is None:
-            raise # TODO: Придумать ошибку.
-        
+            raise  # TODO: Придумать ошибку.
+
         return {
             "name": problem.get("long_name"),
             "description": description,
@@ -256,32 +247,29 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             "languageIds": problem.get("compilers"),
         }
 
-    
     @cache
     def _getContestIds(self) -> list[int]:
         problems = self._getContestStatus().get("problems")
         if problems is None:
-            raise # Придумать ошибку.
+            raise  # Придумать ошибку.
 
         contestIds = list()
         for problem in problems:
             shortProblemName = problem.get("short_name", "")
-            contestId = int(re.findall(r"\w{2}(\d{2})-\d{1,}",
-                                       shortProblemName)[0])
+            contestId = int(re.findall(r"\w{2}(\d{2})-\d{1,}", shortProblemName)[0])
             if contestId not in contestIds:
                 contestIds.append(contestId)
 
         return contestIds
 
     @t.override
-    def getContestIds(self)-> list[int]:
+    def getContestIds(self) -> list[int]:
         return self._getContestIds()
 
     @t.override
     def getContestInfo(self, contestId: int):
         return self._getContestInfo(contestId)
 
-    
     @t.override
     def getTaskInfo(self, contestId: int, taskId: int) -> t.Optional[dict]:
         return self._getTaskInfo(contestId, taskId)

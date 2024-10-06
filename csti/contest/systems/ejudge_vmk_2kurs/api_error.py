@@ -1,4 +1,5 @@
 import enum
+
 from csti.contest.exceptions import APIException
 
 
