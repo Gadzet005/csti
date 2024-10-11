@@ -175,6 +175,19 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
         data = self.getResponseJson(response)
         return data
 
+    def _getTaskGlobalIdFromLocal(self, contestId: int, taskId: int) -> int:
+        problems = self._getContestStatus().get("problems")
+        if problems is None:
+            raise Exception("Не удалось полуить имена задач.")
+
+        for problem in problems:
+            if re.match(r"\w{2}\d*" + f"{contestId}-{taskId}", problem.get("short_name", "")) and self._getTaskStatus(problem["id"])["problem_status"]["is_viewable"] == 1:
+                return int(problem["id"])
+
+        raise Exception("Не удалось преобразовать локальное айди задачи в\
+            глобальное.")
+        
+
     @cache
     def _getContestInfo(self, contestId: int) -> t.Optional[dict]:
         data = dict()
@@ -195,6 +208,9 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             problemContestId = int(
                 re.findall(r"\w{2}(\d{2})-\d{1,}", shortProblemName)[0]
             )
+            problemLocalId = int(
+                re.findall(r"\w{2}\d{2}-(\d{1,})", shortProblemName)[0]
+            )
             if problemContestId < contestId:
                 continue
 
@@ -202,7 +218,7 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
                 break
 
             contestType = re.findall(r"(\w{2})\d{2}-\d{1,}", shortProblemName)[0]
-            data[contestType]["taskIds"].append(int(problem["id"]))
+            data[contestType]["taskIds"].append(problemLocalId)
             if data[contestType]["isOpen"] is None:
                 data[contestType]["isOpen"] = bool(
                     self._getTaskStatus(problem["id"])["problem_status"]["is_viewable"]
@@ -217,6 +233,7 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
 
     @cache
     def _getTaskInfo(self, contestId: int, taskId: int) -> t.Optional[dict]:
+        taskId = self._getTaskGlobalIdFromLocal(contestId, taskId)
         problem = self._getTaskStatus(taskId).get("problem")
         description = self._getTaskStatement(taskId)
         solutions = self._getTaskSolutions(taskId).get("runs", list())
@@ -278,6 +295,7 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
     def sendTaskSolution(
         self, contestId: int, taskId: int, code: str, languageId: int
     ) -> bool:
+        taskId = self._getTaskGlobalIdFromLocal(contestId, taskId)
         try:
             self._submitSolution(taskId, code, languageId)
             return True
