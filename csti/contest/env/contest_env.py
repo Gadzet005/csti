@@ -75,20 +75,20 @@ class ContestEnv:
     def getTaskFile(self, dir: str, task: Task) -> TaskFile:
         return TaskFile(self._config, dir, task)
 
-    # def addTaskFile(self, task: Task):
-    #     """
-    #     Создает файл для задания в рабочей директории и
-    #     добавляет его в список заданий.
-    #     """
+    def addTaskFile(self, task: Task):
+        """
+        Создает файл для задания в рабочей директории и
+        добавляет его в список заданий.
+        """
 
-    #     tasks = self.storage["contest", "taskIds"]
+        tasks = self.storage["contest", "taskIds"]
 
-    #     if task.id not in tasks:
-    #         taskFile = self.getTaskFile(task)
-    #         taskFile.create()
-    #         tasks.append(task.id)
+        if task.id not in tasks:
+            taskFile = self.getTaskFile(self._dir, task)
+            taskFile.create()
+            tasks.append(task.id)
 
-    #     self.storage["contest", "taskIds"] = tasks
+        self.storage["contest", "taskIds"] = tasks
 
     def selectContest(self, contest: Contest):
         """Смена контеста в рабочей директории."""
