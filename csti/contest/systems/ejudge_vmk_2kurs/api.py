@@ -181,12 +181,19 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             raise Exception("Не удалось полуить имена задач.")
 
         for problem in problems:
-            if re.match(r"\w{2}\d*" + f"{contestId}-{taskId}", problem.get("short_name", "")) and self._getTaskStatus(problem["id"])["problem_status"]["is_viewable"] == 1:
+            if (
+                re.match(
+                    r"\w{2}\d*" + f"{contestId}-{taskId}", problem.get("short_name", "")
+                )
+                and self._getTaskStatus(problem["id"])["problem_status"]["is_viewable"]
+                == 1
+            ):
                 return int(problem["id"])
 
-        raise Exception("Не удалось преобразовать локальное айди задачи в\
-            глобальное.")
-        
+        raise Exception(
+            "Не удалось преобразовать локальное айди задачи в\
+            глобальное."
+        )
 
     @cache
     def _getContestInfo(self, contestId: int) -> t.Optional[dict]:

@@ -1,13 +1,17 @@
 import os
 from datetime import datetime
+from os.path import exists
 
 from csti.contest.task import Task
+from csti.storage import config
+from csti.storage.config.general import GeneralConfig
 
 
 class TaskFile:
     """Управление файлов с заданием."""
 
-    def __init__(self, baseDir: str, task: Task):
+    def __init__(self, config: GeneralConfig, baseDir: str, task: Task):
+        self._congig = config
         self._baseDir = baseDir
         self._task = task
 
@@ -16,10 +20,17 @@ class TaskFile:
         return self._task
 
     @property
+    def name(self) -> str:
+        name = self._congig.get("directories", "task-name-template")
+        if not "#" in name:
+            name += "#"
+        number = f"{str(self.task.id)}{self.task.language.defaultfileExtension}"
+        return name.replace("#", number)
+
+    @property
     def path(self) -> str:
         """Название файла."""
-        file = str(self.task.id) + self.task.language.defaultfileExtension
-        return os.path.join(self._baseDir, file)
+        return os.path.join(self._baseDir, self.name)
 
     @property
     def exists(self) -> bool:
@@ -45,6 +56,9 @@ class TaskFile:
         with open(self.path, "w") as f:
             f.write(self.createTemplateCode())
 
-    def remove(self):
-        if self.exists:
-            os.remove(self.path)
+    # TODO: добавить.
+    def archivate(self):
+        pass
+
+    def unarchivate(self):
+        pass

@@ -9,6 +9,7 @@ from csti.contest.manager import ContestManager
 from csti.contest.systems import ContestSystem
 from csti.etc.consts import APP_NAME
 from csti.storage.config import Config
+from csti.storage.config.general import GeneralConfig
 from csti.storage.config.tuner import ConfigTuner
 
 
@@ -19,7 +20,8 @@ class ContestEnv:
     STORAGE_DIR = "storage"
     CONFIG_FILE = "config.yaml"
 
-    def __init__(self, dir: t.Optional[str] = None):
+    def __init__(self, config: GeneralConfig, dir: t.Optional[str] = None):
+        self._config = config
         self._dir = dir or os.getcwd()
         self._storage = EnvDataStorage(os.path.join(self.dataDir, self.STORAGE_DIR))
 
@@ -70,46 +72,56 @@ class ContestEnv:
     def getContestManager(self) -> ContestManager:
         return ContestManager(self.system.api(self.getConfig()))
 
-    def getTaskFile(self, task: Task) -> TaskFile:
-        return TaskFile(self.dir, task)
+    def getTaskFile(self, dir: str, task: Task) -> TaskFile:
+        return TaskFile(self._config, dir, task)
 
-    def addTaskFile(self, task: Task):
-        """
-        Создает файл для задания в рабочей директории и
-        добавляет его в список заданий.
-        """
+    # def addTaskFile(self, task: Task):
+    #     """
+    #     Создает файл для задания в рабочей директории и
+    #     добавляет его в список заданий.
+    #     """
 
-        tasks = self.storage["contest", "taskIds"]
+    #     tasks = self.storage["contest", "taskIds"]
 
-        if task.id not in tasks:
-            taskFile = self.getTaskFile(task)
-            taskFile.create()
-            tasks.append(task.id)
+    #     if task.id not in tasks:
+    #         taskFile = self.getTaskFile(task)
+    #         taskFile.create()
+    #         tasks.append(task.id)
 
-        self.storage["contest", "taskIds"] = tasks
+    #     self.storage["contest", "taskIds"] = tasks
 
     def selectContest(self, contest: Contest):
         """Смена контеста в рабочей директории."""
 
         oldTasks = self.storage.loadTasks(self.getContestManager())
-        if len(oldTasks) > 0:
-            oldTaskSavePath = f"{self.dataDir}/{self.storage["contest", "id"]}/"
+        contestDirName = self._config.get("directories", "contest-dir-template",
+                                          default="#")
+        if not "#" in contestDirName:
+            contestDirName += "#"
+
+        if len(oldTasks) > 0 and self._config.get("directories", "archive-dir") != "./":
+            oldTaskSavePath = f"{self.dir}/{self._config.get("directories", "archive-dir", default=self.DATA_DIR)}/{contestDirName}/"
+            oldTaskSavePath = oldTaskSavePath.replace("#",
+                                                      str(self.storage["contest",
+                                                          "id"]))
             os.makedirs(oldTaskSavePath, exist_ok=True)
             for task in oldTasks:
-                taskFile = self.getTaskFile(task)
+                taskFile = self.getTaskFile(oldTaskSavePath, task)
                 if os.path.exists(taskFile.path):
                     os.rename(
                         taskFile.path,
-                        f"{oldTaskSavePath}{os.path.basename(taskFile.path)}",
+                        f"{oldTaskSavePath}{taskFile.name}",
                     )
 
         tasks = contest.getTasks()
-        taskSavePath = f"{self.dataDir}/{contest.id}/"
+        taskSavePath = f"{self.dir}/{contestDirName}/"
+        taskSavePath = taskSavePath.replace("#", str(contest.id))
+        os.makedirs(taskSavePath, exist_ok=True)
         for task in tasks:
-            taskFile = self.getTaskFile(task)
+            taskFile = self.getTaskFile(taskSavePath, task)
             if os.path.exists(f"{taskSavePath}{os.path.basename(taskFile.path)}"):
                 os.rename(
-                    f"{taskSavePath}{os.path.basename(taskFile.path)}", taskFile.path
+                    f"{taskSavePath}{taskFile.name}", taskFile.path
                 )
             else:
                 taskFile.create()

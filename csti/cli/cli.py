@@ -19,7 +19,7 @@ class ContestCLI:
         self._config.create()
         self._config.load()
 
-        self._env = env or ContestEnv()
+        self._env = env or ContestEnv(self.config)
 
         if printer is None:
             useColor = self.config.get("use-color")
