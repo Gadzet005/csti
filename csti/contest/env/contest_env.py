@@ -20,7 +20,7 @@ class ContestEnv:
     STORAGE_DIR = "storage"
     CONFIG_FILE = "config.yaml"
 
-    def __init__(self, config: GeneralConfig, dir: t.Optional[str] = None):
+    def __init__(self, config: Config, dir: t.Optional[str] = None):
         self._config = config
         self._dir = dir or os.getcwd()
         self._storage = EnvDataStorage(os.path.join(self.dataDir, self.STORAGE_DIR))

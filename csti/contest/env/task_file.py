@@ -1,16 +1,14 @@
 import os
 from datetime import datetime
-from os.path import exists
 
 from csti.contest.task import Task
-from csti.storage import config
-from csti.storage.config.general import GeneralConfig
+from csti.storage.config.config import Config
 
 
 class TaskFile:
     """Управление файлов с заданием."""
 
-    def __init__(self, config: GeneralConfig, baseDir: str, task: Task):
+    def __init__(self, config: Config, baseDir: str, task: Task):
         self._congig = config
         self._baseDir = baseDir
         self._task = task
