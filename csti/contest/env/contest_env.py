@@ -75,6 +75,32 @@ class ContestEnv:
     def getTaskFile(self, dir: str, task: Task) -> TaskFile:
         return TaskFile(self._config, dir, task)
 
+    def getLatestTask(self) -> Task:
+        contestDirName = self._config.get("directories", "contest-dir-template",
+                                          default="#")
+        if not "#" in contestDirName:
+            contestDirName += "#"
+    
+        contest = self.storage.loadContest(self.getContestManager())
+        tasks = contest.getTasks()
+        taskSavePath = f"{self.dir}/{contestDirName}/"
+        taskSavePath = taskSavePath.replace("#", str(contest.id))
+        os.makedirs(taskSavePath, exist_ok=True)
+        
+        lastTaskModify = (-1, tasks[0])
+
+        for task in tasks:
+            taskFile = self.getTaskFile(taskSavePath, task)
+            if os.path.exists(taskFile.path):
+                statbuf = os.stat(taskFile.path)
+                edit = statbuf.st_mtime
+                if edit > lastTaskModify[0] or lastTaskModify[0] == -1:
+                    lastTaskModify = (edit, task)
+                    print(task.name)
+
+        return lastTaskModify[1]
+
+
     def addTaskFile(self, task: Task):
         """
         Создает файл для задания в рабочей директории и

@@ -99,7 +99,8 @@ def showInfo(
         contest = env.storage.loadContest(manager)
         task = contest.getTask(_id)
     else:
-        task = env.storage.loadCurrentTask(manager)
+        # task = env.storage.loadCurrentTask(manager)
+        task = env.getLatestTask()
 
     flags = [name, info, cond, tests, solution]
     shouldPrintAll = not any(flags) or all(flags)
@@ -194,6 +195,7 @@ def sendTask(
         task = contest.getTask(_id)
     else:
         task = env.storage.loadCurrentTask(manager)
+        task = env.getLatestTask()
 
     if file is None:
         taskFile = env.getTaskFile(task)
