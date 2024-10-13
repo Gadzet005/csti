@@ -13,7 +13,7 @@ _:
       '';
     };
     c-template = {
-      path = ./shell_templates/default;
+      path = ./shell_templates/c-template;
       description = "Template for C csti.";
       welcomeText = ''
         # Getting started
