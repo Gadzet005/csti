@@ -1,0 +1,45 @@
+{
+  description = "Shell for С contests csti flake.";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    csti.url = "github:Gadzet005/csti";
+  };
+
+  outputs =
+    { nixpkgs, ... }@inputs:
+    let
+      supportedSystems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+      pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
+
+    in
+    {
+      devShells = forAllSystems (system: {
+        default = pkgs.${system}.mkShellNoCC {
+          packages = with pkgs.${system}; [
+            #	Добавьте необходимые вам пакеты(их названия можно найти на
+            # сайте https://mynixos.com).
+            gnumake
+            libclang
+            gcc
+            w3m
+
+            inputs.csti.packages.${system}.default
+          ];
+
+          # Вместо shell подставьте вашу оболочку командной строки и
+          # расскоментируйте строку.
+          shellHook = ''
+            alias html="csti task info -c | w3m -T text/html"
+            # exec shell
+          '';
+        };
+      });
+    };
+}

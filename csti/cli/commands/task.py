@@ -100,8 +100,9 @@ def showInfo(
     if _id:
         contest = env.storage.loadContest(manager)
         task = contest.getTask(_id)
-    elif cli.config.get("features", "auto-select-last-edit-task",
-                               default=False) == False:
+    elif (
+        cli.config.get("features", "auto-select-last-edit-task", default=False) == False
+    ):
         task = env.storage.loadCurrentTask(manager)
     else:
         task = env.getLatestTask()
@@ -197,8 +198,9 @@ def sendTask(
     if _id:
         contest = env.storage.loadContest(manager)
         task = contest.getTask(_id)
-    elif cli.config.get("features", "auto-select-last-edit-task",
-                               default=False) == False:
+    elif (
+        cli.config.get("features", "auto-select-last-edit-task", default=False) == False
+    ):
         task = env.storage.loadCurrentTask(manager)
     else:
         task = env.getLatestTask()
