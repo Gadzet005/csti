@@ -11,15 +11,15 @@ _:
         - Run `nix develop`
         - Run `csti configure -g`
       '';
-      basicCTemplate = {
-        path = ./shell_templates/default;
-        description = "Template for C csti.";
-        welcomeText = ''
-          # Getting started
-          - Run `nix develop`
-          - Run `csti configure -g`
-        '';
-      };
+    };
+    c-template = {
+      path = ./shell_templates/default;
+      description = "Template for C csti.";
+      welcomeText = ''
+        # Getting started
+        - Run `nix develop`
+        - Run `csti configure -g`
+      '';
     };
   };
 }
