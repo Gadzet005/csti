@@ -13,6 +13,11 @@ class GeneralConfigTuner(ConfigTuner):
     def _tune(self):
         featureChoices = [
             Choice(
+                "auto-select-last-edit-task",
+                "Включить авто выбор последней сохраненной задачи",
+                self.config["features", "enable-auto-formatting"],
+            ),
+            Choice(
                 "enable-auto-tests",
                 "Включить авто тесты",
                 self.config["features", "enable-auto-tests"],
@@ -23,6 +28,18 @@ class GeneralConfigTuner(ConfigTuner):
                 self.config["features", "enable-auto-formatting"],
             ),
         ]
+
+        directories = {
+            "archive-dir": "Директория архивации.",
+            "contest-dir-template": "Директория выбранного контеста.",
+            "task-name-template": "Шаблон названия задачи.",
+        }
+        for elem in directories.keys():
+            elemVal = self.config.get("directories", elem, default="")
+            elemOut = inquirer.text(  # type: ignore
+                directories[elem], default=elemVal, validate=lambda x: x
+            ).execute()
+            self.config["directories", elem] = elemOut
 
         enabledFeatures = inquirer.checkbox(  # type: ignore
             message="Настройка функций.", choices=featureChoices, vi_mode=True

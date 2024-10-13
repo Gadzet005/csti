@@ -24,6 +24,8 @@ def selectTask(cli: ContestCLI, _id: t.Optional[int] = None):
     """Выбрать задачу."""
 
     env = cli.getEnv()
+    if cli.config.get("features", "auto-select-last-edit-task", default=False) == True:
+        raise Exception("Включен автовыбор задачи, task select не работает.")
     manager = env.getContestManager()
     contest = env.storage.loadContest(manager)
     task = contest.getTask(_id) if _id is not None else None
@@ -98,8 +100,12 @@ def showInfo(
     if _id:
         contest = env.storage.loadContest(manager)
         task = contest.getTask(_id)
-    else:
+    elif (
+        cli.config.get("features", "auto-select-last-edit-task", default=False) == False
+    ):
         task = env.storage.loadCurrentTask(manager)
+    else:
+        task = env.getLatestTask()
 
     flags = [name, info, cond, tests, solution]
     shouldPrintAll = not any(flags) or all(flags)
@@ -192,11 +198,15 @@ def sendTask(
     if _id:
         contest = env.storage.loadContest(manager)
         task = contest.getTask(_id)
-    else:
+    elif (
+        cli.config.get("features", "auto-select-last-edit-task", default=False) == False
+    ):
         task = env.storage.loadCurrentTask(manager)
+    else:
+        task = env.getLatestTask()
 
     if file is None:
-        taskFile = env.getTaskFile(task)
+        taskFile = env.getTaskFile(None, task)
         file = taskFile.path
         if os.path.exists(file):
             cli.print.info(f"Файл для отправки: '{file}'.")

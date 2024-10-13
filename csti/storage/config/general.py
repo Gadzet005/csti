@@ -4,7 +4,7 @@ import typing as t
 from platformdirs import user_config_dir
 
 from csti.storage import Group, StorageTemplate
-from csti.storage.config.field import BoolField
+from csti.storage.config.field import BoolField, StringField
 from csti.storage.config.yaml import YAMLConfig
 
 
@@ -16,8 +16,17 @@ class GeneralConfig(YAMLConfig):
             Group(
                 "features",
                 [
-                    BoolField("enable-auto-tests", default=True),
+                    BoolField("enable-auto-tests", default=False),
                     BoolField("enable-auto-formatting", default=True),
+                    BoolField("auto-select-last-edit-task", default=True),
+                ],
+            ),
+            Group(
+                "directories",
+                [
+                    StringField("archive-dir", default=".csti/"),
+                    StringField("contest-dir-template", default="contest#/"),
+                    StringField("task-name-template", default="task#"),
                 ],
             ),
             BoolField("use-color", default=True),
