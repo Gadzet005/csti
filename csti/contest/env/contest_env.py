@@ -9,8 +9,9 @@ from csti.contest.manager import ContestManager
 from csti.contest.systems import ContestSystem
 from csti.etc.consts import APP_NAME
 from csti.storage.config import Config
-from csti.storage.config.general import GeneralConfig
+import re
 from csti.storage.config.tuner import ConfigTuner
+from csti.etc.language import Language
 
 
 class ContestEnv:
@@ -82,23 +83,27 @@ class ContestEnv:
             contestDirName += "#"
     
         contest = self.storage.loadContest(self.getContestManager())
-        tasks = contest.getTasks()
         taskSavePath = f"{self.dir}/{contestDirName}/"
         taskSavePath = taskSavePath.replace("#", str(contest.id))
         os.makedirs(taskSavePath, exist_ok=True)
         
-        lastTaskModify = (-1, tasks[0])
+        lastTaskModify = (-1, "")
 
-        for task in tasks:
-            taskFile = self.getTaskFile(taskSavePath, task)
-            if os.path.exists(taskFile.path):
-                statbuf = os.stat(taskFile.path)
-                edit = statbuf.st_mtime
-                if edit > lastTaskModify[0] or lastTaskModify[0] == -1:
-                    lastTaskModify = (edit, task)
-                    print(task.name)
+        
 
-        return lastTaskModify[1]
+        for taskFile in os.listdir(taskSavePath):
+            statbuf = os.stat(f"{taskSavePath}/{taskFile}")
+            edit = statbuf.st_mtime
+            if edit > lastTaskModify[0]:
+                lastTaskModify = (edit, taskFile)
+
+        pattern = self._config.get("directories", "task-name-template",
+                                   default="#").replace("#", r"(\d)")
+        pattern += r".\w*"
+        try:
+            return contest.getTask(int(re.findall(pattern, lastTaskModify[1])[0]))
+        except:
+            raise Exception(f"Последний сохранненый файл '{lastTaskModify[1]}' не является фйлом контеста!")
 
 
     def addTaskFile(self, task: Task):
