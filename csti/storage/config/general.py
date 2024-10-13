@@ -18,6 +18,7 @@ class GeneralConfig(YAMLConfig):
                 [
                     BoolField("enable-auto-tests", default=False),
                     BoolField("enable-auto-formatting", default=True),
+                    BoolField("auto-select-last-edit-task", default=True),
                 ],
             ),
             Group(

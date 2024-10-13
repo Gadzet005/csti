@@ -13,6 +13,11 @@ class GeneralConfigTuner(ConfigTuner):
     def _tune(self):
         featureChoices = [
             Choice(
+                "auto-select-last-edit-task",
+                "Включить авто выбор последней сохраненной задачи",
+                self.config["features", "enable-auto-formatting"],
+            ),
+            Choice(
                 "enable-auto-tests",
                 "Включить авто тесты",
                 self.config["features", "enable-auto-tests"],

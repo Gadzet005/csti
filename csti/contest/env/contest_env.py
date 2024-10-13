@@ -11,7 +11,6 @@ from csti.etc.consts import APP_NAME
 from csti.storage.config import Config
 import re
 from csti.storage.config.tuner import ConfigTuner
-from csti.etc.language import Language
 
 
 class ContestEnv:
@@ -73,7 +72,17 @@ class ContestEnv:
     def getContestManager(self) -> ContestManager:
         return ContestManager(self.system.api(self.getConfig()))
 
-    def getTaskFile(self, dir: str, task: Task) -> TaskFile:
+    def getTaskFile(self, dir: str | None, task: Task) -> TaskFile:
+        contestDirName = self._config.get("directories", "contest-dir-template",
+                                          default="#")
+        if not "#" in contestDirName:
+            contestDirName += "#"
+
+        if dir is None:
+            contest = self.storage.loadContest(self.getContestManager())
+            taskSavePath = f"{self.dir}/{contestDirName}/"
+            dir = taskSavePath.replace("#", str(contest.id))
+
         return TaskFile(self._config, dir, task)
 
     def getLatestTask(self) -> Task:
