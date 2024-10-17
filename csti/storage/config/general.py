@@ -24,7 +24,7 @@ class GeneralConfig(YAMLConfig):
             Group(
                 "directories",
                 [
-                    StringField("archive-dir", default=".csti/"),
+                    StringField("archive-dir", default="./"),
                     StringField("contest-dir-template", default="contest#/"),
                     StringField("task-name-template", default="task#"),
                 ],

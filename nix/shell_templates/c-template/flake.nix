@@ -27,7 +27,6 @@
             # сайте https://mynixos.com).
             gnumake
             libclang
-            gcc
             w3m
 
             inputs.csti.packages.${system}.default
@@ -36,7 +35,6 @@
           # Вместо shell подставьте вашу оболочку командной строки и
           # расскоментируйте строку.
           shellHook = ''
-            alias html="csti task info -c | w3m -T text/html"
             # exec shell
           '';
         };
