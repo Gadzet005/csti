@@ -184,7 +184,6 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             unparseIp = file.read()
             ip = self._safeUnparseIp(unparseIp)
             lastFileDateEdit = datetime.datetime.fromtimestamp(os.stat('ip').st_mtime).day
-            print(ip, datetime.datetime.today().day, lastFileDateEdit)
             if ip is None or datetime.datetime.today().day - lastFileDateEdit >= 1:
                 unparseIp = input("Введите IP адресс на сегодня: ")
                 ip = self._safeUnparseIp(unparseIp)
@@ -210,9 +209,9 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             ~/contest -ouse_ino\n"
         )
         sshProcess.stdin.write(
-            f"head -c {len(code) - 1} > contest/521/problems/{taskInfo['name']}/submit/gcc/solution.c \n"
+            f"head -c {len(code)} > contest/521/problems/{taskInfo['name']}/submit/gcc/solution.c \n"
         )
-        sshProcess.stdin.write(f"{code.strip()}")
+        sshProcess.stdin.write(f"{code}")
         sshProcess.stdin.write("logout")
         sshProcess.stdin.close()
         sshLogs.close()
