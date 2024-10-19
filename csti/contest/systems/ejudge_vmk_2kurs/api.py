@@ -173,13 +173,18 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
     def _submitSolution(
         self, contestId: int, taskId: int, code: str, languageId: int
     ) -> dict:
+        taskInfo = self.getTaskInfo(contestId, taskId)
+        if taskInfo is None:
+            raise Exception('Ошибка получения имени задачи.')
+
         mode = "r+"
         if not os.path.exists('ip'):
             mode = "w+"
         with open("ip", mode) as file:
             unparseIp = file.read()
             ip = self._safeUnparseIp(unparseIp)
-            lastFileDateEdit = time.gmtime(os.path.getmtime('ip')).tm_mday
+            lastFileDateEdit = datetime.datetime.fromtimestamp(os.stat('ip').st_mtime).day
+            print(ip, datetime.datetime.today().day, lastFileDateEdit)
             if ip is None or datetime.datetime.today().day - lastFileDateEdit >= 1:
                 unparseIp = input("Введите IP адресс на сегодня: ")
                 ip = self._safeUnparseIp(unparseIp)
@@ -205,8 +210,9 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             ~/contest -ouse_ino\n"
         )
         sshProcess.stdin.write(
-            f'echo "{code.strip()}" > contest/521/problems/up0{contestId}-{taskId}/submit/gcc/solution.c \n'
+            f"head -c {len(code) - 1} > contest/521/problems/{taskInfo['name']}/submit/gcc/solution.c \n"
         )
+        sshProcess.stdin.write(f"{code.strip()}")
         sshProcess.stdin.write("logout")
         sshProcess.stdin.close()
         sshLogs.close()
@@ -296,7 +302,7 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
             raise  # TODO: Придумать ошибку.
 
         return {
-            "name": problem.get("long_name"),
+            "name": problem.get("short_name"),
             "description": description,
             "inputFormat": None,
             "outputFormat": None,
