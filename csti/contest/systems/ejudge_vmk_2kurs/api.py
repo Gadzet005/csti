@@ -1,4 +1,8 @@
+import os
 import re
+import subprocess
+import time
+import datetime
 import typing as t
 from functools import cache
 
@@ -161,19 +165,53 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
         data = self.getResponseContent(response)
         return data
 
-    def _submitSolution(self, taskId: int, code: str, languageId: int) -> dict:
-        session = self.getSession()
-        response = session.post(
-            self.requestUrl,
-            params={
-                "action": "submit-run",
-                "prob_id": taskId,
-                "lang_id": languageId,
-                "file": code,
-            },
+    @staticmethod
+    def _safeUnparseIp(ipUnparse: str) -> str | None:
+        ipParse = re.findall(r"(\d+.\d+.\d+.\d+)", ipUnparse)
+        return ipParse[0] if len(ipParse) == 1 else None
+
+    def _submitSolution(
+        self, contestId: int, taskId: int, code: str, languageId: int
+    ) -> dict:
+        mode = "r+"
+        if not os.path.exists('ip'):
+            mode = "w+"
+        with open("ip", mode) as file:
+            unparseIp = file.read()
+            ip = self._safeUnparseIp(unparseIp)
+            lastFileDateEdit = time.gmtime(os.path.getmtime('ip')).tm_mday
+            if ip is None or datetime.datetime.today().day - lastFileDateEdit >= 1:
+                unparseIp = input("Введите IP адресс на сегодня: ")
+                ip = self._safeUnparseIp(unparseIp)
+                if ip is None:
+                    raise Exception("Введен некоректный IP.")
+                file.write(ip)
+
+        sshLogs = open(".csti/sshLogs", "w+")
+
+        sshProcess = subprocess.Popen(
+            ["ssh", "-tt", f'{self._config.get("login")}@{ip}'],
+            stdin=subprocess.PIPE,
+            stdout=sshLogs,
+            universal_newlines=True,
+            bufsize=0,
         )
-        data = self.getResponseJson(response)
-        return data
+        if sshProcess.stdin is None:
+            raise Exception()
+
+        sshProcess.stdin.write(
+            f"/opt/ejudge/bin/ejudge-fuse --user {self._config.get("login")}\
+            --password {self._config.get("password")} --url https://unicorn.ejudge.ru/cgi-bin/\
+            ~/contest -ouse_ino\n"
+        )
+        sshProcess.stdin.write(
+            f'echo "{code.strip()}" > contest/521/problems/up0{contestId}-{taskId}/submit/gcc/solution.c \n'
+        )
+        sshProcess.stdin.write("logout")
+        sshProcess.stdin.close()
+        sshLogs.close()
+
+        return dict()
 
     def _getTaskGlobalIdFromLocal(self, contestId: int, taskId: int) -> int:
         problems = self._getContestStatus().get("problems")
@@ -302,9 +340,8 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
     def sendTaskSolution(
         self, contestId: int, taskId: int, code: str, languageId: int
     ) -> bool:
-        taskId = self._getTaskGlobalIdFromLocal(contestId, taskId)
         try:
-            self._submitSolution(taskId, code, languageId)
+            self._submitSolution(contestId, taskId, code, languageId)
             return True
         except APIException:
             return False
