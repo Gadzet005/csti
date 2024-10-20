@@ -1,11 +1,11 @@
-from io import text_encoding
+import datetime
 import os
 import re
 import subprocess
 import time
-import datetime
 import typing as t
 from functools import cache
+from io import text_encoding
 
 import requests
 
@@ -176,15 +176,17 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
     ) -> dict:
         taskInfo = self.getTaskInfo(contestId, taskId)
         if taskInfo is None:
-            raise Exception('Ошибка получения имени задачи.')
+            raise Exception("Ошибка получения имени задачи.")
 
         mode = "r+"
-        if not os.path.exists('ip'):
+        if not os.path.exists("ip"):
             mode = "w+"
         with open("ip", mode) as file:
             unparseIp = file.read()
             ip = self._safeUnparseIp(unparseIp)
-            lastFileDateEdit = datetime.datetime.fromtimestamp(os.stat('ip').st_mtime).day
+            lastFileDateEdit = datetime.datetime.fromtimestamp(
+                os.stat("ip").st_mtime
+            ).day
             if ip is None or datetime.datetime.today().day - lastFileDateEdit >= 1:
                 unparseIp = input("Введите IP адресс на сегодня: ")
                 ip = self._safeUnparseIp(unparseIp)
@@ -194,31 +196,56 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
 
         addres = f"{self._config.get("login")}@{ip}"
 
-        contestExsist = bool(subprocess.run([
-            "ssh", addres,
-            "[", "-d", "contest/521", "]", "&&", "echo", "True", "||", "echo",
-            "False"
-        ], capture_output=True, text=True).stdout)
-        
+        contestExsist = bool(
+            subprocess.run(
+                [
+                    "ssh",
+                    addres,
+                    "[",
+                    "-d",
+                    "contest/521",
+                    "]",
+                    "&&",
+                    "echo",
+                    "True",
+                    "||",
+                    "echo",
+                    "False",
+                ],
+                capture_output=True,
+                text=True,
+            ).stdout
+        )
+
         if contestExsist == False:
             print("Монтируем ejudge-fuse в contest.")
-            subprocess.run([
-                "ssh", addres, 
-                "/opt/ejudge/bin/ejudge-fuse",
-                "--user", self._config.get("login"),
-                "--password", self._config.get("password"),
-                "--url", f"{self._config.get("url")}/",
-                "~/contest", "-ouse_ino",
-            ])
+            subprocess.run(
+                [
+                    "ssh",
+                    addres,
+                    "/opt/ejudge/bin/ejudge-fuse",
+                    "--user",
+                    self._config.get("login"),
+                    "--password",
+                    self._config.get("password"),
+                    "--url",
+                    f"{self._config.get("url")}/",
+                    "~/contest",
+                    "-ouse_ino",
+                ]
+            )
 
         sendFileName = "send-cashe.c"
         with open(sendFileName, "w") as file:
             file.write(code)
 
-        subprocess.run([
-            "scp", sendFileName,
-            f"{addres}:contest/521/problems/{taskInfo['name']}/submit/gcc/",
-        ])
+        subprocess.run(
+            [
+                "scp",
+                sendFileName,
+                f"{addres}:contest/521/problems/{taskInfo['name']}/submit/gcc/",
+            ]
+        )
         os.remove(sendFileName)
 
         return dict()
