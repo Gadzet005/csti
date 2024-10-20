@@ -1,3 +1,4 @@
+from io import text_encoding
 import os
 import re
 import subprocess
@@ -191,30 +192,34 @@ class Ejudge2KursVmkAPI(ContestSystemAPI):
                     raise Exception("Введен некоректный IP.")
                 file.write(ip)
 
-        sshLogs = open(".csti/sshLogs", "w+")
+        addres = f"{self._config.get("login")}@{ip}"
 
-        sshProcess = subprocess.Popen(
-            ["ssh", "-tt", f'{self._config.get("login")}@{ip}'],
-            stdin=subprocess.PIPE,
-            stdout=sshLogs,
-            universal_newlines=True,
-            bufsize=0,
-        )
-        if sshProcess.stdin is None:
-            raise Exception()
+        contestExsist = bool(subprocess.run([
+            "ssh", addres,
+            "[", "-d", "contest/521", "]", "&&", "echo", "True", "||", "echo",
+            "False"
+        ], capture_output=True, text=True).stdout)
+        
+        if contestExsist == False:
+            print("Монтируем ejudge-fuse в contest.")
+            subprocess.run([
+                "ssh", addres, 
+                "/opt/ejudge/bin/ejudge-fuse",
+                "--user", self._config.get("login"),
+                "--password", self._config.get("password"),
+                "--url", f"{self._config.get("url")}/",
+                "~/contest", "-ouse_ino",
+            ])
 
-        sshProcess.stdin.write(
-            f"/opt/ejudge/bin/ejudge-fuse --user {self._config.get("login")}\
-            --password {self._config.get("password")} --url https://unicorn.ejudge.ru/cgi-bin/\
-            ~/contest -ouse_ino\n"
-        )
-        sshProcess.stdin.write(
-            f"head -c {len(code)} > contest/521/problems/{taskInfo['name']}/submit/gcc/solution.c \n"
-        )
-        sshProcess.stdin.write(f"{code}")
-        sshProcess.stdin.write("logout")
-        sshProcess.stdin.close()
-        sshLogs.close()
+        sendFileName = "send-cashe.c"
+        with open(sendFileName, "w") as file:
+            file.write(code)
+
+        subprocess.run([
+            "scp", sendFileName,
+            f"{addres}:contest/521/problems/{taskInfo['name']}/submit/gcc/",
+        ])
+        os.remove(sendFileName)
 
         return dict()
 
